@@ -1,18 +1,20 @@
-#ifndef itkHessianToJermanMesureImageFilter_h
-#define itkHessianToJermanMesureImageFilter_h
+#ifndef itkHessianToJermanMeasureImageFilter_h
+#define itkHessianToJermanMeasureImageFilter_h
+
+#include <cmath>
 
 namespace itk{
 
-template< typename TInputImage, typename TOuputImage>
-class ITK_TEMPLATE_EXPORT HessianToJermanMesureImageFilter : 
+template< typename TInputImage, typename TOutputImage>
+class ITK_TEMPLATE_EXPORT HessianToJermanMeasureImageFilter : 
 public ImageToImageFilter<TInputImage, TOutputImage>
 {
     public:
 
-    ITK_DISALLOW_COPY_AND_ASSIGN(HessianToJermanMesureImageFilter);
+    ITK_DISALLOW_COPY_AND_ASSIGN(HessianToJermanMeasureImageFilter);
 
     /** standard aliases */
-    using Self = HessianToObjectnessMeasureImageFilter;
+    using Self = HessianToJermanMeasureImageFilter;
     using Superclass = ImageToImageFilter< TInputImage, TOutputImage >;
     using Pointer = SmartPointer< Self >;
     using ConstPointer = SmartPointer< const Self >;
@@ -33,20 +35,25 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     itkNewMacro(Self);
 
     /** Runtime information support. */
-    itkTypeMacro(HessianToJermanMesureImageFilter, ImageToImageFilter);
+    itkTypeMacro(HessianToJermanMeasureImageFilter, ImageToImageFilter);
     
     itkSetMacro(Tau,double);
     itkGetConstMacro(Tau,double);
 
+    itkSetMacro(BrightObject,bool);
+    itkGetConstMacro(BrightObject,bool);
+
     protected:
 
-    HessianToJermanMesureImageFilter();
-    ~HessianToJermanMesureImageFilter() override = default;
+    HessianToJermanMeasureImageFilter();
+    ~HessianToJermanMeasureImageFilter() override = default;
     
     void PrintSelf(std::ostream & os, Indent indent) const override;
 
     void VerifyPreconditions() ITKv5_CONST override;
+    void GenerateData() override;
     void DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread) override;
+    void BeforeThreadedGenerateData() override;
 
     private:
 
@@ -55,12 +62,18 @@ public ImageToImageFilter<TInputImage, TOutputImage>
         {
             return itk::Math::abs(a)<= itk::Math::abs(b);
         }
-    }
+    };
 
-    double m_tau;
+    double m_Tau{0.75};
+    bool m_BrightObject{true};
+    
 
 };
 
+}
+
 #ifndef ITK_MANUAL_INSTANTIATION
-#include "itkHessianToJermanMesureImageFilter.hxx"
-#endif // itkHessianToJermanMesureImageFilter_h
+#include "itkHessianToJermanMeasureImageFilter.hxx"
+#endif
+
+#endif // itkHessianToJermanMeasureImageFilter_h
