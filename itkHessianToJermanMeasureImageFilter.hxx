@@ -56,94 +56,80 @@ namespace itk{
         it.GoToBegin();
 
         EigenValueType maxLambda3 = 0;
+        EigenValueType maxLambda2 = 0;
         EigenValueType lambdaRho = 0;
         OutputPixelType vesselnessMeasure = 0.0;
 
-        EigenValueArrayType sortedEigenValues;
         std::cout<<"computing eigenvalues"<<std::endl;
-        long nbPixels = 0;
         long nbTotalPixels = iSize[0] * iSize[1] * iSize[2] ;
+        long nbPixels = 0;
+        EigenValueArrayType eigenValues;
+        std::vector<EigenValueArrayType> vEigenValues;
         while( !it.IsAtEnd() )
         {
             // Compute eigen values
-            EigenValueArrayType eigenValues;
-            eigenCalculator.ComputeEigenValues(it.Get(), eigenValues);
+            
+
             // sort eigenValues by magnitude but retain their sign.
             // The eigenvalues are to be sorted |e1|<=|e2|<=...<=|eN|
-            sortedEigenValues = eigenValues;
-            std::sort( sortedEigenValues.Begin(), sortedEigenValues.End(), AbsLessEqualCompare() );
-
+            eigenCalculator.SetOrderEigenMagnitudes(true);
+            eigenCalculator.ComputeEigenValues(it.Get(), eigenValues);
             // only second and third eigen values are useful
             if( m_BrightObject)
             {
-                sortedEigenValues[1] *= -1;
-                sortedEigenValues[2] *= -1;
+                eigenValues[1] *= -1;
+                eigenValues[2] *= -1;
             }
 
             // keeping max lambda3 value accross the whole image
-            if( maxLambda3 < sortedEigenValues[2] )
+            if( maxLambda3 < eigenValues[2] )
             {
-                maxLambda3 = sortedEigenValues[2];
+                maxLambda3 = eigenValues[2];
+            };
+            // keeping max Lambda2 for debug
+            if( maxLambda2 < eigenValues[1] )
+            {
+                maxLambda2 = eigenValues[1];
             };
 
-            nbPixels++;
-            if(nbPixels % 500000 == 0)
-                std::cout<<"----------"<<std::endl
-                    <<"nbPixels :"<<nbPixels<<" out of "<<nbTotalPixels<<std::endl
-                    <<it.Get()<<std::endl
-                    <<eigenValues<<std::endl
-                    <<sortedEigenValues<<std::endl;
 
+            if(nbPixels % 1000000 == 0)
+                std::cout<<nbPixels<<" out of "<<nbTotalPixels<<std::endl;
+            vEigenValues.push_back(eigenValues);
+            nbPixels++;
             ++it;
         }
 
         lambdaRho = maxLambda3 * m_Tau;
-        std::cout<<"max lambda:"<< maxLambda3<<std::endl;
+        std::cout<<"max lambda 3:"<< maxLambda3<<std::endl;
+        std::cout<<"max lambda 2:"<< maxLambda2<<std::endl;
         std::cout<<"lambda rho:"<< lambdaRho<<std::endl;
+        std::cout<<"EigenValues vector size:"<<vEigenValues.size()<<std::endl;
+        std::cout<<"sample"<<vEigenValues[0]<<std::endl;
 
-        it.GoToBegin();
-        nbPixels = 0;
-        long modulo = 500000;
-        while(!it.IsAtEnd())
+        for(int i=0; i<vEigenValues.size();i++)
         {
-            // Compute Jerman's volume ratio here....
-            // Set pixel value in oit...
-            if( nbPixels % modulo == 0)
-                std::cout<< sortedEigenValues<<std::endl;
+            eigenValues = vEigenValues[i];
 
-            if( sortedEigenValues[1] <= 0 || lambdaRho <= 0)
+            if( eigenValues[1] <= 0 || lambdaRho <= 0)
             {
-
                 oit.Set( NumericTraits< OutputPixelType >::ZeroValue() );
-                ++it;
                 ++oit;
-                nbPixels++;
-                if(nbPixels % modulo == 0)
-                std::cout<<"vesselnessValue zero :"<<vesselnessMeasure<<std::endl;
                 continue;
             }
-            if( sortedEigenValues[1] >= lambdaRho /2 && lambdaRho/2 > 0)
+            if( eigenValues[1] >= lambdaRho /2.0 && lambdaRho/2.0 > 0)
             {
                 oit.Set(NumericTraits< OutputPixelType >::OneValue() );
-                ++it;
                 ++oit;
-                nbPixels++;
-                if(nbPixels % modulo == 0)
-                std::cout<<"vesselnessValue one :"<<vesselnessMeasure<<std::endl;
                 continue;
             }
             
             // Jerman's ratio
-            vesselnessMeasure = sortedEigenValues[1] * sortedEigenValues[1] * (lambdaRho - sortedEigenValues[1]);
-            vesselnessMeasure *= std::pow( 3/(sortedEigenValues[1] + lambdaRho), 3);  
+            vesselnessMeasure = eigenValues[1] * eigenValues[1] * (lambdaRho - eigenValues[1]);
+            vesselnessMeasure *= std::pow( 3/(eigenValues[1] + lambdaRho), 3);  
 
             oit.Set( vesselnessMeasure);
-            ++it;
             ++oit;
-
-            nbPixels++;
-            //if(nbPixels % 500000 == 0)
-            std::cout<<"vesselnessValue lambda:"<<vesselnessMeasure<<std::endl;
         }
 
         auto stats = StatisticsImageFilter<TOutputImage>::New();
