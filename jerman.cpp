@@ -1,6 +1,7 @@
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkHessianToObjectnessMeasureImageFilter.h"
+//#include "itkDgMultiScaleHessianBasedMeasureImageFilter.h"
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
 
