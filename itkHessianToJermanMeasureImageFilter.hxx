@@ -80,18 +80,18 @@ namespace itk{
 
             if( m_BrightObject)
             {
-                eigenValues[1] *= -1;
-                eigenValues[2] *= -1;
+                eigenValues[1] *= -1.0f;
+                eigenValues[2] *= -1.0f;
             }
 
-            if( eigenValues[1] <= 0 || lambdaRho <= 0)
+            if( eigenValues[1] <= 0.0f || lambdaRho <= 0.0f)
             {
                 oit.Set( NumericTraits< OutputPixelType >::ZeroValue() );
                 ++oit;
                 ++itEV;
                 continue;
             }
-            if( eigenValues[1] >= lambdaRho /2.0 && lambdaRho > 0)
+            if( eigenValues[1] >= lambdaRho /2.0f && lambdaRho > 0.0f)
             {
                 oit.Set(NumericTraits< OutputPixelType >::OneValue() );
                 ++oit;
@@ -102,7 +102,7 @@ namespace itk{
             // Jerman's ratio
             // lambda2^2 * ( lambdaP - lambda2 ) * [3/(lambdaP + lambda2)]^3
             vesselnessMeasure = eigenValues[1] * eigenValues[1] * (lambdaRho - eigenValues[1]); // lambda2^2 * ( lambdaP - lambda2 )
-            vesselnessMeasure *= 27 / ( (eigenValues[1] + lambdaRho) * (eigenValues[1] + lambdaRho) * (eigenValues[1] + lambdaRho) ); // [3/(lambdaP + lambda2)]^3
+            vesselnessMeasure *= 27.0f / ( (eigenValues[1] + lambdaRho) * (eigenValues[1] + lambdaRho) * (eigenValues[1] + lambdaRho) ); // [3/(lambdaP + lambda2)]^3
 
             oit.Set( vesselnessMeasure);
 
