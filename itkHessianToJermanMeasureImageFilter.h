@@ -2,6 +2,7 @@
 #define itkHessianToJermanMeasureImageFilter_h
 
 #include <cmath>
+#include "itkHessianToEigenValues.h"
 
 namespace itk{
 

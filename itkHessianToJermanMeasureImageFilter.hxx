@@ -29,6 +29,9 @@ namespace itk{
     template<typename TInputImage,typename TOutputImage>
     void HessianToJermanMeasureImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread)
     {
+        OutputImageType * output = this->GetOutput();
+        const InputImageType* input = this->GetInput();
+
     }
 
     template<typename TInputImage,typename TOutputImage>
@@ -37,7 +40,10 @@ namespace itk{
         OutputImageType * output = this->GetOutput();
         const InputImageType* input = this->GetInput();
 
-        
+        auto ptr_filter = HessianToEigenValuesImageFilter<TInputImage>::New();
+        ptr_filter->SetInput(input);
+        ptr_filter->Update();
+        std::cout<<"max eigen value:"<<ptr_filter->GetMaxEigenValue()<<std::endl;
 
         //input->SetRequestedRegionToLargestPossibleRegion();
 
@@ -70,7 +76,8 @@ namespace itk{
         std::vector<EigenValueArrayType> vEigenValues;
         while( !it.IsAtEnd() )
             // Compute eigen values
-        {
+        {   
+            /*
             for(int i=0;i<4;i++)
             {
                 if(it.Get()[i] > 2e-4 )
@@ -78,20 +85,18 @@ namespace itk{
                 else
                     std::cout<<0<<" ";
             }
-            std::cout<<std::endl;
+            */
+            //std::cout<<std::endl;
             // sort eigenValues by magnitude but retain their sign.
             // The eigenvalues are to be sorted |e1|<=|e2|<=...<=|eN|
 
             eigenCalculator.SetOrderEigenMagnitudes(true);
             eigenCalculator.ComputeEigenValues(it.Get(), eigenValues);
             // noise removal on eigenValues
-            if( std::isinf(eigenValues[0]) || abs(eigenValues[0]) < 1e-4)
-
-                eigenValues[0] = 0;
-            if( std::isinf(eigenValues[1]) || abs(eigenValues[1]) < 1e-4)
-                eigenValues[1] = 0;
-            if( std::isinf(eigenValues[2]) || abs(eigenValues[2]) < 1e-4)
-                eigenValues[2] = 0;
+            if( std::isinf(eigenValues[0]) || abs(eigenValues[0]) < 1e-4){ eigenValues[0] = 0; }
+            if( std::isinf(eigenValues[1]) || abs(eigenValues[1]) < 1e-4){ eigenValues[1] = 0; }
+            if( std::isinf(eigenValues[2]) || abs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
+                
             
             // only second and third eigen values are useful
             if( m_BrightObject)
@@ -101,7 +106,6 @@ namespace itk{
             }
             // keeping max lambda3 value accross the whole image
             if( maxLambda3 < eigenValues[2] )
-
             {
                 maxLambda3 = eigenValues[2];
             };
