@@ -56,14 +56,12 @@ namespace itk{
 
         EigenValueType maxLambda3 = ptr_filter->GetMaxEigenValue();
         EigenValueType lambdaRho = maxLambda3 * m_Tau;
-        EigenValueType v = NumericTraits< EigenValueType >::ZeroValue();
         OutputPixelType vesselnessMeasure = NumericTraits< OutputPixelType >::ZeroValue();
 
         std::cout<<"computing eigenvalues"<<std::endl;
-        EigenValueArrayType eigenValues;
-        long nbPixels = 0;
-        std::vector<EigenValueArrayType> vEigenValues;
-
+        EigenValueType lambda2;
+        EigenValueType lambda3;
+        
         // additionnal infos
         std::cout<<"max lambda 3:"<< maxLambda3<<std::endl;
         std::cout<<"tau :"<<m_Tau<<std::endl;
@@ -76,22 +74,37 @@ namespace itk{
         itEV.GoToBegin();
         while( !itEV.IsAtEnd() )
         {   
-            eigenValues = itEV.Value();
+            lambda2 = itEV.Value()[1];
+            lambda3 = itEV.Value()[2];
 
-            if( m_BrightObject)
+            if( m_BrightObject) // if brightObject, then eigen values are negatives
             {
-                eigenValues[1] *= -1.0f;
-                eigenValues[2] *= -1.0f;
+                lambda2 *= -1.0f;
+                lambda3 *= -1.0f;
             }
 
-            if( eigenValues[1] <= 0.0f || lambdaRho <= 0.0f)
+            if( lambda3 > maxLambda3 * m_Tau)
+                lambdaRho = lambda3;
+            else
+            {
+                if( lambda3 > 0 )
+                {
+                    lambdaRho = maxLambda3 * m_Tau;
+                }
+                else
+                {
+                    lambdaRho = 0;
+                }
+            } 
+
+            if( lambda2 <= 0.0f || lambdaRho <= 0.0f) // not interested in dark objects
             {
                 oit.Set( NumericTraits< OutputPixelType >::ZeroValue() );
                 ++oit;
                 ++itEV;
                 continue;
             }
-            if( eigenValues[1] >= lambdaRho /2.0f && lambdaRho > 0.0f)
+            if( lambda2 >= lambdaRho /2.0f && lambdaRho > 0.0f) 
             {
                 oit.Set(NumericTraits< OutputPixelType >::OneValue() );
                 ++oit;
@@ -101,10 +114,11 @@ namespace itk{
             
             // Jerman's ratio
             // lambda2^2 * ( lambdaP - lambda2 ) * [3/(lambdaP + lambda2)]^3
-            vesselnessMeasure = eigenValues[1] * eigenValues[1] * (lambdaRho - eigenValues[1]); // lambda2^2 * ( lambdaP - lambda2 )
-            vesselnessMeasure *= 27.0f / ( (eigenValues[1] + lambdaRho) * (eigenValues[1] + lambdaRho) * (eigenValues[1] + lambdaRho) ); // [3/(lambdaP + lambda2)]^3
+            vesselnessMeasure = lambda2* lambda2 * (lambdaRho - lambda2); // lambda2^2 * ( lambdaP - lambda2 )
+            vesselnessMeasure *= 27.0f / ( (lambda2 + lambdaRho) * (lambda2 + lambdaRho) * (lambda2 + lambdaRho) ); // [3/(lambdaP + lambda2)]^3
 
-            oit.Set( vesselnessMeasure);
+            oit.Set( vesselnessMeasure);   
+            
 
             ++oit;
             ++itEV;

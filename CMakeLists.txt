@@ -16,3 +16,6 @@ endif( Boost_FOUND )
  
 add_executable(JermanVesselness jerman.cpp)
 target_link_libraries(JermanVesselness ${Boost_OPTIONS} ${ITK_LIBRARIES})
+
+add_executable(checkGaussian checkGaussian.cpp)
+target_link_libraries(checkGaussian ${Boost_OPTIONS} ${ITK_LIBRARIES})

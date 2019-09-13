@@ -131,7 +131,7 @@ namespace itk
     template<typename TInputImage, typename TOutputImage>
     void HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const RegionType & regionForThread)
     {
-        EigenValueType max = NumericTraits<EigenValueType>::NonpositiveMin();
+        EigenValueType max = NumericTraits<EigenValueType>::ZeroValue();
 
         using CalculatorType = SymmetricEigenAnalysisFixedDimension<ImageDimension, PixelType, EigenValueArrayType>;
         CalculatorType eigenCalculator;
@@ -156,7 +156,7 @@ namespace itk
 
                 itOut.Set(eigenValues);
 
-                max = std::max(max,eigenValues[2]);
+                max = std::max(max,abs(eigenValues[2]) );
                 ++it;
                 ++itOut;
             } 

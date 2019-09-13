@@ -62,7 +62,7 @@ int main( int argc, char* argv[] )
     float tau = vm["tau"].as<float>();
 
     constexpr unsigned int Dimension = 3;
-    using PixelType = float;
+    using PixelType = double;
     using ImageType = itk::Image< PixelType, Dimension >;
 
     typedef itk::ImageFileReader<ImageType> ReaderType;
