@@ -3,6 +3,8 @@
 
 #include "itkImageToImageFilter.h"
 #include "itkSimpleDataObjectDecorator.h"
+#include "itkSymmetricEigenAnalysis.h"
+#include "itkImageScanlineIterator.h"
 
 namespace itk{
     template <typename TInputImage,
@@ -36,6 +38,8 @@ namespace itk{
         using EigenValueType = double;
         using EigenValueArrayType = itk::FixedArray< EigenValueType, Self::ImageDimension >;
 
+        using OutputVectorType = itk::Vector<float,3>;
+
         using RealType = typename NumericTraits<EigenValueType>::RealType;
         using DataObjectPointer = typename DataObject::Pointer;
 
@@ -45,6 +49,10 @@ namespace itk{
         EigenValueType GetMaxEigenValue() const{ return this->GetMaxEigenValueOutput()->Get(); }
         RealObjectType * GetMaxEigenValueOutput();
         const RealObjectType * GetMaxEigenValueOutput()const;
+
+        EigenValueType GetMinEigenValue() const{ return this->GetMinEigenValueOutput()->Get();}
+        RealObjectType * GetMinEigenValueOutput();
+        const RealObjectType * GetMinEigenValueOutput()const;
 
         using DataObjectPointerArraySizeType = ProcessObject::DataObjectPointerArraySizeType;
         using Superclass::MakeOutput;
@@ -74,6 +82,7 @@ namespace itk{
         private:
 
         EigenValueType m_maxEigenValue;
+        EigenValueType m_minEigenValue;
         std::mutex m_mutex;
         
     };

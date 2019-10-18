@@ -1,18 +1,18 @@
-#ifndef itkHessianToJermanMeasureImageFilter_hxx
-#define itkHessianToJermanMeasureImageFilter_hxx
+#ifndef itkHessianToRuiZhangMeasureImageFilter_hxx
+#define itkHessianToRuiZhangMeasureImageFilter_hxx
 
-#include "itkHessianToJermanMeasureImageFilter.h"
+#include "itkHessianToRuiZhangMeasureImageFilter.h"
 #include "itkStatisticsImageFilter.h"
 
 namespace itk{
     template< typename TInputImage,typename TOutputImage>
-    HessianToJermanMeasureImageFilter<TInputImage, TOutputImage>::HessianToJermanMeasureImageFilter()
+    HessianToRuiZhangMeasureImageFilter<TInputImage, TOutputImage>::HessianToRuiZhangMeasureImageFilter()
     {
         //this->DynamicMultiThreadingOn();
     }
 
     template< typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage,TOutputImage>::VerifyPreconditions() ITKv5_CONST
+    void HessianToRuiZhangMeasureImageFilter<TInputImage,TOutputImage>::VerifyPreconditions() ITKv5_CONST
     {
         Superclass::VerifyPreconditions();
         if ( ImageDimension != 3 )
@@ -22,12 +22,12 @@ namespace itk{
     }
 
     template<typename TInputImage, typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage,TOutputImage>::BeforeThreadedGenerateData()
+    void HessianToRuiZhangMeasureImageFilter<TInputImage,TOutputImage>::BeforeThreadedGenerateData()
     {
     }
 
     template<typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread)
+    void HessianToRuiZhangMeasureImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread)
     {
         OutputImageType * output = this->GetOutput();
         const InputImageType* input = this->GetInput();
@@ -35,12 +35,11 @@ namespace itk{
     }
 
     template<typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage>::GenerateData()
+    void HessianToRuiZhangMeasureImageFilter<TInputImage, TOutputImage>::GenerateData()
     {   
         // Grafting and allocating data
         OutputImageType * output = this->GetOutput();
         const InputImageType* input = this->GetInput();
-
         OutputImageRegionType outputRegion;
         outputRegion.SetSize( input->GetLargestPossibleRegion().GetSize() );
         output->SetBufferedRegion(outputRegion);
@@ -59,6 +58,7 @@ namespace itk{
         OutputPixelType vesselnessMeasure = NumericTraits< OutputPixelType >::ZeroValue();
 
         std::cout<<"computing eigenvalues"<<std::endl;
+        EigenValueType lambda1;
         EigenValueType lambda2;
         EigenValueType lambda3;
         
@@ -74,6 +74,7 @@ namespace itk{
         itEV.GoToBegin();
         while( !itEV.IsAtEnd() )
         {   
+            lambda1 = itEV.Value()[0];
             lambda2 = itEV.Value()[1];
             lambda3 = itEV.Value()[2];
 
@@ -113,9 +114,10 @@ namespace itk{
                 continue;
             }
             
-            // Jerman's ratio
-            // lambda2^2 * ( lambdaP - lambda2 ) * [3/(lambdaP + lambda2)]^3
+            // RuiZhang's ratio
+            // lambda2^2 * ( lambdaP - lambda2 ) * [3/(lambdaP + lambda2)]^3 * (1-exp(-R^2 / 2y)) with y=lambdaRho/3
             vesselnessMeasure = lambda2* lambda2 * (lambdaRho - lambda2); // lambda2^2 * ( lambdaP - lambda2 )
+            vesselnessMeasure *= ( 1 - exp( -(lambda1 * lambda1 + lambda2 * lambda2 + lambda3 * lambda3 ) / ( 2 * lambdaRho / 3) ) ); // (1-exp(-R^2 / 2y)) see paper for R and y
             vesselnessMeasure *= 27.0f / ( (lambda2 + lambdaRho) * (lambda2 + lambdaRho) * (lambda2 + lambdaRho) ); // [3/(lambdaP + lambda2)]^3
 
             oit.Set( vesselnessMeasure);   
@@ -138,7 +140,7 @@ namespace itk{
     }
 
     template<typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage>
+    void HessianToRuiZhangMeasureImageFilter<TInputImage, TOutputImage>
     ::PrintSelf(std::ostream & os, Indent indent) const
     {
         Superclass::PrintSelf(os,indent);
@@ -147,4 +149,4 @@ namespace itk{
 
 }
 
-#endif // itkHessianToJermanMeasureImageFilter_hxx
+#endif // itkHessianToRuiZhangMeasureImageFilter_hxx

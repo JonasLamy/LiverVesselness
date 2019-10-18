@@ -7,7 +7,7 @@ namespace itk
 {
     template<typename TInputImage,typename TOutputImage>
     HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::HessianToEigenValuesImageFilter()
-    :m_maxEigenValue(0.0f)
+    :m_maxEigenValue(0.0f), m_minEigenValue(0.0f)
     {
         /*
       // first output is a copy of the image, DataObject created by superlass
@@ -25,9 +25,15 @@ namespace itk
           this->ProcessObject::SetNthOutput(i,output.GetPointer());
       }  */
 
-        typename RealObjectType::Pointer outputEV = 
+        // max eigen value
+        typename RealObjectType::Pointer outputMaxEV = 
         static_cast<RealObjectType *>(this->MakeOutput(1).GetPointer() );
-        this->ProcessObject::SetNthOutput(1,outputEV.GetPointer());
+        this->ProcessObject::SetNthOutput(1,outputMaxEV.GetPointer());
+
+        // min eigen value
+        typename RealObjectType::Pointer outputMinEV = 
+        static_cast<RealObjectType *>(this->MakeOutput(3).GetPointer() );
+        this->ProcessObject::SetNthOutput(3,outputMinEV.GetPointer());
 
         this->GetMaxEigenValueOutput()->Set( NumericTraits<RealType>::ZeroValue() );
 
@@ -53,6 +59,8 @@ namespace itk
         return RealObjectType::New().GetPointer();
         case 2: // eigenValues image
         return TOutputImage::New().GetPointer();
+        case 3: // Min eigenValue
+        return RealObjectType::New().GetPointer();
         default:
         // might as well make an image
         return TInputImage::New().GetPointer();
@@ -73,6 +81,23 @@ namespace itk
     {
         return static_cast<const RealObjectType *>( this->ProcessObject::GetOutput(1) );
     }
+
+    template<typename TInputImage,typename TOutputImage>
+    typename HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::RealObjectType* 
+    HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GetMinEigenValueOutput()
+    {
+        return static_cast<RealObjectType *>( this->ProcessObject::GetOutput(3) );
+    }
+
+    template<typename TInputImage,typename TOutputImage>
+    const typename HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::RealObjectType* 
+    HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GetMinEigenValueOutput() const
+    {
+        return static_cast<const RealObjectType *>( this->ProcessObject::GetOutput(3) );
+    }
+
+
+
 
     template<typename TInputImage,typename TOutputImage>
     void HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GenerateInputRequestedRegion()
@@ -115,24 +140,26 @@ namespace itk
     template<typename TInputImage, typename TOutputImage>
     void HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::BeforeThreadedGenerateData()
     {
-        // Resize he thread temporaries;
         m_maxEigenValue = NumericTraits<EigenValueType>::NonpositiveMin();
-
+        m_minEigenValue = NumericTraits<EigenValueType>::max();
     }
 
     template<typename TInputImage,typename TOutputImage>
     void HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::AfterThreadedGenerateData()
     {
         const EigenValueType maximum = m_maxEigenValue;
+        const EigenValueType minimum = m_minEigenValue;
         //Set the outputs
         this->GetMaxEigenValueOutput()->Set(maximum);
+        this->GetMinEigenValueOutput()->Set(minimum);
     }
 
     template<typename TInputImage, typename TOutputImage>
     void HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const RegionType & regionForThread)
     {
+        
         EigenValueType max = NumericTraits<EigenValueType>::ZeroValue();
-
+        EigenValueType min = NumericTraits<EigenValueType>::max();
         using CalculatorType = SymmetricEigenAnalysisFixedDimension<ImageDimension, PixelType, EigenValueArrayType>;
         CalculatorType eigenCalculator;
         eigenCalculator.SetOrderEigenMagnitudes(true);
@@ -141,22 +168,25 @@ namespace itk
         // Walk the region of eigen values and get the objectness measure
         ImageScanlineConstIterator< TInputImage > it(this->GetInput(),regionForThread);
         ImageScanlineIterator< TOutputImage > itOut(this->GetOutput(),regionForThread);
-        std::cout<<"region :"<<regionForThread<<std::endl;
         it.GoToBegin();
         itOut.GoToBegin();
+        
         while( !it.IsAtEnd() )
         {
             while( !it.IsAtEndOfLine() )
             {
                 eigenCalculator.ComputeEigenValues(it.Get(), eigenValues);
                 // noise removal on eigenValues
+                
                 if( std::isinf(eigenValues[0]) || abs(eigenValues[0]) < 1e-4){ eigenValues[0] = 0; }
                 if( std::isinf(eigenValues[1]) || abs(eigenValues[1]) < 1e-4){ eigenValues[1] = 0; }
                 if( std::isinf(eigenValues[2]) || abs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
-
+                
                 itOut.Set(eigenValues);
 
                 max = std::max(max,abs(eigenValues[2]) );
+                min = std::min(min,abs(eigenValues[0]) );
+                 
                 ++it;
                 ++itOut;
             } 
@@ -165,6 +195,8 @@ namespace itk
         }
         std::lock_guard<std::mutex> mutexHolder(m_mutex);
         m_maxEigenValue = std::max(max,m_maxEigenValue);
+        m_minEigenValue = std::min(min,m_minEigenValue);
+        
     }
 
     template< typename TInputImage, typename TOutputImage >
@@ -174,7 +206,10 @@ namespace itk
         Superclass::PrintSelf(os, indent);
 
         os << indent << "Maximum: "
-        << static_cast< typename NumericTraits< PixelType >::PrintType >( this->GetMaxEigenValue() ) << std::endl;
+        << static_cast< typename NumericTraits< PixelType >::PrintType >( this->GetMaxEigenValue() ) 
+        <<"\n"
+        << indent << "Min: "
+        << static_cast< typename NumericTraits< PixelType >::PrintType >( this->GetMinEigenValue() ) << std::endl;
 
     }
 }
