@@ -85,7 +85,7 @@ int main( int argc, char* argv[] )
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
     multiScaleEnhancementFilter->SetInput( reader->GetOutput() );
     multiScaleEnhancementFilter->SetHessianToMeasureFilter( meijeringFilter );
-    multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
+    //multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
     multiScaleEnhancementFilter->SetSigmaMinimum( sigmaMin );
     multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );
     multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );

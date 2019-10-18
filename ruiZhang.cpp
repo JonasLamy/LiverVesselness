@@ -137,9 +137,9 @@ int main( int argc, char* argv[] )
 
     using MultiScaleEnhancementFilterType = itk::MultiScaleHessianBasedMeasureImageFilter< ImageType, HessianImageType, OutputImageType >;
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
-    multiScaleEnhancementFilter->SetInput( reader->GetOutput() );
+    multiScaleEnhancementFilter->SetInput( sigmoidFilter->GetOutput() );
     multiScaleEnhancementFilter->SetHessianToMeasureFilter( ruiZhangFilter );
-    multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
+    //multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
     multiScaleEnhancementFilter->SetSigmaMinimum( sigmaMin );
     multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );
     multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );
@@ -149,7 +149,7 @@ int main( int argc, char* argv[] )
     using imageWriterType = ImageType;
     typedef  itk::ImageFileWriter< imageWriterType  > WriterType;
     WriterType::Pointer writer = WriterType::New();
-    writer->SetInput( sigmoidFilter->GetOutput() );
+    writer->SetInput( multiScaleEnhancementFilter->GetOutput() );
     writer->SetFileName( std::string(outputFile) );
     writer->Update();
 

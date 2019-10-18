@@ -10,8 +10,6 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-
-
 #include <string>
 
 int main( int argc, char* argv[] )
@@ -85,18 +83,10 @@ int main( int argc, char* argv[] )
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
     multiScaleEnhancementFilter->SetInput( reader->GetOutput() );
     multiScaleEnhancementFilter->SetHessianToMeasureFilter( jermanFilter );
-    multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
+    //multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
     multiScaleEnhancementFilter->SetSigmaMinimum( sigmaMin );
     multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );
     multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );
-
-    // end Antiga vesselness operator
-
-    /*
-    using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, OutputImageType >;
-    RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
-    rescaleFilter->SetInput( multiScaleEnhancementFilter->GetOutput() );
-    */
 
     auto stats = itk::StatisticsImageFilter<OutputImageType>::New();
     stats->SetInput(multiScaleEnhancementFilter->GetOutput());
