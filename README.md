@@ -3,6 +3,15 @@ testRepository for vesselness trials
 
 Attention, tester dans un premier temps avec des valeurs sigmaMin/sigmaMax proches, pour tester les besoins en RAM de l'algo.
 
+## Antiga (Frangi Généralisé)
+```
+./Antiga --input liver.nii --output result.nii --sigmaMin 1 --sigmaMax 5 --nbSigmaSteps 5 --alpha 0.5 --beta 0.5 --gamma 0.5
+```
+## Sato
+```
+./Sato --input liver.nii --output result.nii --sigmaMin 1 --sigmaMax 5 --nbSigmaSteps 5 --alpha1 0.5 --alpha2 0.5
+```
+
 ## Jerman's Vesselness
 ```
 ./JermanVesselness --input liver.nii --output result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8
