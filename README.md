@@ -24,5 +24,15 @@ distinctes de Frangi...l'implémentation choisie ici est -S^2/(2*c) décrite dan
 ```
 ./ZhangVesselness --input liver.nii --ouput result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8
 ```
+## RORPO
+syntaxe des arguments de RORPO différente du dépôt original pour automatiser le benchmark (docopt est toujours utilisé)
+
+```
+./RORPO --input liver.nii --output result.nii --scaleMin 1 --factor 2 --nbScales 4 --core 3
+```
+## OOF
+```
+./OOF --input liver.nii --output result.nii --sigmaMin 1 --sigmaMax 5 --nbSigmaSteps 5
+```
 
 TODO : mettre a jour les licences, auteurs, etc.

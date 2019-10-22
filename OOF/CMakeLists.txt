@@ -38,8 +38,8 @@ include_directories(${PROJECT_SOURCE_DIR})
 message( ${PROJECT_SOURCE_DIR} )
 
 SET(CurrentExe "lightMultiScaleTubularityImageFilter")
-ADD_EXECUTABLE(lightMultiScaleTubularityImageFilter simplifiedTubularityFilterApplication.cxx)
-TARGET_LINK_LIBRARIES(lightMultiScaleTubularityImageFilter ${Libraries})
+ADD_EXECUTABLE(OOF simplifiedTubularityFilterApplication.cxx)
+TARGET_LINK_LIBRARIES(OOF ${Libraries})
 
 
 
