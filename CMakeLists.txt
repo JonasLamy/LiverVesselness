@@ -23,5 +23,8 @@ target_link_libraries(MeijeringNeuriteness ${Boost_OPTIONS} ${ITK_LIBRARIES})
 add_executable(RuiZhangVesselness ruiZhang.cpp)
 target_link_libraries(RuiZhangVesselness ${Boost_OPTIONS} ${ITK_LIBRARIES})
 
+add_executable(ZhangVesselness zhang.cpp)
+target_link_libraries(ZhangVesselness ${Boost_OPTIONS} ${ITK_LIBRARIES})
+
 add_executable(checkGaussian checkGaussian.cpp)
 target_link_libraries(checkGaussian ${Boost_OPTIONS} ${ITK_LIBRARIES})

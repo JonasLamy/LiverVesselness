@@ -54,6 +54,10 @@ namespace itk{
         RealObjectType * GetMinEigenValueOutput();
         const RealObjectType * GetMinEigenValueOutput()const;
 
+        EigenValueType GetMaxEigenValueNorm() const{return this->GetMaxEigenValueNormOutput()->Get();}
+        RealObjectType * GetMaxEigenValueNormOutput();
+        const RealObjectType * GetMaxEigenValueNormOutput()const;
+
         using DataObjectPointerArraySizeType = ProcessObject::DataObjectPointerArraySizeType;
         using Superclass::MakeOutput;
         DataObjectPointer MakeOutput(DataObjectPointerArraySizeType idx)override;
@@ -83,6 +87,7 @@ namespace itk{
 
         EigenValueType m_maxEigenValue;
         EigenValueType m_minEigenValue;
+        EigenValueType m_maxEigenValueNorm;
         std::mutex m_mutex;
         
     };

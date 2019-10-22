@@ -1,7 +1,7 @@
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 
-#include "itkHessianToRuiZhangMeasureImageFilter.h"
+#include "itkHessianToZhangMeasureImageFilter.h"
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
 #include "itkScalarImageKmeansImageFilter.h"
 #include "itkSigmoidImageFilter.h"
@@ -28,7 +28,6 @@ int main( int argc, char* argv[] )
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("tau,t", po::value<float>()->default_value(0.75), "Jerman's tau" )
-    ("nbSeeds,s",po::value<int>()->default_value(5),"number of kmean seeds")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma");
 
     bool parsingOK = true;
@@ -53,7 +52,7 @@ int main( int argc, char* argv[] )
                 << " sigmaMin : scale space minimum size \n"
 		            << " sigmaMax : scale space maximum size \n"
                 << " nbSigmaSteps : scale space length \n\n"
-                <<"example : ./RuiZhangVesselness --input liver.nii --output result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8 \n" << std::endl;
+                <<"example : ./ZhangVesselness --input liver.nii --output result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8 \n" << std::endl;
     
       return 0;
     }
@@ -64,7 +63,6 @@ int main( int argc, char* argv[] )
     float sigmaMax = vm["sigmaMax"].as<float>();
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     float tau = vm["tau"].as<float>();
-    unsigned int nbClasses = vm["nbSeeds"].as<int>();
 
     constexpr unsigned int Dimension = 3;
     using PixelType = double;
@@ -75,70 +73,21 @@ int main( int argc, char* argv[] )
     reader->SetFileName( inputFile );
     auto img = reader->GetOutput();
     // Filtering image
-
-    typedef itk::ScalarImageKmeansImageFilter<ImageType> KmeanFilterType;
-    auto kMeansFilter = KmeanFilterType::New();
-    kMeansFilter->SetInput( img );
-    kMeansFilter->SetUseNonContiguousLabels(true);
-
-    auto stats = itk::StatisticsImageFilter<ImageType>::New();
-    stats->SetInput( img );
-    stats->Update();
-    
-    double min = stats->GetMinimum(); // 0/4
-    double max = stats->GetMaximum(); // 4/4
-    
-    std::cout<<"min seed: "<<min<<std::endl;
-
-    kMeansFilter->AddClassWithInitialMean(min);
-    double step = (max - min) / nbClasses;
-    for(int i=1; i<nbClasses-1;i++)
-    {
-        kMeansFilter->AddClassWithInitialMean(step * i);
-        std::cout<<"seed: "<<step*i<<std::endl;
-    }
-    kMeansFilter->AddClassWithInitialMean(max);
-
-    std::cout<<"max seed: "<<max<<std::endl;
-
-    kMeansFilter->Update();
-
-    KmeanFilterType::ParametersType estimatedMeans = kMeansFilter->GetFinalMeans();
-    for( unsigned int i=0;i<nbClasses;i++)
-    {
-        std::cout<<"cluster["<<i<<"]"<<std::endl;
-        std::cout<<"estimated mean : "<<estimatedMeans[i]<<std::endl;
-    }
-
-    double alpha = (estimatedMeans[nbClasses-1] - estimatedMeans[nbClasses-2])/2.0;
-    double beta  = (estimatedMeans[nbClasses-1] + estimatedMeans[nbClasses-1])/2.0;
-
-    // filtering with sigmoid
-
-    typedef itk::SigmoidImageFilter<ImageType,ImageType> SigmoidFilterType;
-    auto sigmoidFilter = SigmoidFilterType::New();
-
-    sigmoidFilter->SetOutputMaximum(1);
-    sigmoidFilter->SetOutputMinimum(0);
-
-    sigmoidFilter->SetAlpha(alpha);
-    sigmoidFilter->SetBeta(beta);
-
-    sigmoidFilter->SetInput( img );
+// filtering with sigmoid
 
     using HessianPixelType = itk::SymmetricSecondRankTensor< double, Dimension >;
     using HessianImageType = itk::Image< HessianPixelType, Dimension >;
     
     using OutputImageType = itk::Image< double, Dimension >;
 
-    using RuiZhangFilterType = itk::HessianToRuiZhangMeasureImageFilter<HessianImageType, OutputImageType>;
-    auto ruiZhangFilter = RuiZhangFilterType::New();
-    ruiZhangFilter->SetTau(tau);
+    using ZhangFilterType = itk::HessianToZhangMeasureImageFilter<HessianImageType, OutputImageType>;
+    auto zhangFilter = ZhangFilterType::New();
+    zhangFilter->SetTau(tau);
 
     using MultiScaleEnhancementFilterType = itk::MultiScaleHessianBasedMeasureImageFilter< ImageType, HessianImageType, OutputImageType >;
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
-    multiScaleEnhancementFilter->SetInput( sigmoidFilter->GetOutput() );
-    multiScaleEnhancementFilter->SetHessianToMeasureFilter( ruiZhangFilter );
+    multiScaleEnhancementFilter->SetInput( reader->GetOutput() );
+    multiScaleEnhancementFilter->SetHessianToMeasureFilter( zhangFilter );
     //multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
     multiScaleEnhancementFilter->SetSigmaMinimum( sigmaMin );
     multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );

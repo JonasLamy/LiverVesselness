@@ -7,7 +7,7 @@ namespace itk
 {
     template<typename TInputImage,typename TOutputImage>
     HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::HessianToEigenValuesImageFilter()
-    :m_maxEigenValue(0.0f), m_minEigenValue(0.0f)
+    :m_maxEigenValue(0.0f), m_minEigenValue(0.0f), m_maxEigenValueNorm(0.0f)
     {
         /*
       // first output is a copy of the image, DataObject created by superlass
@@ -35,7 +35,13 @@ namespace itk
         static_cast<RealObjectType *>(this->MakeOutput(3).GetPointer() );
         this->ProcessObject::SetNthOutput(3,outputMinEV.GetPointer());
 
+        typename RealObjectType::Pointer outputMaxEVNorm = 
+        static_cast<RealObjectType *>(this->MakeOutput(4).GetPointer());
+        this->ProcessObject::SetNthOutput(4,outputMaxEVNorm.GetPointer());
+
         this->GetMaxEigenValueOutput()->Set( NumericTraits<RealType>::ZeroValue() );
+        this->GetMinEigenValueOutput()->Set( NumericTraits<RealType>::max() );
+        this->GetMaxEigenValueNormOutput()->Set( NumericTraits<RealType>::ZeroValue() );
 
         /* Should not be needed, see AllocateOutputs */
         typename TOutputImage::Pointer outputImage = 
@@ -57,10 +63,16 @@ namespace itk
         break;
         case 1: // Max eigenValue
         return RealObjectType::New().GetPointer();
+        break;
         case 2: // eigenValues image
         return TOutputImage::New().GetPointer();
+        break;
         case 3: // Min eigenValue
         return RealObjectType::New().GetPointer();
+        break;
+        case 4: // Max Norm value
+        return RealObjectType::New().GetPointer();
+        break;
         default:
         // might as well make an image
         return TInputImage::New().GetPointer();
@@ -94,6 +106,20 @@ namespace itk
     HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GetMinEigenValueOutput() const
     {
         return static_cast<const RealObjectType *>( this->ProcessObject::GetOutput(3) );
+    }
+
+    template<typename TInputImage,typename TOutputImage>
+    typename HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::RealObjectType* 
+    HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GetMaxEigenValueNormOutput()
+    {
+        return static_cast<RealObjectType *>( this->ProcessObject::GetOutput(4) );
+    }
+
+    template<typename TInputImage,typename TOutputImage>
+    const typename HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::RealObjectType* 
+    HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GetMaxEigenValueNormOutput() const
+    {
+        return static_cast<const RealObjectType *>( this->ProcessObject::GetOutput(4) );
     }
 
 
@@ -141,7 +167,9 @@ namespace itk
     void HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::BeforeThreadedGenerateData()
     {
         m_maxEigenValue = NumericTraits<EigenValueType>::NonpositiveMin();
+        m_maxEigenValueNorm = NumericTraits<EigenValueType>::NonpositiveMin();
         m_minEigenValue = NumericTraits<EigenValueType>::max();
+
     }
 
     template<typename TInputImage,typename TOutputImage>
@@ -149,9 +177,11 @@ namespace itk
     {
         const EigenValueType maximum = m_maxEigenValue;
         const EigenValueType minimum = m_minEigenValue;
+        const EigenValueType maximumNorm = m_maxEigenValueNorm;
         //Set the outputs
         this->GetMaxEigenValueOutput()->Set(maximum);
         this->GetMinEigenValueOutput()->Set(minimum);
+        this->GetMaxEigenValueNormOutput()->Set(maximumNorm);
     }
 
     template<typename TInputImage, typename TOutputImage>
@@ -160,6 +190,8 @@ namespace itk
         
         EigenValueType max = NumericTraits<EigenValueType>::ZeroValue();
         EigenValueType min = NumericTraits<EigenValueType>::max();
+        EigenValueType norm = NumericTraits<EigenValueType>::ZeroValue();
+
         using CalculatorType = SymmetricEigenAnalysisFixedDimension<ImageDimension, PixelType, EigenValueArrayType>;
         CalculatorType eigenCalculator;
         eigenCalculator.SetOrderEigenMagnitudes(true);
@@ -186,6 +218,8 @@ namespace itk
 
                 max = std::max(max,abs(eigenValues[2]) );
                 min = std::min(min,abs(eigenValues[0]) );
+                // norm of the eigen values vector, the comparison is done on the squared norm for efficiency
+                norm = std::max(norm,eigenValues[0]*eigenValues[0] + eigenValues[1]*eigenValues[1] + eigenValues[2]*eigenValues[2]);
                  
                 ++it;
                 ++itOut;
@@ -196,6 +230,7 @@ namespace itk
         std::lock_guard<std::mutex> mutexHolder(m_mutex);
         m_maxEigenValue = std::max(max,m_maxEigenValue);
         m_minEigenValue = std::min(min,m_minEigenValue);
+        m_maxEigenValueNorm = std::sqrt(std::max(norm,m_maxEigenValueNorm));
         
     }
 

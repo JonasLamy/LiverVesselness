@@ -58,7 +58,10 @@ namespace itk{
         EigenValueType lambdaRho = maxLambda3 * m_Tau;
         OutputPixelType vesselnessMeasure = NumericTraits< OutputPixelType >::ZeroValue();
 
+        EigenValueType alpha = ptr_filter->GetMaxEigenValueNorm();
+
         std::cout<<"computing eigenvalues"<<std::endl;
+        EigenValueType lambda1;
         EigenValueType lambda2;
         EigenValueType lambda3;
         
@@ -72,8 +75,10 @@ namespace itk{
         ImageRegionIterator< OutputImageType >     oit(output, output->GetLargestPossibleRegion());
         oit.GoToBegin();
         itEV.GoToBegin();
+
         while( !itEV.IsAtEnd() )
         {   
+            lambda1 = itEV.Value()[0];
             lambda2 = itEV.Value()[1];
             lambda3 = itEV.Value()[2];
 
@@ -106,8 +111,8 @@ namespace itk{
             }
             if( lambda2 >= lambdaRho /2.0f && lambdaRho > 0.0f) 
             {
-                vesselnessMesure = std::exp( - lambda2 / lambdaRho) * ( 1 - std::exp( - (m_Scale * m_Scale) / (2 * m_Alpha * m_Alpha) ) ); // TODO no scale but frobenius norm
-                oit.Set( vesselnessMesure );
+                vesselnessMeasure = std::exp( - lambda2 / lambdaRho) * ( 1 - std::exp( - (lambda1 * lambda1 + lambda2 * lambda2 + lambda3 * lambda3 ) / (2 * alpha * alpha) ) );
+                oit.Set( vesselnessMeasure );
                 ++oit;
                 ++itEV;
                 continue;
@@ -116,7 +121,7 @@ namespace itk{
             // Zhang's ratio
             // lambda2^2 * lambdaP * [3/(2*lambdaP + lambda2)]^3
             vesselnessMeasure = lambda2* lambda2 * lambdaRho; // lambda2^2 * lambdaP
-            vesselnessMeasure *= 27.0f / ( (2*lambda2 + lambdaRho) * (2*lambda2 + lambdaRho) * (2*lambda2 + lambdaRho) ); // [3/(lambdaP + lambda2)]^3
+            vesselnessMeasure *= 27.0f / ( (2*lambda2 + lambdaRho) * (2*lambda2 + lambdaRho) * (2*lambda2 + lambdaRho) ); // [3/(2*lambdaP + lambda2)]^3
 
             oit.Set( vesselnessMeasure);   
             

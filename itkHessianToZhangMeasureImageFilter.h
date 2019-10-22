@@ -41,12 +41,6 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     itkSetMacro(Tau,double);
     itkGetConstMacro(Tau,double);
 
-    itkSetMacro(Scale,double);
-    itkGetConstMacro(Scale,double);
-
-    itkSetMacro(Alpha,double);
-    itkGetConstMacro(Alpha,double);
-
     itkSetMacro(BrightObject,bool);
     itkGetConstMacro(BrightObject,bool);
 
@@ -72,8 +66,6 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     };
 
     double m_Tau{0.75};
-    double m_Scale;
-    double m_Alpha;
     bool m_BrightObject{true};
     
 
