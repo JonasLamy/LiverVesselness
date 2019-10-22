@@ -13,18 +13,17 @@ if ( Boost_FOUND )
   include_directories( ${Boost_INCLUDE_DIRS} )
   SET(Boost_OPTIONS ${Boost_LIBRAIRIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 endif( Boost_FOUND )
- 
-add_executable(JermanVesselness jerman.cpp)
-target_link_libraries(JermanVesselness ${Boost_OPTIONS} ${ITK_LIBRARIES})
 
-add_executable(MeijeringNeuriteness meijering.cpp)
-target_link_libraries(MeijeringNeuriteness ${Boost_OPTIONS} ${ITK_LIBRARIES})
+include_directories(lib)
 
-add_executable(RuiZhangVesselness ruiZhang.cpp)
-target_link_libraries(RuiZhangVesselness ${Boost_OPTIONS} ${ITK_LIBRARIES})
-
-add_executable(ZhangVesselness zhang.cpp)
-target_link_libraries(ZhangVesselness ${Boost_OPTIONS} ${ITK_LIBRARIES})
+add_subdirectory(Sato)
+add_subdirectory(Antiga)
+add_subdirectory(Zhang)
+add_subdirectory(Jerman)
+add_subdirectory(Meijering)
+add_subdirectory(RuiZhang)
+add_subdirectory(OOF)
+add_subdirectory(RORPO)
 
 add_executable(checkGaussian checkGaussian.cpp)
 target_link_libraries(checkGaussian ${Boost_OPTIONS} ${ITK_LIBRARIES})

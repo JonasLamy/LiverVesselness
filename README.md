@@ -17,7 +17,12 @@ Todo : Checker la valeur optimal de lambda pour la hessienne modifiée. Obara do
 ```
 ./RuiZhangVesselness --input liver.nii --output result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8
 ```
+## Zhang's vesselness
+Attention : La méthode de Zhang n'est pas bien définie par l'auteur....l'exposant -S^2/(2*alpha) ressemble à la combinaison de deux parties
+distinctes de Frangi...l'implémentation choisie ici est -S^2/(2*c) décrite dans le papier de Frangi.
 
-
+```
+./ZhangVesselness --input liver.nii --ouput result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8
+```
 
 TODO : mettre a jour les licences, auteurs, etc.
