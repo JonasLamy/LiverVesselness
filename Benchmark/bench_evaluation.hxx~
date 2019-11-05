@@ -1,0 +1,158 @@
+#include "bench_evaluation.h"
+
+// Change QuickView.h for itkViewImage.h
+#include "itkViewImage.h"
+
+template<typename TImageType, typename TGroundTruthImageType>
+Eval<TImageType,TGroundTruthImageType>::Eval( typename TImageType::Pointer img, typename TGroundTruthImageType::Pointer gt)
+  :  m_truePositive(0),m_trueNegative(0),m_falsePositive(0),m_falseNegative(0)
+
+{
+  countMatchesFloating(img,gt);
+}
+
+template<typename TImageType, typename TGroundTruthImageType>
+void Eval<TImageType, TGroundTruthImageType>::countMatchesBinary(typename TImageType::Pointer img, typename TGroundTruthImageType::Pointer gt)
+{
+
+  typename itk::ImageRegionConstIterator<TImageType> itImg(img,img->GetLargestPossibleRegion());
+  typename itk::ImageRegionConstIterator<TGroundTruthImageType> itGT(gt,gt->GetLargestPossibleRegion());
+ 
+  itImg.GoToBegin();
+  itGT.GoToBegin();
+
+  // in this part itGT is compared to 1 because some groundtruth are labelmaps with 2 systems. portal  veins is 1 in this case.
+  while( !itImg.IsAtEnd() )
+    {
+      // true positive
+      if( itImg.Get() == 1 && itGT.Get() == 1 )
+	{
+	  m_truePositive++;
+	  ++itImg;
+	  ++itGT;
+	  continue;
+	}
+      // true negative
+      if( itImg.Get() != 1 && itGT.Get() != 1 )
+	{
+	  m_trueNegative++;
+	  ++itImg;
+	  ++itGT;
+	  continue;
+	}
+      //false positive
+      if( itImg.Get()==1 && itGT.Get() != 1 )
+	{
+	  m_falsePositive++;
+	  ++itImg;
+	  ++itGT;
+	  continue;
+	}
+      // false negative
+      if( itImg.Get() != 1 && itGT.Get() == 1 )
+	{
+	  m_falseNegative++;
+	  ++itImg;
+	  ++itGT;
+	}
+    }
+}
+
+
+template<typename TImageType, typename TGroundTruthImageType>
+void Eval<TImageType, TGroundTruthImageType>::countMatchesFloating(typename TImageType::Pointer img, typename TGroundTruthImageType::Pointer gt)
+{
+  
+typename itk::ImageRegionConstIterator<TImageType> itImg(img,img->GetLargestPossibleRegion());
+  typename itk::ImageRegionConstIterator<TGroundTruthImageType> itGT(gt,gt->GetLargestPossibleRegion());
+
+  itImg.GoToBegin();
+  itGT.GoToBegin();
+
+  
+    // debug purpose to insure that both images are in the same coordinate system....
+  typename TImageType::Pointer p = TImageType::New();
+  p->SetRegions(img->GetLargestPossibleRegion());
+  p->Allocate();
+  p->FillBuffer(0);
+  
+  typename itk::ImageRegionIterator<TImageType> itP(p,p->GetLargestPossibleRegion());
+  auto reader = itk::ImageFileWriter<TImageType>::New(); 
+    
+  while( !itImg.IsAtEnd() )
+    {
+      if( itImg.Get( ) > 0 )
+	{
+	  if(itGT.Get() > 0 )
+	    {
+	      itP.Set(100); // both values
+	      m_truePositive++;
+	    }
+	  else
+	    {
+	      itP.Set(10); // only source image
+	      m_falsePositive++;
+	    }
+	}
+      else
+	{
+	  if(itGT.Get() > 0)
+	    {
+	      itP.Set(1); // only gt
+	      m_falseNegative++;
+	    }
+	  else{
+	    itP.Set(-100);// nothing
+	    m_trueNegative++;
+	  }
+	}
+      ++itImg;
+      ++itGT;
+      ++itP;
+    }
+
+  
+  reader->SetFileName("verif.nii");
+  reader->SetInput(p);
+  reader->Update();
+  
+  
+}
+
+template<typename TImageType, typename TGroundTruthImageType>
+double Eval<TImageType,TGroundTruthImageType>::precision()
+{
+  return m_truePositive / (double)( m_truePositive + m_falsePositive );
+}
+
+template<typename TImageType, typename TGroundTruthImageType>
+double Eval<TImageType,TGroundTruthImageType>::sensitivity()
+{
+  return m_truePositive / (double)( m_truePositive + m_falseNegative );
+}
+
+template<typename TImageType, typename TGroundTruthImageType>
+double Eval<TImageType,TGroundTruthImageType>::specificity()
+{
+  return m_trueNegative / (double)( m_trueNegative+m_truePositive );
+}
+
+template<typename TImageType, typename TGroundTruthImageType>
+double Eval<TImageType,TGroundTruthImageType>::accuracy()
+{
+  return (m_truePositive + m_trueNegative) / (double)( m_truePositive + m_trueNegative + m_falsePositive + m_falseNegative ); 
+}
+
+template<typename TImageType,typename TGroundTruthImageType>
+void Eval<TImageType,TGroundTruthImageType>::print()
+{
+  std::cout<<"stats\n"
+	   <<"TP (1,1) :"<<m_truePositive<<std::endl
+	   <<"TN (0,0):"<<m_trueNegative<<std::endl
+	   <<"FP (1,0):"<<m_falsePositive<<std::endl
+	   <<"FN (0,1):"<<m_falseNegative<<std::endl<<std::endl
+	   <<"Sensitivity:"<<sensitivity()<<std::endl
+	   <<"Specificity:"<<specificity()<<std::endl
+	   <<"Precision:"<<precision()<<std::endl
+	   <<"Accuracy:"<<accuracy()<<std::endl;
+}

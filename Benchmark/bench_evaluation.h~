@@ -1,0 +1,33 @@
+#ifndef bench_evaluation_h
+#define bench_evaluation_h
+
+#include "itkImage.h"
+#include "itkImageFileWriter.h"
+#include "itkImageRegionConstIterator.h"
+#include <iostream>
+
+template<typename TImageType, typename TGroundTruthImageType>
+class Eval{
+ public:
+
+  Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt);
+  double sensitivity();
+  double specificity();
+  double accuracy();
+  double precision();
+  
+  void print();
+ private:
+  void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt);
+  void countMatchesFloating(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt);
+
+  
+  long m_truePositive;
+  long m_trueNegative;
+  long m_falsePositive;
+  long m_falseNegative;
+};
+
+#include "bench_evaluation.hxx"
+
+#endif // bench_evaluation_h

@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.9.5)
  
-project(Vesselness)
+project(benchmark)
  
-
-find_package(ITK 5.1 REQUIRED)
+find_package(ITK REQUIRED)
 include(${ITK_USE_FILE})
 
 FIND_PACKAGE(Boost 1.46.0 REQUIRED COMPONENTS program_options)
@@ -14,14 +13,10 @@ if ( Boost_FOUND )
   SET(Boost_OPTIONS ${Boost_LIBRAIRIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 endif( Boost_FOUND )
 
-include_directories(lib)
+FIND_PACKAGE(jsoncpp REQUIRED)
+include_directories( ${JSONCPP_INCLUDE_DIR})
 
-add_subdirectory(Sato)
-add_subdirectory(Antiga)
-add_subdirectory(Zhang)
-add_subdirectory(Jerman)
-add_subdirectory(Meijering)
-add_subdirectory(RuiZhang)
-add_subdirectory(OOF)
-add_subdirectory(RORPO)
-add_subdirectory(Benchmark)
+add_executable(benchmark benchmark.cpp)
+target_link_libraries(benchmark ${Boost_OPTIONS} ${ITK_LIBRARIES} jsoncpp)
+
+file(MAKE_DIRECTORY ./build/output)
