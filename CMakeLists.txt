@@ -2,26 +2,61 @@ cmake_minimum_required(VERSION 3.9.5)
  
 project(Vesselness)
  
-
 find_package(ITK 5.1 REQUIRED)
 include(${ITK_USE_FILE})
+find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options)
 
-FIND_PACKAGE(Boost 1.46.0 REQUIRED COMPONENTS program_options)
-if ( Boost_FOUND )
-  message(STATUS "Boost and boost_program_options found.")
-  ADD_DEFINITIONS(${BOOST_DEFINITIONS} -DBOOST_ALL_NO_LIB)    
-  include_directories( ${Boost_INCLUDE_DIRS} )
-  SET(Boost_OPTIONS ${Boost_LIBRAIRIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-endif( Boost_FOUND )
 
-include_directories(lib)
+#Executable Section:
 
-add_subdirectory(Sato)
-add_subdirectory(Antiga)
-add_subdirectory(Zhang)
-add_subdirectory(Jerman)
-add_subdirectory(Meijering)
-add_subdirectory(RuiZhang)
-add_subdirectory(OOF)
+#Antiga ------------------------
+
+add_executable(Antiga antiga.cpp)
+target_include_directories(Antiga PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(Antiga ${ITK_LIBRARIES} Boost::program_options )
+set_target_properties(Antiga PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+# Jerman -----------------------
+
+add_executable(Jerman jerman.cpp)
+target_include_directories(Jerman PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Jerman>"
+  "$<INSTALL_INTERFACE:include/Jerman>"
+  )
+target_link_libraries(Jerman ${ITK_LIBRARIES} Boost::program_options)
+set_target_properties(Jerman PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+# Meijering
+
+add_executable(Meijering meijering.cpp)
+target_include_directories(Meijering PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Meijering>"
+  "$<INSTALL_INTERFACE:include/Meijering>"
+  )
+target_link_libraries(Meijering ${ITK_LIBRARIES} Boost::program_options)
+set_target_properties(Meijering PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+# Sato
+
+add_executable(Sato sato.cpp)
+target_include_directories(Sato PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  )
+target_link_libraries(Sato ${ITK_LIBRARIES} Boost::program_options)
+set_target_properties(Sato PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+# OOF
+
+add_executable(OOF oof.cxx)
+target_include_directories(OOF PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/OOF>"
+  "$<INSTALL_INTERFACE:include/OOF>"
+  )
+target_link_libraries(OOF ${ITK_LIBRARIES} Boost::program_options)
+set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+# RORPO
+
 add_subdirectory(RORPO)
-add_subdirectory(Benchmark)

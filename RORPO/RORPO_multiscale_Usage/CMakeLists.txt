@@ -20,5 +20,5 @@ add_executable( ${PROJECT_NAME} main.cpp )
 
 # LINK REQUIRED LIBS
 target_link_libraries( ${PROJECT_NAME} RORPO docopt ${ITK_LIBRARIES} )
-
+set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/ )
