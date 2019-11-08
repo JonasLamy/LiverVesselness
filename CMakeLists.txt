@@ -29,7 +29,8 @@ target_include_directories(Jerman PUBLIC
   )
 target_link_libraries(Jerman ${ITK_LIBRARIES} Boost::program_options)
 set_target_properties(Jerman PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
-# Meijering
+
+# Meijering --------------------------
 
 add_executable(Meijering meijering.cpp)
 target_include_directories(Meijering PUBLIC
@@ -39,7 +40,8 @@ target_include_directories(Meijering PUBLIC
   )
 target_link_libraries(Meijering ${ITK_LIBRARIES} Boost::program_options)
 set_target_properties(Meijering PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
-# Sato
+
+# Sato -----------------------------
 
 add_executable(Sato sato.cpp)
 target_include_directories(Sato PUBLIC
@@ -47,7 +49,8 @@ target_include_directories(Sato PUBLIC
   )
 target_link_libraries(Sato ${ITK_LIBRARIES} Boost::program_options)
 set_target_properties(Sato PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
-# OOF
+
+# OOF ------------------------------
 
 add_executable(OOF oof.cxx)
 target_include_directories(OOF PUBLIC
@@ -57,6 +60,19 @@ target_include_directories(OOF PUBLIC
   )
 target_link_libraries(OOF ${ITK_LIBRARIES} Boost::program_options)
 set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
-# RORPO
+
+# RORPO ----------------------------
 
 add_subdirectory(RORPO)
+
+# benchmark ------------------------
+
+find_package(jsoncpp REQUIRED)
+add_executable(Benchmark benchmark.cpp)
+target_include_directories(Benchmark PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
+  "$<INSTALL_INTERFACE:include/Benchmark>"
+  )
+target_link_libraries(Benchmark ${ITK_LIBRARIES} Boost::program_options jsoncpp)
+set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
