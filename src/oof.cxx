@@ -14,11 +14,15 @@ Based on work of Turetken & Fethallah Benmansour
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "utils.h"
+
 int main(int argc, char** argv)
 {
     //********************************************************
     //                   Reading arguments
     //********************************************************
+    bool isInputDicom;
+ 
     namespace po = boost::program_options;
     // parsing arguments
     po::options_description general_opt("Allowed options are ");
@@ -29,7 +33,8 @@ int main(int argc, char** argv)
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("sigma,s",po::value<double>(),"sigma for smoothing");
+    ("sigma,s",po::value<double>(),"sigma for smoothing")
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -72,13 +77,8 @@ int main(int argc, char** argv)
 
     typedef float PixelType;
     typedef itk::Image<PixelType,maxDimension> InputImageType;
-    typedef itk::ImageFileReader<InputImageType> ReaderType;
 
-    ReaderType::Pointer reader = ReaderType::New();
-    reader->SetFileName(inputFile);
-    reader->Update();
-
-    InputImageType::Pointer inputImage = reader->GetOutput();
+    InputImageType::Pointer inputImage = vUtils::readImage<InputImageType>(inputFile,isInputDicom);
 
     //********************************************************
     //                   Filter

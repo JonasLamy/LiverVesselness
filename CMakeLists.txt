@@ -11,7 +11,7 @@ find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options)
 
 #Antiga ------------------------
 
-add_executable(Antiga antiga.cpp)
+add_executable(Antiga src/antiga.cpp)
 target_include_directories(Antiga PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -21,7 +21,7 @@ set_target_properties(Antiga PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY
 
 # Jerman -----------------------
 
-add_executable(Jerman jerman.cpp)
+add_executable(Jerman src/jerman.cpp)
 target_include_directories(Jerman PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Jerman>"
@@ -32,7 +32,7 @@ set_target_properties(Jerman PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY
 
 # Meijering --------------------------
 
-add_executable(Meijering meijering.cpp)
+add_executable(Meijering src/meijering.cpp)
 target_include_directories(Meijering PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Meijering>"
@@ -43,7 +43,7 @@ set_target_properties(Meijering PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 
 # Sato -----------------------------
 
-add_executable(Sato sato.cpp)
+add_executable(Sato src/sato.cpp)
 target_include_directories(Sato PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   )
@@ -52,7 +52,7 @@ set_target_properties(Sato PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_D
 
 # OOF ------------------------------
 
-add_executable(OOF oof.cxx)
+add_executable(OOF src/oof.cxx)
 target_include_directories(OOF PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/OOF>"
@@ -68,7 +68,7 @@ add_subdirectory(RORPO)
 # benchmark ------------------------
 
 find_package(jsoncpp REQUIRED)
-add_executable(Benchmark benchmark.cpp)
+add_executable(Benchmark src/benchmark.cpp)
 target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
