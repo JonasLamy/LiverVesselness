@@ -45,14 +45,6 @@ TODO : mettre a jour les licences, auteurs, etc.
 (Nifti support - type:float/double)
 ./Benchmark --input liver.nii --groundTruth gt_liver.nii --mask mask_liver.nii --parametersFile parameters.json
 (Dicom series support - type: int16)
-./Benchmark --input liver.nii --inputIsDicom --groundTruth gt_liver.nii --gtIsDicom --mask mask_liver.nii --maskIsDicom --parametersFile parameters.json
+./Benchmark --input liver_directory/ --groundTruth gt_directory/ --mask mask_directory/ --parametersFile parameters.json
 ```
-
-    ("help,h", "display this message")
-    ("input,i",po::value<std::string>(),"Input image ")
-    ("inputIsDicom,n",po::value<bool>()->default_value(false),"specify dicom input")
-    ("groundTruth,g", po::value<std::string>(), "GroundTruth : input img" )
-    ("gtIsDicom,t",po::value<bool>()->default_value(false),"specify dicom groundTruth")
-    ("mask,m", po::value<std::string>(), "mask : mask image")
-    ("maskIsDicom,a",po::value<bool>()->default_value(false),"specify dicom input")
-    ("parametersFile,p",po::value<std::string>()->default_value("parameters.json"),"ParameterFile : input json file");
+Le benchmark détecte si les images en input (input,gt,mask) sont du DICOM en regardant si le chemin du gt est un répertoire.
