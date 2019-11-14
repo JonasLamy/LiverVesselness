@@ -29,7 +29,7 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	p->FillBuffer(0);
 
 	typename itk::ImageRegionIterator<TImageType> itP(p, p->GetLargestPossibleRegion());
-	auto reader = itk::ImageFileWriter<TImageType>::New();
+	auto writer = itk::ImageFileWriter<TImageType>::New();
 
 	while (!itImg.IsAtEnd())
 	{
@@ -66,11 +66,12 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 		++itImg;
 		++itGT;
 		++itP;
+		++itMask;
 	}
 
-	reader->SetFileName("verif.nii");
-	reader->SetInput(p);
-	reader->Update();
+	writer->SetFileName("verif.nii");
+	writer->SetInput(p);
+	writer->Update();
 }
 
 

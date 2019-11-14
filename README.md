@@ -26,13 +26,7 @@ Todo : Checker la valeur optimal de lambda pour la hessienne modifiée. Obara do
 ```
 ./RuiZhangVesselness --input liver.nii --output result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8
 ```
-## Zhang's vesselness
-Attention : La méthode de Zhang n'est pas bien définie par l'auteur....l'exposant -S^2/(2*alpha) ressemble à la combinaison de deux parties
-distinctes de Frangi...l'implémentation choisie ici est -S^2/(2*c) décrite dans le papier de Frangi.
 
-```
-./ZhangVesselness --input liver.nii --ouput result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8
-```
 ## RORPO
 syntaxe des arguments de RORPO différente du dépôt original pour automatiser le benchmark (docopt est toujours utilisé)
 
@@ -45,3 +39,20 @@ syntaxe des arguments de RORPO différente du dépôt original pour automatiser 
 ```
 
 TODO : mettre a jour les licences, auteurs, etc.
+
+## Benchmark 
+```
+(Nifti support - type:float/double)
+./Benchmark --input liver.nii --groundTruth gt_liver.nii --mask mask_liver.nii --parametersFile parameters.json
+(Dicom series support - type: int16)
+./Benchmark --input liver.nii --inputIsDicom --groundTruth gt_liver.nii --gtIsDicom --mask mask_liver.nii --maskIsDicom --parametersFile parameters.json
+```
+
+    ("help,h", "display this message")
+    ("input,i",po::value<std::string>(),"Input image ")
+    ("inputIsDicom,n",po::value<bool>()->default_value(false),"specify dicom input")
+    ("groundTruth,g", po::value<std::string>(), "GroundTruth : input img" )
+    ("gtIsDicom,t",po::value<bool>()->default_value(false),"specify dicom groundTruth")
+    ("mask,m", po::value<std::string>(), "mask : mask image")
+    ("maskIsDicom,a",po::value<bool>()->default_value(false),"specify dicom input")
+    ("parametersFile,p",po::value<std::string>()->default_value("parameters.json"),"ParameterFile : input json file");

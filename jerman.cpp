@@ -12,8 +12,12 @@
 
 #include <string>
 
+#include "utils.h"
+
 int main( int argc, char* argv[] )
 {
+    bool isInputDicom;
+
     namespace po = boost::program_options;
     // parsing arguments
     po::options_description general_opt("Allowed options are ");
@@ -24,7 +28,8 @@ int main( int argc, char* argv[] )
     ("tau,t", po::value<float>()->default_value(0.75), "Jerman's tau" )
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
-    ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma");
+    ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -65,8 +70,7 @@ int main( int argc, char* argv[] )
     using ImageType = itk::Image< PixelType, Dimension >;
 
     typedef itk::ImageFileReader<ImageType> ReaderType;
-    auto reader = ReaderType::New();
-    reader->SetFileName( inputFile );
+    ImageType::Pointer image = vUtils::readImage<ImageType>(inputFile,isInputDicom);
 
     // Antiga vesselness operator
 
@@ -81,7 +85,7 @@ int main( int argc, char* argv[] )
 
     using MultiScaleEnhancementFilterType = itk::MultiScaleHessianBasedMeasureImageFilter< ImageType, HessianImageType, OutputImageType >;
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
-    multiScaleEnhancementFilter->SetInput( reader->GetOutput() );
+    multiScaleEnhancementFilter->SetInput( image );
     multiScaleEnhancementFilter->SetHessianToMeasureFilter( jermanFilter );
     //multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
     multiScaleEnhancementFilter->SetSigmaMinimum( sigmaMin );
