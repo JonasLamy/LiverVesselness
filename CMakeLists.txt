@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9.5)
  
 project(Vesselness)
  
-find_package(ITK 5.1 REQUIRED)
+find_package(ITK 5.0 REQUIRED)
 include(${ITK_USE_FILE})
 find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options)
 
