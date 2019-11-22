@@ -77,6 +77,9 @@ int main(int argc, char** argv)
   configFile.close();
   std::cout<<"done\n"<<std::endl;
 
+  // parsing csv file name using JSON file Name
+  size_t pos = parameterFileName.find(".");
+  std::string csvFileName = parameterFileName.substr (0,pos) + ".csv"; // we want everything before ".json" and we replace extension
 
   using ImageType = itk::Image<double,3>;
   using GroundTruthImageType = itk::Image<int,3>;
@@ -89,26 +92,27 @@ int main(int argc, char** argv)
   // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
   // Mask is only useful for statistics during segmentation assessment, 
   // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
-
+  
   if( vUtils::isDir( groundTruthFileName ) ) // boolean choice for now, 0 is nifti & 1 is DICOM 
   {
     
-    std::cout<<"Using dicom data...."<<std::endl;
-    DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(groundTruthFileName,true);
-    DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskFileName,true);
+    std::cout<<"Using dicom groundTruth data...."<<std::endl;
+    DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(groundTruthFileName,false);
+    DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskFileName,false);
     
-    Benchmark<ImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,inputFileName,groundTruth,maskImage);
+    Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,inputFileName,csvFileName,groundTruth,maskImage);
     b.SetDicomInput();
     b.run();
   }
   else
   {
-    std::cout<<"Using NIFTI data...."<<std::endl;
+    std::cout<<"Using NIFTI groundtruth data...."<<std::endl;
     GroundTruthImageType::Pointer groundTruth = vUtils::readImage<GroundTruthImageType>(groundTruthFileName,false);
     MaskImageType::Pointer maskImage = vUtils::readImage<MaskImageType>(maskFileName,false);
     
-    Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,inputFileName,groundTruth,maskImage);
+    Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,inputFileName,csvFileName,groundTruth,maskImage);
     b.SetNiftiInput();
     b.run();
   }
+  
 }

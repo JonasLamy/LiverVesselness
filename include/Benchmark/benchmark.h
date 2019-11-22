@@ -20,13 +20,12 @@ template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 class Benchmark
 {
 public:
-    Benchmark(const Json::Value root,std::string inputFileName, typename TGroundTruthImageType::Pointer gtImage, typename TMaskImageType::Pointer maskImage);
-
-    bool SetDicomInput(){m_inputIsDicom = true;}
-    bool SetNiftiInput(){m_inputIsDicom = false;}
+    Benchmark(const Json::Value root,std::string inputFileName,std::string csvFileName, typename TGroundTruthImageType::Pointer gtImage, typename TMaskImageType::Pointer maskImage);
+    ~Benchmark();
+    void SetDicomInput(){m_inputIsDicom = true;}
+    void SetNiftiInput(){m_inputIsDicom = false;}
 
     void run();
-    void  print();
 private:
     std::string m_inputFileName;
     bool m_inputIsDicom;
@@ -35,10 +34,13 @@ private:
     VoxelsMap m_vMap;
     MetricsMap m_mMap;
 
+    std::ofstream m_resultFileStream;
+
     typename TGroundTruthImageType::Pointer m_gt;
     typename TMaskImageType::Pointer m_mask;
 
     void launchScript(const std::string &commandLine,const std::string &outputName);
+    void addResultsToFile(int algoID,int threshold, const Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType>& eval);
 };
 
 #include "benchmark.hxx"

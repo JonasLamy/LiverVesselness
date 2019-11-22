@@ -28,7 +28,7 @@ class Eval{
   double dice();
   long double matthewsCorrelation();
 
-  static void roc(VoxelsMap &vMap);
+  static void roc(VoxelsMap &vMap); // not used or implemented here
     
   void print();
  private:
@@ -40,6 +40,20 @@ class Eval{
   long m_falseNegative;
 };
 
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+std::ostream& operator <<(std::ostream& out,const Eval<TImageType,TGroundTruthImageType,TMaskImageType> eval)
+{
+  out<< eval.TP() << ","
+		<< eval.TN() << ","
+		<< eval.FP() << ","
+		<< eval.FN() << ","
+		<< eval.sensitivity() << ","
+		<< eval.specificity() << ","
+		<< eval.precision() << ","
+		<< eval.accuracy() << ","
+		<< eval.dice() << ","
+		<< eval.matthewsCorrelation() << std::endl;
+}
 #include "bench_evaluation.hxx"
 
 #endif // bench_evaluation_h

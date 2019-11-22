@@ -76,3 +76,33 @@ target_include_directories(Benchmark PUBLIC
   )
 target_link_libraries(Benchmark ${ITK_LIBRARIES} Boost::program_options jsoncpp)
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+# process ircad -------------------
+
+add_executable(CropImages src/process_ircad_data.cpp)
+target_include_directories(CropImages PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(CropImages ${ITK_LIBRARIES})
+set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../scripts" )
+
+# temp --------------------------------
+
+add_executable(Tot src/tot.cpp)
+target_include_directories(Tot PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(Tot ${ITK_LIBRARIES})
+set_target_properties(Tot PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+add_executable(MakeIso src/makeIso.cpp)
+target_include_directories(MakeIso PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeIso ${ITK_LIBRARIES})
+set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../scripts" )
+
+

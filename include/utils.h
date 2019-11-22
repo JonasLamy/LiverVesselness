@@ -11,6 +11,7 @@
 #include "itkGDCMImageIO.h"
 #include "itkGDCMSeriesFileNames.h"
 #include "itkImageSeriesReader.h"
+#include "itkImageSeriesWriter.h"
 
 #include <vector>
 #include <sys/stat.h>
@@ -81,5 +82,7 @@ namespace vUtils{
         return reader->GetOutput();
     }
 }
+
+#include "utils.hxx"
 
 #endif

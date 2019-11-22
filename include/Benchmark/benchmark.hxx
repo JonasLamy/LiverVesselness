@@ -5,6 +5,7 @@
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json::Value root, 
                                                 std::string inputFileName,
+                                                std::string csvFileName,
                                                 typename TGroundTruthImageType::Pointer gtImage, 
                                                 typename TMaskImageType::Pointer maskImage)
 {
@@ -25,6 +26,25 @@ Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json
     m_mMap["accuracy"] = std::vector<double>();
     m_mMap["precision"] = std::vector<double>();
     m_mMap["specificity"] = std::vector<double>();
+
+    // opening resultFileStream
+    m_resultFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
+    if( m_resultFileStream.is_open() )
+    {
+      m_resultFileStream <<"AlgoID,threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,dice,MatthewsCorrelation"<<std::endl;
+    } 
+    else{ 
+      throw "Error opening csv file....";
+    }
+}
+
+template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
+Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::~Benchmark()
+{
+    if( m_resultFileStream.is_open() )
+    {
+      m_resultFileStream.close();
+    }
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
@@ -93,8 +113,8 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(const std::string &commandLine,const std::string &outputName)
 {
-    typedef itk::BinaryThresholdImageFilter<TImageType,TGroundTruthImageType> ThresholdFilterType;
-  /*
+  typedef itk::BinaryThresholdImageFilter<TImageType,TGroundTruthImageType> ThresholdFilterType;
+
   std::cout<<commandLine<<std::endl;
   // starting external algorithm
   if( m_inputIsDicom == true )
@@ -106,13 +126,11 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(co
   {
     system(commandLine.c_str());
   }
-  */
-
+  std::cout<<"opening result"<<std::endl;
   auto outputImage = vUtils::readImage<TImageType>(outputName,false);
   
-  
+  /*
   std::cout<<"comparing output to ground truth....\n";
-  // TODO do some stats here
   if( outputImage->GetLargestPossibleRegion().GetSize() != m_gt->GetLargestPossibleRegion().GetSize() )
     {
       std::cout<<"output from program and groundTruth size does not match...No stats computed"<<std::endl;
@@ -150,7 +168,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(co
     eval.print();
   }
   std::cout<<"best threshold from ROC:"<<bestThreshold<<std::endl;
-
+  */
   /* 
   
   vMap["TP"].push_back( eval.TP() );
