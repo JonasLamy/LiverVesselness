@@ -30,6 +30,18 @@ target_include_directories(Jerman PUBLIC
 target_link_libraries(Jerman ${ITK_LIBRARIES} Boost::program_options)
 set_target_properties(Jerman PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
+# RhuiZhang -----------------------
+
+add_executable(RuiZhang src/ruiZhang.cpp)
+target_include_directories(RuiZhang PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/RuiZhang>"
+  "$<INSTALL_INTERFACE:include/RuiZhang>"
+  )
+target_link_libraries(RuiZhang ${ITK_LIBRARIES} Boost::program_options)
+set_target_properties(RuiZhang PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+
 # Meijering --------------------------
 
 add_executable(Meijering src/meijering.cpp)

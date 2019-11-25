@@ -12,12 +12,13 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-
-
 #include <string>
+
+#include "utils.h"
 
 int main( int argc, char* argv[] )
 {
+    bool isInputDicom = false;
     namespace po = boost::program_options;
     // parsing arguments
     po::options_description general_opt("Allowed options are ");
@@ -29,7 +30,8 @@ int main( int argc, char* argv[] )
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("tau,t", po::value<float>()->default_value(0.75), "Jerman's tau" )
     ("nbSeeds,s",po::value<int>()->default_value(5),"number of kmean seeds")
-    ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma");
+    ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -70,10 +72,7 @@ int main( int argc, char* argv[] )
     using PixelType = double;
     using ImageType = itk::Image< PixelType, Dimension >;
 
-    typedef itk::ImageFileReader<ImageType> ReaderType;
-    auto reader = ReaderType::New();
-    reader->SetFileName( inputFile );
-    auto img = reader->GetOutput();
+    auto img = vUtils::readImage<ImageType>(inputFile,isInputDicom);
     // Filtering image
 
     typedef itk::ScalarImageKmeansImageFilter<ImageType> KmeanFilterType;
