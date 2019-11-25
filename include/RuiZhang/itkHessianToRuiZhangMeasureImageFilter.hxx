@@ -117,7 +117,7 @@ namespace itk{
             // RuiZhang's ratio
             // lambda2^2 * ( lambdaP - lambda2 ) * [3/(lambdaP + lambda2)]^3 * (1-exp(-R^2 / 2y)) with y=lambdaRho/3
             vesselnessMeasure = lambda2* lambda2 * (lambdaRho - lambda2); // lambda2^2 * ( lambdaP - lambda2 )
-            vesselnessMeasure *= ( 1 - exp( -(lambda1 * lambda1 + lambda2 * lambda2 + lambda3 * lambda3 ) / ( 2 * lambdaRho / 3) ) ); // (1-exp(-R^2 / 2y)) see paper for R and y
+            vesselnessMeasure *= ( 1 - exp( -(lambda1 * lambda1 + lambda2 * lambda2 + lambdaRho * lambdaRho ) / ( 2 * lambdaRho / 3) ) ); // (1-exp(-R^2 / 2y)) see paper for R and y
             vesselnessMeasure *= 27.0f / ( (lambda2 + lambdaRho) * (lambda2 + lambdaRho) * (lambda2 + lambdaRho) ); // [3/(lambdaP + lambda2)]^3
 
             oit.Set( vesselnessMeasure);   

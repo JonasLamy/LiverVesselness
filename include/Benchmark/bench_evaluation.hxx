@@ -39,12 +39,12 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 			{
 				if (itGT.Get() > 0)
 				{
-					itP.Set(100); // both values
+					itP.Set(255); // both values
 					m_truePositive++;
 				}
 				else
 				{
-					itP.Set(10); // only source image
+					itP.Set(100); // only source image
 					m_falsePositive++;
 				}
 			}
@@ -52,12 +52,12 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 			{
 				if (itGT.Get() > 0)
 				{
-					itP.Set(1); // only gt
+					itP.Set(50); // only gt
 					m_falseNegative++;
 				}
 				else
 				{
-					itP.Set(-100); // nothing
+					itP.Set(0); // nothing
 					m_trueNegative++;
 				}
 			}

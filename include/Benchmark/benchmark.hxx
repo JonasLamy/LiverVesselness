@@ -63,7 +63,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
   for (auto &algoName : algoNames)
   {
     std::cout << "Algorithm n°" << nbAlgorithms << " " << algoName << std::endl;
-    nbAlgorithms++;
 
     const Json::Value algo = m_rootNode[algoName];
 
@@ -85,7 +84,8 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
           std::string m = arg.getMemberNames()[0]; // only one name in the array
           sStream << "--" << m << " " << arg[m].asString() << " ";
         }
-        launchScript(sStream.str(),outputName);
+        launchScript(nbAlgorithms,sStream.str(),outputName);
+        nbAlgorithms++;
       }
     }
     else // the algorithm contains only one set of parameters
@@ -104,14 +104,15 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
         std::string m = arg.getMemberNames()[0]; // only one name in the array
         sStream << m << " " << arg[m].asString() << " ";
       }
-      launchScript(sStream.str(),outputName);
+      launchScript(nbAlgorithms,sStream.str(),outputName);
+      nbAlgorithms++;
     }
   }
 }
 
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
-void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(const std::string &commandLine,const std::string &outputName)
+void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,const std::string &commandLine,const std::string &outputName)
 {
   typedef itk::BinaryThresholdImageFilter<TImageType,TGroundTruthImageType> ThresholdFilterType;
 
@@ -129,7 +130,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(co
   std::cout<<"opening result"<<std::endl;
   auto outputImage = vUtils::readImage<TImageType>(outputName,false);
   
-  /*
   std::cout<<"comparing output to ground truth....\n";
   if( outputImage->GetLargestPossibleRegion().GetSize() != m_gt->GetLargestPossibleRegion().GetSize() )
     {
@@ -165,10 +165,10 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(co
       minDist = euclideanDistance;
       bestThreshold = i;
     }
-    eval.print();
+    m_resultFileStream <<algoID <<","<<i<<","<< eval;
   }
   std::cout<<"best threshold from ROC:"<<bestThreshold<<std::endl;
-  */
+  
   /* 
   
   vMap["TP"].push_back( eval.TP() );

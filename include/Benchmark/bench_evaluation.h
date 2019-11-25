@@ -41,7 +41,7 @@ class Eval{
 };
 
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-std::ostream& operator <<(std::ostream& out,const Eval<TImageType,TGroundTruthImageType,TMaskImageType> eval)
+std::ostream& operator <<(std::ostream& out,Eval<TImageType,TGroundTruthImageType,TMaskImageType> & eval)
 {
   out<< eval.TP() << ","
 		<< eval.TN() << ","
@@ -53,6 +53,8 @@ std::ostream& operator <<(std::ostream& out,const Eval<TImageType,TGroundTruthIm
 		<< eval.accuracy() << ","
 		<< eval.dice() << ","
 		<< eval.matthewsCorrelation() << std::endl;
+
+    return out;
 }
 #include "bench_evaluation.hxx"
 
