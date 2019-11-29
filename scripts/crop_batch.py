@@ -3,18 +3,21 @@ import sys
 import os
 import itk
 import numpy as np
-import glob
+import fnmatch
 
-outputDir = sys.argv[1]
+inputDir = sys.argv[1]
+outputDir = sys.argv[2]
 
-for patientDirectory in glob.glob('3D*'):
+for patientDirectory in fnmatch.filter( os.listdir(inputDir),'3D*'):
     print(patientDirectory)
-    patientPath = patientDirectory + "/PATIENT_DICOM/"
-    liverPath = patientDirectory + "/MASKS_DICOM/liver"
-    venousPath = patientDirectory + "/MASKS_DICOM/venoussystem/"
+
+    
+    patientPath = inputDir +"/"+ patientDirectory + "/PATIENT_DICOM/"
+    liverPath = inputDir +"/"+ patientDirectory + "/MASKS_DICOM/liver"
+    venousPath = inputDir +"/"+ patientDirectory + "/MASKS_DICOM/venoussystem/"
     if not os.path.isdir(venousPath) :
-        venousPath = patientDirectory + "/MASKS_DICOM/venacava/"
-    portalPath = patientDirectory + "/MASKS_DICOM/portalvein/"
+        venousPath = inputDir +"/"+ patientDirectory + "/MASKS_DICOM/venacava/"
+    portalPath = inputDir +"/"+ patientDirectory + "/MASKS_DICOM/portalvein/"
     
     print(patientPath)
     print(venousPath)
@@ -37,3 +40,4 @@ for patientDirectory in glob.glob('3D*'):
     print(commandLine)
     
     os.system(commandLine)
+    

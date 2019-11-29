@@ -7,29 +7,30 @@ import glob
 
 outputDir = sys.argv[1]
 
-for patientDirectory in glob.glob('3D*'):
+for patientDirectory in glob.glob(outputDir +'/3D*'):
     print(patientDirectory)
-    patientPath = outputDir +"/"+ patientDirectory+"/patient.nii"
-    liverPath = outputDir +"/"+ patientDirectory+ "/liver.nii"
-    venousPath = outputDir +"/"+ patientDirectory+ "/venacava.nii"
-    portalPath = outputDir +"/"+ patientDirectory+ "/portal.nii"
+    patientPath =  patientDirectory+"/patient.nii"
+    liverPath =  patientDirectory+ "/liver.nii"
+    venousPath =  patientDirectory+ "/venacava.nii"
+    portalPath =  patientDirectory+ "/portal.nii"
         
     print(patientPath)
     print(venousPath)
     print(portalPath)
     print(liverPath)
 
-    if not os.path.exists(outputDir +"/"+ patientDirectory):
-        os.makedirs(outputDir +"/"+ patientDirectory)
+    if not os.path.exists( patientDirectory):
+        os.makedirs(patientDirectory)
 
-    patientOutPath = outputDir +"/"+ patientDirectory+"/patientIso.nii"
-    liverOutPath = outputDir +"/"+ patientDirectory+ "/liverIso.nii"
-    vesselsOutPath = outputDir +"/"+ patientDirectory+ "/vesselsIso.nii"
+    patientOutPath = patientDirectory+"/patientIso.nii"
+    liverOutPath = patientDirectory+ "/liverIso.nii"
+    vesselsOutPath = patientDirectory+ "/vesselsIso.nii"
+    maskedLiverOutPath = patientDirectory+"/maskedLiverIso.nii"
     
     # calling external program
     # missing outputs
     commandLine = "./MakeIso " + patientPath + " " + liverPath + " " + venousPath + " " + portalPath + " "
-    commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath 
+    commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath + " " + maskedLiverOutPath
 
     print(commandLine)
     

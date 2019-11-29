@@ -2,6 +2,7 @@
 #include "itkImageFileWriter.h"
 #include "itkBinaryImageToShapeLabelMapFilter.h"
 #include "itkCropImageFilter.h"
+//#include "itkMaskImageFilter.h"
 
 #include <string>
 
@@ -19,6 +20,7 @@ int main(int argc,char** argv)
     std::string outputMaskFileName( argv[6] );
     std::string outputVesselsFileName( argv[7] );
     std::string outputPortalFileName( argv[8] );
+    //std::string outputMaskedLiverFileName( argv[9] );
 
     // settings images types
     using DicomImageType = itk::Image<int16_t,3>;
@@ -135,13 +137,23 @@ int main(int argc,char** argv)
 
 
     std::cout<<"size after crop:"<<cropPatientImageFilter->GetOutput()->GetLargestPossibleRegion().GetSize()<<std::endl;
+    /*
+    using MaskFilterType = itk::MaskImageFilter<DicomImageType,MaskImageType>;
+    auto maskFilter = MaskFilterType::New();
 
+    maskFilter->SetInput(cropPatientImageFilter->GetOutput());
+    maskFilter->SetMaskImage(cropMaskImageFilter->GetOutput());
+    */
     using DicomWriterType = itk::ImageFileWriter<DicomImageType>;
     auto writer = DicomWriterType::New();
     writer->SetInput(cropPatientImageFilter->GetOutput() );
     writer->SetFileName( outputPatientFileName);
     writer->Update();
-
+    /*
+    writer->SetInput(maskFilter->GetOutput());
+    writer->SetFileName(outputMaskedLiverFileName);
+    writer->Update();
+    */
     using VesselsWriterType = itk::ImageFileWriter<VesselsImageType>;
     auto vesselsWriter = VesselsWriterType::New();
     vesselsWriter->SetInput(cropVesselsImageFilter->GetOutput() );
