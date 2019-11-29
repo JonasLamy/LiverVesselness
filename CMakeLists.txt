@@ -97,17 +97,17 @@ target_include_directories(CropImages PUBLIC
   "$<INSTALL_INTERFACE:include>"
   )
 target_link_libraries(CropImages ${ITK_LIBRARIES})
-set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../scripts" )
+set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 # temp --------------------------------
 
-add_executable(Tot src/tot.cpp)
-target_include_directories(Tot PUBLIC
+add_executable(ChangeLabelDicom src/changeLabelDicom.cpp)
+target_include_directories(ChangeLabelDicom PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
   )
-target_link_libraries(Tot ${ITK_LIBRARIES})
-set_target_properties(Tot PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
+set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 add_executable(MakeIso src/makeIso.cpp)
 target_include_directories(MakeIso PUBLIC
@@ -115,6 +115,6 @@ target_include_directories(MakeIso PUBLIC
   "$<INSTALL_INTERFACE:include>"
   )
 target_link_libraries(MakeIso ${ITK_LIBRARIES})
-set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../scripts" )
+set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 

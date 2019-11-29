@@ -6,6 +6,7 @@
 #include "itkResampleImageFilter.h"
 
 #include "itkXorImageFilter.h"
+#include "itkMaskImageFilter.h"
 
 #include <string>
 
@@ -18,14 +19,16 @@ typename TImageType::Pointer makeIso(typename TImageType::Pointer inputImage,boo
     typename TImageType::SpacingType spacing = inputImage->GetSpacing();
 
     typename TImageType::SpacingType newSpacing;
-    newSpacing[0] = 1;
-    newSpacing[1] = 1;
-    newSpacing[2] = 1;
+    double minSpacing = std::min( spacing[0],std::min(spacing[1],spacing[2]) );
+    newSpacing[0] = minSpacing;
+    newSpacing[1] = minSpacing;
+    newSpacing[2] = minSpacing;
 
+    std::cout<<"new spacing:"<<newSpacing<<std::endl;
     typename TImageType::SizeType newSize;
-    newSize[0] = long(size[0] * spacing[0]) + 1;
-    newSize[1] = long(size[1] * spacing[1]) + 1;
-    newSize[2] = long(size[2] * spacing[2]) + 1;
+    newSize[0] = long(size[0] * spacing[0]) / newSpacing[0] + 1;
+    newSize[1] = long(size[1] * spacing[1]) / newSpacing[1] + 1;
+    newSize[2] = long(size[2] * spacing[2]) / newSpacing[2] + 1;
 
     auto idTransform = itk::IdentityTransform<double,3>::New();
     auto interpolator = itk::BSplineInterpolateImageFunction<TImageType>::New();
@@ -62,6 +65,7 @@ int main(int argc,char** argv)
     std::string outputPatientFileName( argv[5] );
     std::string outputMaskFileName( argv[6] );
     std::string outputVesselsFileName( argv[7] );
+    std::string outputMaskedLiverFileName( argv[8] );
 
     // settings images types
     using DicomImageType = itk::Image<int16_t,3>;
@@ -83,14 +87,25 @@ int main(int argc,char** argv)
     xorImageFilter->Update();
     auto imgVessels = xorImageFilter->GetOutput();
 
+    // making maskedLiver
+
+    using MaskFilterType = itk::MaskImageFilter<DicomImageType,MaskImageType>;
+    auto maskFilter = MaskFilterType::New();
+
+    maskFilter->SetInput(imgPatient);
+    maskFilter->SetMaskImage(imgMask);
+    maskFilter->Update();
+    
+    auto imgMaskedLiverIso = makeIso<DicomImageType>(maskFilter->GetOutput(),false);
     auto imgPatientIso = makeIso<DicomImageType>(imgPatient,false);
     auto imgMaskIso = makeIso<MaskImageType>(imgMask,true);
     auto imgVesselsIso = makeIso<VesselsImageType>(imgVessels,true);
     
+
     std::cout<<"patient "<<imgPatientIso->GetLargestPossibleRegion().GetSize()<<std::endl;
     std::cout<<"mask "<<imgMaskIso->GetLargestPossibleRegion().GetSize()<<std::endl;
     std::cout<<"vessels "<<imgVesselsIso->GetLargestPossibleRegion().GetSize()<<std::endl;
-
+    std::cout<<"maskedLiver "<<imgMaskedLiverIso->GetLargestPossibleRegion().GetSize()<<std::endl;
 
 
 
@@ -98,6 +113,10 @@ int main(int argc,char** argv)
     auto writer = DicomWriterType::New();
     writer->SetInput(imgPatientIso );
     writer->SetFileName( outputPatientFileName);
+    writer->Update();
+
+    writer->SetInput(imgMaskedLiverIso);
+    writer->SetFileName(outputMaskedLiverFileName);
     writer->Update();
 
     using VesselsWriterType = itk::ImageFileWriter<VesselsImageType>;
