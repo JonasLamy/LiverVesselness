@@ -5,7 +5,7 @@
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json::Value root, 
                                                 std::string inputFileName,
-                                                std::string csvFileName,
+                                                std::ofstream &csvFileStream,
                                                 typename TGroundTruthImageType::Pointer gtImage, 
                                                 typename TMaskImageType::Pointer maskImage)
 {
@@ -27,24 +27,12 @@ Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json
     m_mMap["precision"] = std::vector<double>();
     m_mMap["specificity"] = std::vector<double>();
 
-    // opening resultFileStream
-    m_resultFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
-    if( m_resultFileStream.is_open() )
-    {
-      m_resultFileStream <<"AlgoID,threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,dice,MatthewsCorrelation"<<std::endl;
-    } 
-    else{ 
-      throw "Error opening csv file....";
-    }
+    m_resultFileStream = std::move(csvFileStream);
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::~Benchmark()
 {
-    if( m_resultFileStream.is_open() )
-    {
-      m_resultFileStream.close();
-    }
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
@@ -59,10 +47,9 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
   std::cout<<"------------------"<<std::endl;
 
   Json::Value::Members algoNames = m_rootNode.getMemberNames();
-  int nbAlgorithms = 0;
   for (auto &algoName : algoNames)
   {
-    std::cout << "Algorithm n°" << nbAlgorithms << " " << algoName << std::endl;
+    std::cout << "Algorithm n°" << m_nbAlgorithms << " " << algoName << std::endl;
 
     const Json::Value algo = m_rootNode[algoName];
 
@@ -84,8 +71,8 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
           std::string m = arg.getMemberNames()[0]; // only one name in the array
           sStream << "--" << m << " " << arg[m].asString() << " ";
         }
-        launchScript(nbAlgorithms,sStream.str(),outputName);
-        nbAlgorithms++;
+        launchScript(m_nbAlgorithms,sStream.str(),m_outputDir+ "/" + outputName);
+       m_nbAlgorithms++;
       }
     }
     else // the algorithm contains only one set of parameters
@@ -97,15 +84,15 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
       sStream << "./" << algoName << " "
               << "--input"
               << " " << m_inputFileName << " "
-              << "--output " << outputName << " ";
+              << "--output " << m_outputDir+ "/" + outputName << " ";
 
       for (auto &arg : arguments)
       {
         std::string m = arg.getMemberNames()[0]; // only one name in the array
         sStream << m << " " << arg[m].asString() << " ";
       }
-      launchScript(nbAlgorithms,sStream.str(),outputName);
-      nbAlgorithms++;
+      launchScript(m_nbAlgorithms,sStream.str(),m_outputDir+ "/" + outputName);
+      m_nbAlgorithms++;
     }
   }
 }
@@ -165,7 +152,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       minDist = euclideanDistance;
       bestThreshold = i;
     }
-    m_resultFileStream <<algoID <<","<<i<<","<< eval;
+    m_resultFileStream <<m_patient<<","<<algoID <<","<<i<<","<< eval;
   }   
   std::cout<<"done"<<std::endl;
 }

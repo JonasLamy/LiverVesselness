@@ -82,18 +82,6 @@ int main(int argc, char** argv)
   configFile.close();
   std::cout<<"done\n"<<std::endl;
 
-  // parsing csv file name using JSON file Name
-  size_t pos = parameterFileName.find(".");
-  std::string csvFileName = parameterFileName.substr (0,pos) + ".csv"; // we want everything before ".json" and we replace extension
-
-  using ImageType = itk::Image<double,3>;
-  using GroundTruthImageType = itk::Image<int,3>;
-  using MaskImageType = itk::Image<int,3>;
-
-  using DicomImageType = itk::Image<int16_t,3>;
-  using DicomGroundTruthImageType = itk::Image<uint8_t,3>;
-  using DicomMaskImageType = itk::Image<uint8_t,3>;
-
   // -----------------
   // Reading inputFileList
   // -----------------
@@ -106,13 +94,37 @@ int main(int argc, char** argv)
   std::string gtName;
 
   std::string benchDir = "bench/";
+
+  // parsing csv file name using JSON file Name
+  size_t pos = parameterFileName.find(".");
+  std::string csvFileName = benchDir + parameterFileName.substr (0,pos) + ".csv"; // we want everything before ".json" and we replace extension
+  // opening resultFileStream
+  std::ofstream csvFileStream;
+  csvFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
+  if( csvFileStream.is_open() )
+  {
+    csvFileStream <<"SerieName,AlgoID,threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,dice,MatthewsCorrelation"<<std::endl;
+  } 
+  else{ 
+    throw "Error opening csv file....";
+  }
+
+
   //creating root directory
   #ifdef __unix__
-    mkdir("bench",S_IRWXG | S_IRWXO | S_IRWXU);
+    mkdir(benchDir.c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
   #else
     mkdir("bench");
   #endif
 
+  using ImageType = itk::Image<double,3>;
+  using GroundTruthImageType = itk::Image<int,3>;
+  using MaskImageType = itk::Image<int,3>;
+
+  using DicomImageType = itk::Image<int16_t,3>;
+  using DicomGroundTruthImageType = itk::Image<uint8_t,3>;
+  using DicomMaskImageType = itk::Image<uint8_t,3>;
+  
   while(std::getline(f,patientName))
   {
     std::getline(f,imgName);
@@ -142,8 +154,9 @@ int main(int argc, char** argv)
       DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(gtName,false);
       DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskName,false);
       
-      Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,imgName,csvFileName,groundTruth,maskImage);
+      Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,imgName,csvFileStream,groundTruth,maskImage);
       b.SetOutputDirectory(benchDir + patientName);
+      b.SetPatientDirectory(patientName);
       b.SetDicomInput();
       b.run();
     }
@@ -153,11 +166,13 @@ int main(int argc, char** argv)
       GroundTruthImageType::Pointer groundTruth = vUtils::readImage<GroundTruthImageType>(gtName,false);
       MaskImageType::Pointer maskImage = vUtils::readImage<MaskImageType>(maskName,false);
       
-      Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,imgName,csvFileName,groundTruth,maskImage);
+      Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,imgName,csvFileStream,groundTruth,maskImage);
       b.SetOutputDirectory(benchDir + patientName);
+      b.SetPatientDirectory(patientName);
       b.SetNiftiInput();
       b.run();
     }
   }
   f.close();
+  csvFileStream.close();
 }
