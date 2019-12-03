@@ -24,10 +24,12 @@ public:
     ~Benchmark();
     void SetDicomInput(){m_inputIsDicom = true;}
     void SetNiftiInput(){m_inputIsDicom = false;}
+    void SetOutputDirectory(const std::string outputDir){m_outputDir = outputDir; }
 
     void run();
 private:
     std::string m_inputFileName;
+    std::string m_outputDir;
     bool m_inputIsDicom;
     Json::Value m_rootNode;
 

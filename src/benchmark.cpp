@@ -17,6 +17,17 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+// system depedant Unix include to create folders....
+#ifdef __unix__ //
+  #include <sys/stat.h>
+  #include <sys/types.h>
+#else // assume windows
+  #include <conio.h>
+  #include <dir.h>
+  #include <process.h>
+  #include <stdio.h>
+#endif
+
 int main(int argc, char** argv)
 {
   // ------------------
@@ -29,8 +40,6 @@ int main(int argc, char** argv)
   general_opt.add_options()
     ("help,h", "display this message")
     ("input,i",po::value<std::string>(),"Input image ")
-    ("groundTruth,g", po::value<std::string>(), "GroundTruth : input img" )
-    ("mask,m", po::value<std::string>(), "mask : mask image")
     ("parametersFile,p",po::value<std::string>()->default_value("parameters.json"),"ParameterFile : input json file");
   bool parsingOK = true;
   po::variables_map vm;
@@ -46,19 +55,15 @@ int main(int argc, char** argv)
   po::notify(vm);
   if( !parsingOK || vm.count("help") || argc<=1 )
     {
-      std::cout<<"\n Usage : benchmark [input image] [ground truth] [optionnal parameterFile] \n\n"
-	       << " ground truth : ground truth image (.nii float/double type)\n"
-	       <<" input : input image for benchmark (.nii float/double type)\n"
-         <<" mask : mask image for the benchmarl (.nii int type) \n"
+      std::cout<<"\n Usage : benchmark [input file] [optionnal parameterFile] \n\n"
+	       <<" input : input file listing patient name, image,mask and ground truth\n"
 	       <<" parametersFile : input Json parameter file. If none provided, default is parameters.json\n"<<std::endl;
     
       return 0;
     }
 
   std::string inputFileName = vm["input"].as<std::string>();
-  std::string groundTruthFileName = vm["groundTruth"].as<std::string>();
   std::string parameterFileName = vm["parametersFile"].as<std::string>();
-  std::string maskFileName = vm["mask"].as<std::string>();
 
   // -----------------
   // Reading JSON file
@@ -89,30 +94,70 @@ int main(int argc, char** argv)
   using DicomGroundTruthImageType = itk::Image<uint8_t,3>;
   using DicomMaskImageType = itk::Image<uint8_t,3>;
 
-  // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
-  // Mask is only useful for statistics during segmentation assessment, 
-  // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
-  
-  if( vUtils::isDir( groundTruthFileName ) ) // boolean choice for now, 0 is nifti & 1 is DICOM 
+  // -----------------
+  // Reading inputFileList
+  // -----------------
+
+  std::ifstream f;
+  f.open(inputFileName);
+  std::string patientName;
+  std::string imgName;
+  std::string maskName;
+  std::string gtName;
+
+  std::string benchDir = "bench/";
+  //creating root directory
+  #ifdef __unix__
+    mkdir("bench",S_IRWXG | S_IRWXO | S_IRWXU);
+  #else
+    mkdir("bench");
+  #endif
+
+  while(std::getline(f,patientName))
   {
+    std::getline(f,imgName);
+    std::getline(f,maskName);
+    std::getline(f,gtName);
+
+    std::cout<<patientName<<std::endl;
+    std::cout<<imgName<<std::endl;
+    std::cout<<maskName<<std::endl;
+    std::cout<<gtName<<std::endl;
+
+    //creating root directory
+    #ifdef __unix__
+      mkdir( (benchDir+patientName).c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
+    #else
+      mkdir("bench/"+patientName);
+    #endif
+
+    // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
+    // Mask is only useful for statistics during segmentation assessment, 
+    // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
     
-    std::cout<<"Using dicom groundTruth data...."<<std::endl;
-    DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(groundTruthFileName,false);
-    DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskFileName,false);
-    
-    Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,inputFileName,csvFileName,groundTruth,maskImage);
-    b.SetDicomInput();
-    b.run();
+    if( vUtils::isDir( gtName ) ) // boolean choice for now, 0 is nifti & 1 is DICOM 
+    {
+      
+      std::cout<<"Using dicom groundTruth data...."<<std::endl;
+      DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(gtName,false);
+      DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskName,false);
+      
+      Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,imgName,csvFileName,groundTruth,maskImage);
+      b.SetOutputDirectory(benchDir + patientName);
+      b.SetDicomInput();
+      b.run();
+    }
+    else
+    {
+      std::cout<<"Using NIFTI groundtruth data...."<<std::endl;
+      GroundTruthImageType::Pointer groundTruth = vUtils::readImage<GroundTruthImageType>(gtName,false);
+      MaskImageType::Pointer maskImage = vUtils::readImage<MaskImageType>(maskName,false);
+      
+      Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,imgName,csvFileName,groundTruth,maskImage);
+      b.SetOutputDirectory(benchDir + patientName);
+      b.SetNiftiInput();
+      b.run();
+    }
   }
-  else
-  {
-    std::cout<<"Using NIFTI groundtruth data...."<<std::endl;
-    GroundTruthImageType::Pointer groundTruth = vUtils::readImage<GroundTruthImageType>(groundTruthFileName,false);
-    MaskImageType::Pointer maskImage = vUtils::readImage<MaskImageType>(maskFileName,false);
-    
-    Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,inputFileName,csvFileName,groundTruth,maskImage);
-    b.SetNiftiInput();
-    b.run();
-  }
-  
+  f.close();
 }
