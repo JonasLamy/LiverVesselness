@@ -96,8 +96,10 @@ int main(int argc, char** argv)
   std::string benchDir = "bench/";
 
   // parsing csv file name using JSON file Name
+  
   size_t pos = parameterFileName.find(".");
-  std::string csvFileName = benchDir + parameterFileName.substr (0,pos) + ".csv"; // we want everything before ".json" and we replace extension
+  std::string benchName = parameterFileName.substr (0,pos);
+  std::string csvFileName = benchDir + benchName + ".csv"; // we want everything before ".json" and we replace extension
   // opening resultFileStream
   std::ofstream csvFileStream;
   csvFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
@@ -138,7 +140,14 @@ int main(int argc, char** argv)
 
     //creating root directory
     #ifdef __unix__
-      mkdir( (benchDir+patientName).c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
+      mkdir( (benchDir+benchName).c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
+    #else
+      mkdir("bench/"+patientName);
+    #endif
+
+    //creating subdirectory with patient
+    #ifdef __unix__
+      mkdir( (benchDir+benchName+"/"+patientName).c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
     #else
       mkdir("bench/"+patientName);
     #endif
@@ -155,8 +164,8 @@ int main(int argc, char** argv)
       DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskName,false);
       
       Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,imgName,csvFileStream,groundTruth,maskImage);
-      b.SetOutputDirectory(benchDir + patientName);
-      b.SetPatientDirectory(patientName);
+      b.SetOutputDirectory(benchDir+benchName+"/"+patientName);
+      b.SetPatientDirectory(benchName+"/"+patientName);
       b.SetDicomInput();
       b.run();
     }
@@ -167,8 +176,8 @@ int main(int argc, char** argv)
       MaskImageType::Pointer maskImage = vUtils::readImage<MaskImageType>(maskName,false);
       
       Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,imgName,csvFileStream,groundTruth,maskImage);
-      b.SetOutputDirectory(benchDir + patientName);
-      b.SetPatientDirectory(patientName);
+      b.SetOutputDirectory(benchDir+benchName+"/"+patientName);
+      b.SetPatientDirectory(benchName+"/"+patientName);
       b.SetNiftiInput();
       b.run();
     }
