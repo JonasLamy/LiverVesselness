@@ -77,7 +77,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
         sStream << "./" << algoName << " "
                 << "--input"
                 << " " << m_inputFileName << " "
-                << "--output " << outputName << " ";
+                << "--output " << m_outputDir+ "/" + outputName << " ";
 
         for (auto &arg : arguments)
         {
@@ -166,25 +166,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       bestThreshold = i;
     }
     m_resultFileStream <<algoID <<","<<i<<","<< eval;
-  }
-  std::cout<<"best threshold from ROC:"<<bestThreshold<<std::endl;
-  
-  /* 
-  
-  vMap["TP"].push_back( eval.TP() );
-  vMap["TN"].push_back( eval.TN() );
-  vMap["FP"].push_back( eval.FP() );
-  vMap["FN"].push_back( eval.FN() );
-
-  mMap["Dice"].push_back( eval.dice() );
-  mMap["MCC"].push_back( eval.matthewsCorrelation() );
-
-  mMap["sensitivity"].push_back( eval.sensitivity() );
-  mMap["accuracy"].push_back( eval.accuracy() );
-  mMap["precision"].push_back( eval.precision() );
-  mMap["specificity"].push_back( eval.specificity() );
-
-  */
-      
+  }   
   std::cout<<"done"<<std::endl;
 }
