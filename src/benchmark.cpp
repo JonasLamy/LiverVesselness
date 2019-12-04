@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   std::ifstream configFile(parameterFileName,std::ifstream::binary);
   if(!configFile.is_open())
     {
-      std::cout<<"couldn't find parameter.json file...aborting"<<std::endl;
+      std::cout<<"couldn't find "<<parameterFileName<<" file...aborting"<<std::endl;
       exit(-1);
     }
       
@@ -98,10 +98,20 @@ int main(int argc, char** argv)
   // parsing csv file name using JSON file Name
   
   size_t pos = parameterFileName.find(".");
-  std::string benchName = parameterFileName.substr (0,pos);
+  int backSlash = parameterFileName.find_last_of("/");
+  std::string benchName;
+  if(backSlash)
+  {
+    benchName = parameterFileName.substr(backSlash+1,pos-backSlash-1);
+  }
+  else
+  {
+    benchName = parameterFileName.substr (0,pos);
+  }
   std::string csvFileName = benchDir + benchName + ".csv"; // we want everything before ".json" and we replace extension
   // opening resultFileStream
   std::ofstream csvFileStream;
+  std::cout<<"creating csv file :"<<csvFileName<<std::endl;
   csvFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
   if( csvFileStream.is_open() )
   {
@@ -180,6 +190,10 @@ int main(int argc, char** argv)
       b.SetPatientDirectory(benchName+"/"+patientName);
       b.SetNiftiInput();
       b.run();
+    }
+    if( !f.is_open())
+    {
+      std::cout<<"we are doomed"<<std::endl;
     }
   }
   f.close();

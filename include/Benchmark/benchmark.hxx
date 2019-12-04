@@ -27,7 +27,7 @@ Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json
     m_mMap["precision"] = std::vector<double>();
     m_mMap["specificity"] = std::vector<double>();
 
-    m_resultFileStream = std::move(csvFileStream);
+    m_resultFileStream = &csvFileStream;
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
@@ -127,7 +127,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
   // Computing roc curve for the image segmentation
   double bestThreshold = 0;
   double minDist = 1000;
-  for(float i=1.0f; i>=0.0f;i-=0.1f)
+  for(float i=1.0f; i>=0.0f;i-=0.05f)
   {
     // thresholding for all values ( keeping upper value and adding more incertainty as lower probabilities are accepted )
     auto tFilter = ThresholdFilterType::New();
@@ -152,7 +152,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       minDist = euclideanDistance;
       bestThreshold = i;
     }
-    m_resultFileStream <<m_patient<<","<<algoID <<","<<i<<","<< eval;
+    (*m_resultFileStream)<<m_patient<<","<<algoID <<","<<i<<","<< eval;
   }   
   std::cout<<"done"<<std::endl;
 }
