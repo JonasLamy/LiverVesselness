@@ -20,7 +20,7 @@ template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 class Benchmark
 {
 public:
-    Benchmark(const Json::Value root,std::string inputFileName,std::ofstream &csvFileStream, typename TGroundTruthImageType::Pointer gtImage, typename TMaskImageType::Pointer maskImage);
+    Benchmark(const Json::Value root,std::string inputFileName,std::ofstream & csvFileStream, typename TGroundTruthImageType::Pointer gtImage, typename TMaskImageType::Pointer maskImage);
     ~Benchmark();   
     void SetDicomInput(){m_inputIsDicom = true;}
     void SetNiftiInput(){m_inputIsDicom = false;}
@@ -40,7 +40,7 @@ private:
     VoxelsMap m_vMap;
     MetricsMap m_mMap;
 
-    std::ofstream m_resultFileStream;
+    std::ofstream * m_resultFileStream;
 
     typename TGroundTruthImageType::Pointer m_gt;
     typename TMaskImageType::Pointer m_mask;
