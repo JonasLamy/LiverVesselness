@@ -170,8 +170,36 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
                                                     verbose,
                                                     mask);
 
+        // getting min and max from multiscale image
+        PixelType min = 255;
+        PixelType max = 0;
+ 
+        for( PixelType &value:multiscale.get_data() )
+        {
+            if( value > max)
+                max = value;
+            if( value < min)
+                min = value;
+        }
+
+
+        // normalize output
+        Image3D<float> multiscale_normalized(multiscale.dimX(),
+                                            multiscale.dimY(),
+                                            multiscale.dimZ(),
+                                            multiscale.spacingX(),
+                                            multiscale.spacingY(),
+                                            multiscale.spacingZ());
+
+
+        for(unsigned int i=0; i<multiscale.size();i++)
+        {
+            multiscale_normalized.get_data()[i] = (multiscale.get_data()[i]-min)/(float)(max-min); //general form of normalization, this should work on all type of data.
+        }
+
         // Write the result to nifti image
-        Write_Itk_Image<PixelType>(multiscale, outputPath);
+        Write_Itk_Image<float>(multiscale_normalized, outputPath);
+        //Write_Itk_Image<PixelType>(multiscale, outputPath);
     }
 
     return 0;
