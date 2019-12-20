@@ -4,8 +4,9 @@ project(Vesselness)
  
 find_package(ITK 5.0 REQUIRED)
 include(${ITK_USE_FILE})
-find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options filesystem)
 
+set(CMAKE_BUILD_TYPE Release)
 
 #Executable Section:
 
@@ -117,4 +118,20 @@ target_include_directories(MakeIso PUBLIC
 target_link_libraries(MakeIso ${ITK_LIBRARIES})
 set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
+add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
+target_include_directories(MakeVascuSynthGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
+set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
+
+add_executable(testScaleSpace src/testScaleSpace.cpp)
+target_include_directories(testScaleSpace PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(testScaleSpace ${ITK_LIBRARIES} Boost::filesystem)
+set_target_properties(testScaleSpace PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
