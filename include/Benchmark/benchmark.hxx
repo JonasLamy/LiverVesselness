@@ -127,7 +127,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
   // Computing roc curve for the image segmentation
   double bestThreshold = 0;
   double minDist = 1000;
-  for(float i=1.01f; i>=0.0f;i-=0.01f)
+  for(float i=1.0f; i>=0.0f;i-=0.01f)
   {
     // thresholding for all values ( keeping upper value and adding more incertainty as lower probabilities are accepted )
     auto tFilter = ThresholdFilterType::New();
