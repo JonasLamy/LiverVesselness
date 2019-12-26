@@ -115,7 +115,7 @@ int main(int argc, char** argv)
   csvFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
   if( csvFileStream.is_open() )
   {
-    csvFileStream <<"SerieName,AlgoID,threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,dice,MatthewsCorrelation"<<std::endl;
+    csvFileStream <<"SerieName,Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC"<<std::endl;
   } 
   else{ 
     throw "Error opening csv file....";

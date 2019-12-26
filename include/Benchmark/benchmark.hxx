@@ -71,7 +71,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
           std::string m = arg.getMemberNames()[0]; // only one name in the array
           sStream << "--" << m << " " << arg[m].asString() << " ";
         }
-        launchScript(m_nbAlgorithms,sStream.str(),m_outputDir+ "/" + outputName);
+        launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
        m_nbAlgorithms++;
       }
     }
@@ -91,7 +91,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
         std::string m = arg.getMemberNames()[0]; // only one name in the array
         sStream << m << " " << arg[m].asString() << " ";
       }
-      launchScript(m_nbAlgorithms,sStream.str(),m_outputDir+ "/" + outputName);
+      launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
       m_nbAlgorithms++;
     }
   }
@@ -99,7 +99,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
 
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
-void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,const std::string &commandLine,const std::string &outputName)
+void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName)
 {
   typedef itk::BinaryThresholdImageFilter<TImageType,TGroundTruthImageType> ThresholdFilterType;
 
@@ -115,7 +115,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     system(commandLine.c_str());
   }
   std::cout<<"opening result"<<std::endl;
-  auto outputImage = vUtils::readImage<TImageType>(outputName,false);
+  auto outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
   
   std::cout<<"comparing output to ground truth....\n";
   if( outputImage->GetLargestPossibleRegion().GetSize() != m_gt->GetLargestPossibleRegion().GetSize() )
@@ -152,7 +152,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       minDist = euclideanDistance;
       bestThreshold = i;
     }
-    (*m_resultFileStream)<<m_patient<<","<<algoID <<","<<i<<","<< eval;
+    (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<i<<","<< eval;
   }   
   std::cout<<"done"<<std::endl;
 }
