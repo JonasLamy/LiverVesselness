@@ -45,7 +45,7 @@ private:
     typename TGroundTruthImageType::Pointer m_gt;
     typename TMaskImageType::Pointer m_mask;
 
-    void launchScript(int algoID,const std::string &commandLine,const std::string &outputName);
+    void launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName);
     void addResultsToFile(int algoID,int threshold, const Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType>& eval);
 };
 

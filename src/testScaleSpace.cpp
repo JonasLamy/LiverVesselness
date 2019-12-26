@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
 
     std::ofstream csvFile;
     csvFile.open(csvFileName);
-    csvFile<<"Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,dice,MatthewsCorrelation"<<std::endl;
+    csvFile<<"Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC"<<std::endl;
 
     using MaximumImageFilterType = itk::MaximumImageFilter<ImageType>;
     using ThresholdFilterType = itk::BinaryThresholdImageFilter<ImageType,GTImageType>;
