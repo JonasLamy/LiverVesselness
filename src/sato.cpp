@@ -9,7 +9,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include <string>
-
+#include <itkRescaleIntensityImageFilter.h>
 #include "utils.h"
 
 int main( int argc, char* argv[] )
@@ -91,16 +91,18 @@ int main( int argc, char* argv[] )
     multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );
 
     // end Antiga vesselness operator
-/*
-    using OutputImageType = itk::Image< unsigned char, Dimension >;
+
+    using OutputImageType = ImageType;
     using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, OutputImageType >;
     RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
+    rescaleFilter->SetOutputMinimum(0.0f);
+    rescaleFilter->SetOutputMaximum(1.0f);
     rescaleFilter->SetInput( multiScaleEnhancementFilter->GetOutput() );
-*/
+
     using imageWriterType = itk::Image<PixelType,Dimension>;
     typedef  itk::ImageFileWriter< imageWriterType  > WriterType;
     WriterType::Pointer writer = WriterType::New();
-    writer->SetInput( multiScaleEnhancementFilter->GetOutput() );
+    writer->SetInput( rescaleFilter->GetOutput() );
     writer->SetFileName( std::string(outputFile) );
     writer->Update();
 

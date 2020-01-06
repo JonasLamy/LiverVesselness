@@ -38,6 +38,7 @@ class Eval{
   long m_trueNegative;
   long m_falsePositive;
   long m_falseNegative;
+  float m_epsilon;
 };
 
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>

@@ -189,7 +189,11 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
                                             multiscale.dimZ(),
                                             multiscale.spacingX(),
                                             multiscale.spacingY(),
-                                            multiscale.spacingZ());
+                                            multiscale.spacingZ(),
+                                            multiscale.originX(),
+                                            multiscale.originY(),
+                                            multiscale.originZ()
+                                            );
 
 
         for(unsigned int i=0; i<multiscale.size();i++)

@@ -52,7 +52,7 @@ Image3D<PixelType> RORPO_multiscale(Image3D<PixelType> &I,
 
     // ################## Computation of RORPO for each scale ##################
 
-    Image3D<PixelType> Multiscale(I.dimX(), I.dimY(), I.dimZ(),I.spacingX(),I.spacingY(),I.spacingZ());
+    Image3D<PixelType> Multiscale(I.dimX(), I.dimY(), I.dimZ(),I.spacingX(),I.spacingY(),I.spacingZ(),I.originX(),I.originY(),I.originZ());
 
 	std::vector<int>::const_iterator it;
 

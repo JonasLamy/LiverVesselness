@@ -5,7 +5,7 @@
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask)
-	: m_truePositive(0), m_trueNegative(0), m_falsePositive(0), m_falseNegative(0)
+	: m_truePositive(0), m_trueNegative(0), m_falsePositive(0), m_falseNegative(0), m_epsilon(0.000001f)
 {
 	countMatchesBinary(img, gt, mask);
 }
@@ -78,24 +78,33 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::precision()
 {
-	return m_truePositive / (long double)(m_truePositive + m_falsePositive);
+	if( (m_truePositive + m_falsePositive) == 0 )
+		return 0;
+	 
+	return m_truePositive / (long double)(m_truePositive + m_falsePositive); 
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::sensitivity()
 {
+	if( (m_truePositive + m_falseNegative) == 0 )
+		return 0;
 	return m_truePositive / (long double)(m_truePositive + m_falseNegative);
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::specificity()
 {
+	if( (m_trueNegative + m_falsePositive) == 0 )
+		return 0;
 	return m_trueNegative / (long double)(m_trueNegative + m_falsePositive);
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::accuracy()
 {
+	if( (m_truePositive + m_trueNegative + m_falsePositive + m_falseNegative) == 0)
+		return 0;
 	return (m_truePositive + m_trueNegative) / (long double)(m_truePositive + m_trueNegative + m_falsePositive + m_falseNegative);
 }
 
@@ -107,6 +116,9 @@ long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorr
 	a *= (m_trueNegative + m_falsePositive);
 	a *= (m_trueNegative + m_falseNegative);
 
+	if( abs(a) < m_epsilon)
+		return 0;
+
 	long double b = (m_truePositive * m_trueNegative) - (m_falsePositive * m_truePositive);
 
 	return b / std::sqrt(a);
@@ -115,6 +127,8 @@ long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorr
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::dice()
 {
+	if( (m_falsePositive + m_falseNegative + 2 * m_truePositive) == 0 )
+		return 0;
 	return 2 * m_truePositive / (double)(m_falsePositive + m_falseNegative + 2 * m_truePositive);
 }
 
