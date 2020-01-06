@@ -134,4 +134,4 @@ target_include_directories(testScaleSpace PUBLIC
   "$<INSTALL_INTERFACE:include>"
   )
 target_link_libraries(testScaleSpace ${ITK_LIBRARIES} Boost::filesystem)
-set_target_properties(testScaleSpace PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+set_target_properties(testScaleSpace PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )

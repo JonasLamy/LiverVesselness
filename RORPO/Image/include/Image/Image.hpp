@@ -126,20 +126,33 @@ class Image3D {
 
 public :
 
-	Image3D(): m_nDimX(0), m_nDimY(0), m_nDimZ(0), m_nSize(0),m_spacingX(1.0),m_spacingY(1.0),m_spacingZ(1.0) {}
+	Image3D(): m_nDimX(0), m_nDimY(0), m_nDimZ(0), m_nSize(0),m_spacingX(1.0),m_spacingY(1.0),m_spacingZ(1.0),
+	m_originX(0.0f),m_originY(0.0f),m_originZ(0.0f) {}
 
-	Image3D(unsigned int dimX, unsigned int dimY, unsigned int dimZ,float spacingX,float spacingY,float spacingZ, T value=0):
+	Image3D(unsigned int dimX, 
+		unsigned int dimY, 
+		unsigned int dimZ,
+		float spacingX,
+		float spacingY,
+		float spacingZ,
+		double originX,
+		double originY,
+		double originZ,
+		 T value=0):
 		m_nDimX(dimX), m_nDimY(dimY), m_nDimZ(dimZ), m_nSize(dimX*dimY*dimZ), 
 		m_vImage(dimX*dimY*dimZ, value),
-		m_spacingX(spacingX),m_spacingY(spacingY),m_spacingZ(spacingZ){}
+		m_spacingX(spacingX),m_spacingY(spacingY),m_spacingZ(spacingZ),
+		m_originX(originX),m_originY(originY),m_originZ(originZ){}
 
 	Image3D( unsigned int dimX, unsigned int dimY, unsigned int dimZ, T value=0 ):
 		m_nDimX(dimX), m_nDimY(dimY), m_nDimZ(dimZ), m_nSize(dimX*dimY*dimZ), m_vImage(dimX*dimY*dimZ, value),
-		m_spacingX(1.0),m_spacingY(1.0),m_spacingZ(1.0){}
+		m_spacingX(1.0),m_spacingY(1.0),m_spacingZ(1.0),
+		m_originX(0.0f),m_originY(0.0f),m_originZ(0.0f){}
 
 	Image3D( const Image3D& image ):
 	 	m_nDimX(image.m_nDimX), m_nDimY(image.m_nDimY), m_nDimZ(image.m_nDimZ), m_nSize(image.m_nSize), m_vImage(image.m_vImage),
-		m_spacingX(image.m_spacingX),m_spacingY(image.m_spacingY),m_spacingZ(image.m_spacingZ){}
+		m_spacingX(image.m_spacingX),m_spacingY(image.m_spacingY),m_spacingZ(image.m_spacingZ),
+		m_originX(0.0f),m_originY(0.0f),m_originZ(0.0f){}
 
 	~Image3D(){}
 
@@ -197,6 +210,18 @@ public :
 		return m_spacingZ;
 	}
 
+	const double originX() const{
+		return m_originX;
+	}
+
+	const double originY() const{
+		return m_originY;
+	}
+
+	const double originZ() const{
+		return m_originZ;
+	}
+
 	bool empty() const {
 		return m_vImage.empty();
 	}
@@ -229,7 +254,7 @@ public :
 
 	// Return a new image "bordered_image" which is the self image with a "border"-pixel border
 	Image3D<T> add_border(int border, int value=0) const {
-		Image3D<T> bordered_image(m_nDimX + 2 * border, m_nDimY + 2 * border, m_nDimZ + 2 * border,m_spacingX,m_spacingY,m_spacingZ, value);
+		Image3D<T> bordered_image(m_nDimX + 2 * border, m_nDimY + 2 * border, m_nDimZ + 2 * border,m_spacingX,m_spacingY,m_spacingZ,m_originX,m_originY,m_originZ, value);
 		for (int z = 0; z < m_nDimZ ; ++z)
 			for (int y = 0 ; y < m_nDimY ; ++y)
 				for (int x = 0 ; x < m_nDimX ; ++x)
@@ -268,7 +293,7 @@ public :
 	// return a new image which is the copy of this
 	const Image3D<unsigned char> copy_image_2_uchar() const {
 
-		Image3D<unsigned char> copy(m_nDimX , m_nDimY , m_nDimZ, m_spacingX, m_spacingY, m_spacingZ);
+		Image3D<unsigned char> copy(m_nDimX , m_nDimY , m_nDimZ, m_spacingX, m_spacingY, m_spacingZ,m_originX,m_originY,m_originZ);
 		auto it1 = m_vImage.begin();
 		auto it2 = copy.get_data().begin();
 		for ( ; it1 != m_vImage.end() ; ++it1, ++it2 )
@@ -278,7 +303,7 @@ public :
 
 	// return a new image which is the copy of this
 	Image3D copy_image() const {
-		Image3D copy(m_nDimX , m_nDimY , m_nDimZ,m_spacingX,m_spacingY,m_spacingZ);
+		Image3D copy(m_nDimX , m_nDimY , m_nDimZ,m_spacingX,m_spacingY,m_spacingZ,m_originX,m_originY,m_originZ);
 		copy.add_data_from_pointer(m_vImage.data());
 		return copy;
 	}
@@ -296,6 +321,10 @@ public :
 			m_spacingX = image.spacingX();
 			m_spacingY = image.spacingY();
 			m_spacingZ = image.spacingZ();
+
+			m_originX = image.originX();
+			m_originY = image.originY();
+			m_originZ = image.originZ();
 		}
 		m_vImage.assign(image.get_data().begin(),image.get_data().end());
 	}
@@ -346,6 +375,10 @@ public :
 		float m_spacingX;
 		float m_spacingY;
 		float m_spacingZ;
+
+		double m_originX;
+		double m_originY;
+		double m_originZ;
 
 		std::vector<T>m_vImage;
 };

@@ -17,12 +17,13 @@ using namespace boost::filesystem;
 
 int main(int argc, char ** argv)
 {
-    std::string directoryName = "/home/skvader/programming/these/LiverVesselness/build/bin/bench/scaleSpaceJerman/3Dircadb1.1/";
-    std::string csvFileName = "/home/skvader/programming/these/LiverVesselness/build/bin/bench/scaleSpaceJerman/stackedScales.csv";
+    std::string outputDirName = argv[1];
+    std::string directoryName = argv[2];
+    std::string csvFileName = argv[3];
 
-    std::string inputFileName = argv[1];
-    std::string groundTruthFileName = argv[2];
-    std::string maskFileName = argv[3];
+    std::string inputFileName = argv[4];
+    std::string groundTruthFileName = argv[5];
+    std::string maskFileName = argv[6];
 
     // Opening file list
     std::ifstream fileNames;
@@ -105,7 +106,7 @@ int main(int argc, char ** argv)
             {
                 // opening all images in a scales 
                 auto reader = itk::ImageFileReader<ImageType>::New();
-                reader->SetFileName(directoryName + scaleList[k]);
+                reader->SetFileName(directoryName+"/"+ scaleList[k]);
                 reader->Update();
 
                 auto img = reader->GetOutput();
@@ -120,7 +121,7 @@ int main(int argc, char ** argv)
             }
 
             auto r = itk::ImageFileWriter<itk::Image<float,3>>::New();
-            r->SetFileName(std::string("./debug/") + scaleList[i] + std::string("-") + scaleList[j] + std::string(".nii"));
+            r->SetFileName( std::string(outputDirName+"/debug/") + scaleList[i] + std::string("-") + scaleList[j] + std::string(".nii"));
             r->SetInput(maxImage);
             r->Update();
 
