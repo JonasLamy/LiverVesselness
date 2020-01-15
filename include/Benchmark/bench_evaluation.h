@@ -13,7 +13,7 @@ using MetricsMap = std::map<std::string,std::vector<double> >;
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 class Eval{
  public:
-  Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
+  Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id);
 
   long TP(){return m_truePositive;}
   long TN(){return m_trueNegative;}
@@ -32,7 +32,7 @@ class Eval{
     
   void print();
  private:
-  void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
+  void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask, const std::string &id);
   
   long m_truePositive;
   long m_trueNegative;

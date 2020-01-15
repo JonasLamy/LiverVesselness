@@ -29,7 +29,10 @@ int main(int argc, char ** argv)
     std::ifstream fileNames;
     fileNames.open( inputFileName );
     if( !fileNames.is_open() )
-        std::cout<<"couldn't find file list";
+    {
+        std::cout<<"couldn't find file list"<<std::endl;
+        exit(0);
+    }
 
     int nbFiles = 0;
     int steps = 10;
@@ -121,7 +124,7 @@ int main(int argc, char ** argv)
             }
 
             auto r = itk::ImageFileWriter<itk::Image<float,3>>::New();
-            r->SetFileName( std::string(outputDirName+"/debug/") + scaleList[i] + std::string("-") + scaleList[j] + std::string(".nii"));
+            r->SetFileName( std::string(outputDirName+"/stackedScales/") + scaleList[i] + std::string("-") + scaleList[j] + std::string(".nii"));
             r->SetInput(maxImage);
             r->Update();
 
@@ -142,7 +145,7 @@ int main(int argc, char ** argv)
                 auto segmentationImage = tFilter->GetOutput();
                 
                 
-                Eval<GTImageType,GTImageType,MaskImageType> eval(segmentationImage,gtImage,maskImage);
+                Eval<GTImageType,GTImageType,MaskImageType> eval(segmentationImage,gtImage,maskImage,std::to_string(t));
                 std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
                         << " false positive rate : " << 1.0f - eval.specificity() << "\n";
                 

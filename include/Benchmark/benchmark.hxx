@@ -1,5 +1,6 @@
 #include "benchmark.h"
 #include "itkStatisticsImageFilter.h"
+#include "itkImageFileWriter.h"
 
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
@@ -108,11 +109,11 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
   if( m_inputIsDicom == true )
   {
     std::string commandLineDicom = commandLine + " --inputIsDicom";
-    system(commandLineDicom.c_str() );
+    int returnValue = system(commandLineDicom.c_str() );
   }
   else
   {
-    system(commandLine.c_str());
+    int returnValue = system(commandLine.c_str());
   }
   std::cout<<"opening result"<<std::endl;
   auto outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
@@ -127,7 +128,9 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
   // Computing roc curve for the image segmentation
   double bestThreshold = 0;
   double minDist = 1000;
-  for(float i=1.0f; i>=0.0f;i-=0.01f)
+
+  // trying out new way of tresholding for complete ROC curve...
+  for(float i=100; i>0; i--)
   {
     // thresholding for all values ( keeping upper value and adding more incertainty as lower probabilities are accepted )
     auto tFilter = ThresholdFilterType::New();
@@ -135,13 +138,13 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     tFilter->SetInsideValue( 1 );
     tFilter->SetOutsideValue( 0 );
 
-    tFilter->SetLowerThreshold(i);
+    tFilter->SetLowerThreshold(i/100.0f );
     tFilter->SetUpperThreshold(1.01f);
     tFilter->Update();
     auto segmentationImage = tFilter->GetOutput();
     
-    
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_mask);
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_mask,std::to_string(i/100.0f));
+    std::cout<<"threshold:"<<i/100.0f<<std::endl;
     std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
             << " false positive rate : " << 1.0f - eval.specificity() << "\n";
     
@@ -150,9 +153,51 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     if( minDist >  euclideanDistance )
     {
       minDist = euclideanDistance;
-      bestThreshold = i;
+      bestThreshold = i/100.0f;
     }
-    (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<i<<","<< eval;
+    (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<i/100.0f<<","<< eval;
+
+    // TODO uncomment for debug
+    /*
+    auto writer = itk::ImageFileWriter<TGroundTruthImageType>::New();
+    writer->SetFileName( std::string("toto/") + std::to_string(i) + std::string(".nii") );
+	  writer->SetInput(segmentationImage);
+	  writer->Update();
+    */
   }   
+
+  // computing the special case 0 because looping on float is annoying....
+
+  auto tFilter = ThresholdFilterType::New();
+  tFilter->SetInput( outputImage );
+  tFilter->SetInsideValue( 1 );
+  tFilter->SetOutsideValue( 0 );
+
+  tFilter->SetLowerThreshold( 0 );
+  tFilter->SetUpperThreshold(1.01f);
+  tFilter->Update();
+  auto segmentationImage = tFilter->GetOutput();
+  // TODO uncomment for debug
+  /*
+  auto writer = itk::ImageFileWriter<TGroundTruthImageType>::New();
+  writer->SetFileName( std::string("0.nii") );
+	writer->SetInput(segmentationImage);
+	writer->Update();
+  */
+
+  Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_mask,std::to_string(0));
+  std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
+          << " false positive rate : " << 1.0f - eval.specificity() << "\n";
+  
+  // perfect qualifier (0,1), our segmentation (TPR,FPR)
+  float euclideanDistance =  (eval.sensitivity()*eval.sensitivity()) + ( 1.0f - eval.specificity() ) * ( 1.0f - eval.specificity() );
+  if( minDist >  euclideanDistance )
+  {
+    minDist = euclideanDistance;
+    bestThreshold = 0;
+  }
+  (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<0<<","<< eval;
+
+
   std::cout<<"done"<<std::endl;
 }
