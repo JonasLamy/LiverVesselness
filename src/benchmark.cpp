@@ -95,20 +95,29 @@ int main(int argc, char** argv)
 
   std::string benchDir = "bench/";
 
-  // parsing csv file name using JSON file Name
-  
-  size_t pos = parameterFileName.find(".");
-  int backSlash = parameterFileName.find_last_of("/");
+  // making composed name for csv (inputFile + param file) to avoid overwritting results with same parameter files but different dataset.
+  size_t posInput = inputFileName.find(".");
+  int backSlashInput = inputFileName.find_last_of("/");
+
+  size_t posParam = parameterFileName.find(".");
+  int backSlashParam = parameterFileName.find_last_of("/");
   std::string benchName;
-  if(backSlash)
+  if(backSlashParam)
   {
-    benchName = parameterFileName.substr(backSlash+1,pos-backSlash-1);
+    if( backSlashInput)
+      benchName = inputFileName.substr(backSlashInput+1,posInput-backSlashInput-1) + std::string("_") + parameterFileName.substr(backSlashParam+1,posParam-backSlashParam-1);
+    else
+      benchName = inputFileName.substr(0,posInput-backSlashInput-1) + std::string("_") + parameterFileName.substr (backSlashParam+1,posParam-backSlashParam-1);
   }
   else
   {
-    benchName = parameterFileName.substr (0,pos);
+    if(backSlashInput)
+      benchName = inputFileName.substr(backSlashInput+1,posInput-backSlashInput-1) + std::string("_") + parameterFileName.substr (0,posParam-backSlashParam-1);
+    else
+      benchName = inputFileName.substr(0,posInput-backSlashInput-1) + std::string("_") + parameterFileName.substr (0,posParam-backSlashParam-1);
   }
-  std::string csvFileName = benchDir + benchName + ".csv"; // we want everything before ".json" and we replace extension
+
+  std::string csvFileName = benchDir + benchName + ".csv";
   // opening resultFileStream
   std::ofstream csvFileStream;
   std::cout<<"creating csv file :"<<csvFileName<<std::endl;
@@ -191,6 +200,7 @@ int main(int argc, char** argv)
       b.SetNiftiInput();
       b.run();
     }
+    
     if( !f.is_open())
     {
       std::cout<<"we are doomed"<<std::endl;

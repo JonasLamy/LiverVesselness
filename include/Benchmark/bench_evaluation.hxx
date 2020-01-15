@@ -4,14 +4,14 @@
 #include "itkViewImage.h"
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask)
+Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id)
 	: m_truePositive(0), m_trueNegative(0), m_falsePositive(0), m_falseNegative(0), m_epsilon(0.000001f)
 {
-	countMatchesBinary(img, gt, mask);
+	countMatchesBinary(img, gt, mask, id);
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt,const typename TMaskImageType::Pointer mask)
+void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask, const std::string &id)
 {
 
 	typename itk::ImageRegionConstIterator<TImageType> itImg(segmentation, segmentation->GetLargestPossibleRegion());
@@ -69,7 +69,7 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 		++itMask;
 	}
 
-	writer->SetFileName("verif.nii");
+	writer->SetFileName( std::string("toto/") + std::string("verif") + id + std::string(".nii"));
 	writer->SetInput(p);
 	writer->Update();
 }
