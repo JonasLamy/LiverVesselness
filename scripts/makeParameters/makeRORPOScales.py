@@ -40,14 +40,23 @@ print("""    \""""+str(name)+"""\":
 for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
     if(i == 0):
         continue
-    for j in drange(minFactor,maxFactor,stepFactor) :
+    if(minFactor == maxFactor):
         print("\t{",end="") 
-        scaleSpaceSingleScale(i,j,step)
-
-        if( i==maxBoundaryStart  and j == maxFactor ):
+        scaleSpaceSingleScale(i,minFactor,step)
+        if( i==maxBoundaryStart):
             print("\t\t]\n\t}")
         else:
             print("\t\t]\n\t},")
-    
+    else:
+        
+        for j in drange(minFactor,maxFactor,stepFactor) :
+            print("\t{",end="") 
+            scaleSpaceSingleScale(i,j,step)
+            
+            if( i==maxBoundaryStart  and j == maxFactor ):
+                print("\t\t]\n\t}")
+            else:
+                print("\t\t]\n\t},")
+                    
 print("    ]")
 print("}")
