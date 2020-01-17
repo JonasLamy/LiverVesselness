@@ -18,7 +18,7 @@ def scaleSpaceSingleScale(start,end,step):
 		{"sigmaMin":\""""+str(start)+"""\"},
 		{"sigmaMax":\""""+str(end)+"""\"},
 		{"nbSigmaSteps":\""""+str(step)+"""\"},
-	        {"tau":"0.2"}"""
+	        {"tau":"0.7"}"""
     print(st)
 
 

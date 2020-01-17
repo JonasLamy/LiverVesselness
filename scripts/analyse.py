@@ -11,6 +11,10 @@ rankingMethod = sys.argv[2]
 data = pd.read_csv(sys.argv[1])
 print(data.columns)
 
+noPlot=False
+if( len(sys.argv)>3):
+    noPlot=True
+
 if 'Name' in data.columns:
     attribute ='Name'
 else:
@@ -25,6 +29,12 @@ topMetric = deque()
 topMinRocDist = deque()
 heap = []
 
+
+######################
+
+#Finding top parameter's sets depending
+
+######################
 
 topLength = 20
 globMinDist = 10000
@@ -71,84 +81,108 @@ for name,dataFiltered in grp:
         
 print("--------------")
 topList = []
+orderedDisplayList = []
 
-rank = 1
+#################
+
+# poping results from the stack
+
+################
+
 while( heap ):
-    print("------------")
-    print("rank:",rank)
-
     (d,i,e) = heapq.heappop(heap)
 
     if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" ):
         topList.append( e )
-        print("distance from closest point to top point(0,1) for ROC:",d)
+        orderedDisplayList.append((d,i,e))
     else: # max queue was used
         topList.append( e )
-        print("metric score:",-d)
+        orderedDisplayList.append((-d,i,e))
+
+############
+
+# display results on terminal
+
+###########
+        
+rank=len(orderedDisplayList)
+for d,i,e in reversed(orderedDisplayList):
+    print("-----------")
+    print("rank:",rank)
+    if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" ):
+        print("distance from closest point to top point(0,1) for ROC:",d)
+    else:
+        print("metric score:",d)
     
     print(e)
-    rank += 1
+    rank-=1
 
-# printing stuff
-fig,axes = plt.subplots(2,3)
-ax = axes[0,0]
-ax1 = axes[0,1]
-ax2 = axes[0,2]
-ax3 = axes[1,0]
-ax4 = axes[1,1]
-ax5 = axes[1,2]
+##########
 
-ax.set_title("click to see lines label")
+# display results on plot
 
-for top in topList:
-    name = top[attribute]
+##########
     
-    dataFiltered = grp.get_group(name)
+if(not noPlot):
+    fig,axes = plt.subplots(2,3)
+    ax = axes[0,0]
+    ax1 = axes[0,1]
+    ax2 = axes[0,2]
+    ax3 = axes[1,0]
+    ax4 = axes[1,1]
+    ax5 = axes[1,2]
 
-    # computing ROC curve
-    TruePositiveRate = dataFiltered['sensitivity'].values
-    FalsePositiveRate = 1 - dataFiltered['specificity'].values
+    ax.set_title("click to see lines label")
 
-    ax.plot(FalsePositiveRate,TruePositiveRate,marker="x",label=f"${name}$")
-    ax.set_xlabel('False Positive Rate')
-    ax.set_ylabel('True Postive Rate')
-    ax.set_ylim(0,1)
-    ax.set_xlim(0,1)
+    for top in topList:
+        name = top[attribute]
+    
+        dataFiltered = grp.get_group(name)
+        
+        # computing ROC curve
+        TruePositiveRate = dataFiltered['sensitivity'].values
+        FalsePositiveRate = 1 - dataFiltered['specificity'].values
+        
+        ax.plot(FalsePositiveRate,TruePositiveRate,marker="x",label=f"${name}$")
+        ax.set_xlabel('False Positive Rate')
+        ax.set_ylabel('True Postive Rate')
+        ax.set_ylim(0,1)
+        ax.set_xlim(0,1)
 
-    # MCC plot
-    ax1.plot(np.linspace(1,0,101),dataFiltered['MCC'].values,label=f"${name}$")
-    ax1.set_xlabel('threshold')
-    ax1.set_ylabel('MCC')
-    ax1.set_ylim(-1,1)
-    ax1.set_xlim(1,0)
+        # MCC plot
+        ax1.plot(np.linspace(1,0,101),dataFiltered['MCC'].values,label=f"${name}$")
+        ax1.set_xlabel('threshold')
+        ax1.set_ylabel('MCC')
+        ax1.set_ylim(-1,1)
+        ax1.set_xlim(1,0)
+    
+        # Dice plot
+        ax2.plot(np.linspace(1,0,101),dataFiltered['Dice'].values,label=f"${name}$")
+        ax2.set_xlabel('threshold')
+        ax2.set_ylabel('dice')
+        ax2.set_ylim(0,1)
+        ax2.set_xlim(1,0)
+        
+        # Precision recall plot
+        ax3.plot(dataFiltered['sensitivity'].values,dataFiltered['precision'].values,label=f"${name}$")
+        ax3.set_xlabel('recall')
+        ax3.set_ylabel('precision')
+        ax3.set_xlim(0,1)
+        ax3.set_ylim(0,1)
+        
+        # sensitivity plot
+        ax4.plot(np.linspace(1,0,101),dataFiltered['sensitivity'].values,label=f"${name}$")
+        ax4.set_xlabel('threshold')
+        ax4.set_ylabel('sensitivity')
+        ax4.set_xlim(1,0)
+    
+        # specificity plot
+        ax5.plot(np.linspace(1,0,101),dataFiltered['specificity'].values,label=f"${name}$")
+        ax5.set_xlabel('threshold')
+        ax5.set_ylabel('specificity')
+        ax5.set_xlim(1,0)
 
-    # Dice plot
-    ax2.plot(np.linspace(1,0,101),dataFiltered['Dice'].values,label=f"${name}$")
-    ax2.set_xlabel('threshold')
-    ax2.set_ylabel('dice')
-    ax2.set_ylim(0,1)
-    ax2.set_xlim(1,0)
-
-    # Precision recall plot
-    ax3.plot(dataFiltered['sensitivity'].values,dataFiltered['precision'].values,label=f"${name}$")
-    ax3.set_xlabel('recall')
-    ax3.set_ylabel('precision')
-    ax3.set_xlim(0,1)
-    ax3.set_ylim(0,1)
-
-    # sensitivity plot
-    ax4.plot(np.linspace(1,0,101),dataFiltered['sensitivity'].values,label=f"${name}$")
-    ax4.set_xlabel('threshold')
-    ax4.set_ylabel('sensitivity')
-    ax4.set_xlim(1,0)
-
-    # specificity plot
-    ax5.plot(np.linspace(1,0,101),dataFiltered['specificity'].values,label=f"${name}$")
-    ax5.set_xlabel('threshold')
-    ax5.set_ylabel('specificity')
-    ax5.set_xlim(1,0)
-
-plt.legend(loc='best',ncol=4)
-mplcursors.cursor().connect(
-    "add", lambda sel: sel.annotation.set_text(sel.artist.get_label()+"\n x="+str(sel.target[0]) +"\n y=" + str(sel.target[1])))
-plt.show()
+    plt.legend(loc='best',ncol=4)
+    mplcursors.cursor().connect(
+        "add", lambda sel: sel.annotation.set_text(sel.artist.get_label()+"\n x="+str(sel.target[0]) +"\n y=" + str(sel.target[1])))
+    plt.show()
