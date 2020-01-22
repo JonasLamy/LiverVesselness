@@ -32,9 +32,9 @@ globMinValue = 100000000000
 
 id = 0
 for name,dataGroup in grp:
-    print(name)
     dataFiltered = dataGroup.groupby(["Threshold"]).mean()
     dataFiltered.insert(0,"Name",name)
+    print(dataFiltered.columns)
     
     # computing ROC curve
     TruePositiveRate = dataFiltered['sensitivity'].values
@@ -73,24 +73,46 @@ for name,dataGroup in grp:
         
 print("--------------")
 topList = []
+orderedDisplayList = []
 
-rank = 1
+#################
+
+# poping results from the stack
+
+################
+
 while( heap ):
-    print("------------")
-    print("rank:",rank)
-
     (d,i,e) = heapq.heappop(heap)
 
     if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" ):
         topList.append( e )
-        print("distance from closest point to top point(0,1) for ROC:",d)
+        orderedDisplayList.append((d,i,e))
     else: # max queue was used
         topList.append( e )
-        print("distance from closest point to top point(0,1) for ROC:",-d)
+        orderedDisplayList.append((-d,i,e))
+
+############
+
+# display results on terminal
+
+###########
+        
+rank=len(orderedDisplayList)
+for d,i,e in reversed(orderedDisplayList):
+    print("-----------")
+    print("rank:",rank)
+    if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" ):
+        print("distance from closest point to top point(0,1) for ROC:",d)
+    else:
+        print("metric score:",d)
     
     print(e)
-    rank += 1
+    rank-=1
 
+
+
+
+    
 # printing stuff
 fig,axes = plt.subplots(2,3)
 ax = axes[0,0]
@@ -108,16 +130,14 @@ for top in topList:
     dataGroup = grp.get_group(name)
     dataFiltered = dataGroup.groupby(["Threshold"]).mean()
     dataFiltered.insert(0,"Name",name)
-
-    print(dataFiltered)
     
     # computing ROC curve
     TruePositiveRate = dataFiltered['sensitivity'].values
     FalsePositiveRate = 1 - dataFiltered['specificity'].values
 
     ax.plot(FalsePositiveRate,TruePositiveRate,marker="x",label=f"${name}$")
-    ax.set_xlabel('FalsePositiveRate')
-    ax.set_ylabel('TruePoistiveRate')
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
     ax.set_ylim(0,1)
     ax.set_xlim(0,1)
 

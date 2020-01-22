@@ -2,7 +2,7 @@
 
 # min scale pace bound
 $minBoundStart=1
-$minBoundEnd=5
+$minBoundEnd=4
 $minBoundStep=1
 # max scale space bound
 $maxBoundStart=1

@@ -29,7 +29,8 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	p->FillBuffer(0);
 
 	typename itk::ImageRegionIterator<TImageType> itP(p, p->GetLargestPossibleRegion());
-	auto writer = itk::ImageFileWriter<TImageType>::New();
+	
+	//auto writer = itk::ImageFileWriter<TImageType>::New();
 
 	while (!itImg.IsAtEnd())
 	{
@@ -69,9 +70,9 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 		++itMask;
 	}
 
-	writer->SetFileName( std::string("toto/") + std::string("verif") + id + std::string(".nii"));
-	writer->SetInput(p);
-	writer->Update();
+	//writer->SetFileName( std::string("toto/") + std::string("verif") + id + std::string(".nii"));
+	//writer->SetInput(p);
+	//writer->Update();
 }
 
 
