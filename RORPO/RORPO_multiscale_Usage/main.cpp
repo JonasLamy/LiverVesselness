@@ -201,6 +201,11 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
             multiscale_normalized.get_data()[i] = (multiscale.get_data()[i]-min)/(float)(max-min); //general form of normalization, this should work on all type of data.
         }
 
+        if(verbose)
+        {
+            std::cout<<"converting output image intensity :"<<min<<"-"<<max<<" to [0;1]"<<std::endl;
+        }
+
         // Write the result to nifti image
         Write_Itk_Image<float>(multiscale_normalized, outputPath);
         //Write_Itk_Image<PixelType>(multiscale, outputPath);

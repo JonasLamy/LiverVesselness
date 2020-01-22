@@ -100,7 +100,7 @@ target_include_directories(CropImages PUBLIC
 target_link_libraries(CropImages ${ITK_LIBRARIES})
 set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
-# temp --------------------------------
+# utilities --------------------------------
 
 add_executable(ChangeLabelDicom src/changeLabelDicom.cpp)
 target_include_directories(ChangeLabelDicom PUBLIC
@@ -135,3 +135,11 @@ target_include_directories(testScaleSpace PUBLIC
   )
 target_link_libraries(testScaleSpace ${ITK_LIBRARIES} Boost::filesystem)
 set_target_properties(testScaleSpace PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
+target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
+set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
