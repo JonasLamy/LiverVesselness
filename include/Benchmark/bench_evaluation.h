@@ -4,6 +4,7 @@
 #include "itkImage.h"
 #include "itkImageFileWriter.h"
 #include "itkImageRegionConstIterator.h"
+#include "itkHausdorffDistanceImageFilter.h"
 #include <iostream>
 
 // map to store values
@@ -26,7 +27,9 @@ class Eval{
   double precision();
   double accuracy();
   double dice();
+  double hausdorffDistance();
   long double matthewsCorrelation();
+
 
   static void roc(VoxelsMap &vMap); // not used or implemented here
     
@@ -39,6 +42,7 @@ class Eval{
   long m_falsePositive;
   long m_falseNegative;
   float m_epsilon;
+  double m_hausdorff_distance;
 };
 
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
@@ -53,7 +57,8 @@ std::ostream& operator <<(std::ostream& out,Eval<TImageType,TGroundTruthImageTyp
 		<< eval.precision() << ","
 		<< eval.accuracy() << ","
 		<< eval.dice() << ","
-		<< eval.matthewsCorrelation() << std::endl;
+		<< eval.matthewsCorrelation() << "," 
+    << eval.hausdorffDistance() << std::endl;
 
     return out;
 }

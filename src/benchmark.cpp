@@ -33,14 +33,17 @@ int main(int argc, char** argv)
   // ------------------
   // Reading arguments 
   // ------------------
-
   namespace po = boost::program_options;
   // parsing arguments
+  bool computeMetricsOnly = false;
+  bool removeResultsVolumes = false;
   po::options_description general_opt("Allowed options are ");
   general_opt.add_options()
     ("help,h", "display this message")
     ("input,i",po::value<std::string>(),"Input image ")
-    ("parametersFile,p",po::value<std::string>()->default_value("parameters.json"),"ParameterFile : input json file");
+    ("parametersFile,p",po::value<std::string>()->default_value("parameters.json"),"ParameterFile : input json file")
+    ("computeMetricsOnly,c",po::bool_switch(&computeMetricsOnly),"if true, assume that algo outputs are already calculated")
+    ("removeResultsVolumes,r",po::bool_switch(&removeResultsVolumes),"if true, assume that algo outputs are already calculated");
   bool parsingOK = true;
   po::variables_map vm;
 
@@ -88,6 +91,11 @@ int main(int argc, char** argv)
 
   std::ifstream f;
   f.open(inputFileName);
+  if( !f.is_open() )
+  {
+    std::cout<<"couldn't open "<< inputFileName<<std::endl;
+    return 2;
+  };
   std::string patientName;
   std::string imgName;
   std::string maskName;
@@ -102,6 +110,7 @@ int main(int argc, char** argv)
   size_t posParam = parameterFileName.find(".");
   int backSlashParam = parameterFileName.find_last_of("/");
   std::string benchName;
+
   if(backSlashParam)
   {
     if( backSlashInput)
@@ -117,14 +126,23 @@ int main(int argc, char** argv)
       benchName = inputFileName.substr(0,posInput-backSlashInput-1) + std::string("_") + parameterFileName.substr (0,posParam-backSlashParam-1);
   }
 
-  std::string csvFileName = benchDir + benchName + ".csv";
+  std::string csvFileName;
+  if( computeMetricsOnly )
+  {
+    csvFileName = benchDir + benchName +".csv";
+  }
+  else
+  {
+    csvFileName = benchDir + benchName + ".csv";
+  }
+  
   // opening resultFileStream
   std::ofstream csvFileStream;
   std::cout<<"creating csv file :"<<csvFileName<<std::endl;
   csvFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
   if( csvFileStream.is_open() )
   {
-    csvFileStream <<"SerieName,Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC"<<std::endl;
+    csvFileStream <<"SerieName,Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,Hausdorff"<<std::endl;
   } 
   else{ 
     throw "Error opening csv file....";
@@ -133,7 +151,13 @@ int main(int argc, char** argv)
 
   //creating root directory
   #ifdef __unix__
-    mkdir(benchDir.c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
+    int error = mkdir(benchDir.c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
+    if( errno != EEXIST)
+      {
+        std::cout<<"couldn't create root directory "<<benchDir.c_str()<<std::endl; 
+        csvFileStream.close();
+        return 1;
+      }
   #else
     mkdir("bench");
   #endif
@@ -160,6 +184,14 @@ int main(int argc, char** argv)
     //creating root directory
     #ifdef __unix__
       mkdir( (benchDir+benchName).c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
+      if( errno != EEXIST)
+      {
+        std::cout<<"couldn't create directory " << (benchDir+benchName).c_str() << std::endl; 
+        std::cout<<errno<<std::endl;
+      }
+      else{
+        std::cout<<"creating directory "<< (benchDir+benchName).c_str()<<std::endl;
+      }
     #else
       mkdir("bench/"+patientName);
     #endif
@@ -167,6 +199,14 @@ int main(int argc, char** argv)
     //creating subdirectory with patient
     #ifdef __unix__
       mkdir( (benchDir+benchName+"/"+patientName).c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
+      if( errno != EEXIST)
+      {
+        std::cout<<"couldn't create directory " << (benchDir+benchName+"/"+patientName).c_str() << std::endl; 
+        std::cout<<errno<<std::endl;
+      }
+      else{
+        std::cout<<"creating directory "<< (benchDir+benchName+"/"+patientName).c_str()<<std::endl;
+      }
     #else
       mkdir("bench/"+patientName);
     #endif
@@ -186,6 +226,8 @@ int main(int argc, char** argv)
       b.SetOutputDirectory(benchDir+benchName+"/"+patientName);
       b.SetPatientDirectory(benchName+"/"+patientName);
       b.SetDicomInput();
+      b.SetComputeMetricsOnly(computeMetricsOnly);
+      b.SetremoveResultsVolume(removeResultsVolumes);
       b.run();
     }
     else
@@ -198,6 +240,8 @@ int main(int argc, char** argv)
       b.SetOutputDirectory(benchDir+benchName+"/"+patientName);
       b.SetPatientDirectory(benchName+"/"+patientName);
       b.SetNiftiInput();
+      b.SetComputeMetricsOnly(computeMetricsOnly);
+      b.SetremoveResultsVolume(removeResultsVolumes);
       b.run();
     }
     
