@@ -51,7 +51,7 @@ namespace itk{
         ptr_filter->Update();
 
         auto eigenValuesImage = ptr_filter->GetOutput();
-        std::cout<<"max eigen value:"<<ptr_filter->GetMaxEigenValue()<<std::endl;
+        //std::cout<<"max eigen value:"<<ptr_filter->GetMaxEigenValue()<<std::endl;
 
         EigenValueType maxLambda3 = ptr_filter->GetMaxEigenValue();
         EigenValueType lambdaRho = maxLambda3 * m_Tau;
@@ -63,9 +63,9 @@ namespace itk{
         EigenValueType lambda3;
         
         // additionnal infos
-        std::cout<<"max lambda 3:"<< maxLambda3<<std::endl;
-        std::cout<<"tau :"<<m_Tau<<std::endl;
-        std::cout<<"lambda rho:"<< lambdaRho<<std::endl;
+        //std::cout<<"max lambda 3:"<< maxLambda3<<std::endl;
+        //std::cout<<"tau :"<<m_Tau<<std::endl;
+        //std::cout<<"lambda rho:"<< lambdaRho<<std::endl;
 
         // Walk the region of eigen values and get the objectness measure
         ImageRegionConstIterator< Image<EigenValueArrayType,3> > itEV(eigenValuesImage, eigenValuesImage->GetLargestPossibleRegion());
@@ -127,7 +127,7 @@ namespace itk{
             ++itEV;
         }
 
-        std::cout<<"before stats"<<std::endl;
+        std::cout<<"vesselness stats"<<std::endl;
 
         auto stats = StatisticsImageFilter<TOutputImage>::New();
         stats->SetInput(output);

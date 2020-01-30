@@ -158,9 +158,9 @@ namespace itk
                 if( std::isinf(eigenValues[2]) || abs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
 
                 // modified eigenvalues for meijerin's neuriteness
-                modifiedEigenValues[0] = eigenValues[0] + m_Alpha * eigenValues[1] + m_Alpha * eigenValues[2];
-                modifiedEigenValues[1] = eigenValues[1] + m_Alpha * eigenValues[0] + m_Alpha * eigenValues[2];
-                modifiedEigenValues[2] = eigenValues[2] + m_Alpha * eigenValues[0] + m_Alpha * eigenValues[1];
+                modifiedEigenValues[0] = eigenValues[0] + m_Alpha/2.0 * eigenValues[1] + m_Alpha/2.0 * eigenValues[2];
+                modifiedEigenValues[1] = eigenValues[1] + m_Alpha/2.0 * eigenValues[0] + m_Alpha/2.0 * eigenValues[2];
+                modifiedEigenValues[2] = eigenValues[2] + m_Alpha/2.0 * eigenValues[0] + m_Alpha/2.0 * eigenValues[1];
 
                 // sorting values lambda1 < lambda2 < lambda3
                 std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return abs(i) < abs(j); } );                 

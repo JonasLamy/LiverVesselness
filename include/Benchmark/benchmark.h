@@ -10,7 +10,6 @@
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
-#include <map>
 
 #include "itkImageFileReader.h"
 #include "itkBinaryThresholdImageFilter.h"
@@ -24,6 +23,8 @@ public:
     ~Benchmark();   
     void SetDicomInput(){m_inputIsDicom = true;}
     void SetNiftiInput(){m_inputIsDicom = false;}
+    void SetComputeMetricsOnly(bool computeMetricsOnly){m_computeMetricsOnly = computeMetricsOnly;}
+    void SetremoveResultsVolume(bool removeResultsVolume){ m_removeResultsVolume = removeResultsVolume;}
     void SetOutputDirectory(const std::string &outputDir){m_outputDir = outputDir; }
     void SetPatientDirectory(const std::string &patient){m_patient = patient;}
 
@@ -35,10 +36,9 @@ private:
 
     static int m_nbAlgorithms;
     bool m_inputIsDicom;
+    bool m_computeMetricsOnly;
+    bool m_removeResultsVolume;
     Json::Value m_rootNode;
-
-    VoxelsMap m_vMap;
-    MetricsMap m_mMap;
 
     std::ofstream * m_resultFileStream;
 

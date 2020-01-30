@@ -31,7 +31,6 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	typename itk::ImageRegionIterator<TImageType> itP(p, p->GetLargestPossibleRegion());
 	
 	//auto writer = itk::ImageFileWriter<TImageType>::New();
-
 	while (!itImg.IsAtEnd())
 	{
 		if (itMask.Get() > 0)
@@ -70,11 +69,43 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 		++itMask;
 	}
 
-	//writer->SetFileName( std::string("toto/") + std::string("verif") + id + std::string(".nii"));
-	//writer->SetInput(p);
-	//writer->Update();
+
+
+	// Computing haussdorffDistance
+	//if( m_truePositive == 0 and m_falsePositive == 0)
+	//{
+		// space is a rectangular cuboid, so space diagonal should be the max distance
+		int a = gt->GetLargestPossibleRegion().GetSize()[0];
+		int b = gt->GetLargestPossibleRegion().GetSize()[1];
+		int c = gt->GetLargestPossibleRegion().GetSize()[2];
+		m_hausdorff_distance = std::sqrt(a*a + b*b + c*c);
+	//	std::cout<<a<<" "<<b<<" "<<c<<" "<<m_hausdorff_distance<<std::endl;
+	//}	
+	//else
+	//{
+	//	using HaussdorffFilterType = itk::HausdorffDistanceImageFilter<TImageType,TGroundTruthImageType>;
+
+	//	auto hFilter = HaussdorffFilterType::New();
+	//	hFilter->SetInput1(segmentation);
+	//	hFilter->SetInput2(gt);
+	//	hFilter->Update();
+
+	//	m_hausdorff_distance = hFilter->GetHausdorffDistance();
+	//}
+	
+	
+	/*
+	writer->SetFileName( std::string("toto/") + std::string("verif") + id + std::string(".nii"));
+	writer->SetInput(p);
+	writer->Update();
+	*/
 }
 
+template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::hausdorffDistance()
+{
+	return m_hausdorff_distance;
+}
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::precision()
@@ -161,5 +192,6 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::print()
 			  << "Precision:" << precision() << std::endl
 			  << "Accuracy:" << accuracy() << std::endl
 			  << "Matthews correlation:" << matthewsCorrelation() << std::endl
-			  << "Dice:" << dice() << std::endl;
+			  << "Dice:" << dice() << std::endl
+			  << "Hausdorff:"<<hausdorffDistance() <<std::endl;
 }

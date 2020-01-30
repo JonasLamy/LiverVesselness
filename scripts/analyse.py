@@ -60,7 +60,7 @@ for name,dataFiltered in grp:
         else:
             heapq.heappushpop(heap, (minRocDist,id,dataFiltered.iloc[indexROC,:]) )
         
-    elif( rankingMethod == "FP" or rankingMethod == "FN") : # interested in minimizing these results
+    elif( rankingMethod == "FP" or rankingMethod == "FN" or rankingMethod =="Hausdorff") : # interested in minimizing these results
         index = np.argmin(dataFiltered[rankingMethod].values)
         minValue = np.min(dataFiltered[rankingMethod].values)
         
@@ -92,7 +92,7 @@ orderedDisplayList = []
 while( heap ):
     (d,i,e) = heapq.heappop(heap)
 
-    if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" ):
+    if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" or rankingMethod == "Hausdorff" ):
         topList.append( e )
         orderedDisplayList.append((d,i,e))
     else: # max queue was used
@@ -142,6 +142,8 @@ if(not noPlot):
         # computing ROC curve
         TruePositiveRate = dataFiltered['sensitivity'].values
         FalsePositiveRate = 1 - dataFiltered['specificity'].values
+
+        nbElements = TruePositiveRate.size
         
         ax.plot(FalsePositiveRate,TruePositiveRate,marker="x",label=f"${name}$")
         ax.set_xlabel('False Positive Rate')
@@ -150,14 +152,14 @@ if(not noPlot):
         ax.set_xlim(0,1)
 
         # MCC plot
-        ax1.plot(np.linspace(1,0,101),dataFiltered['MCC'].values,label=f"${name}$")
+        ax1.plot(np.linspace(1,0,nbElements),dataFiltered['MCC'].values,label=f"${name}$")
         ax1.set_xlabel('threshold')
         ax1.set_ylabel('MCC')
         ax1.set_ylim(-1,1)
         ax1.set_xlim(1,0)
     
         # Dice plot
-        ax2.plot(np.linspace(1,0,101),dataFiltered['Dice'].values,label=f"${name}$")
+        ax2.plot(np.linspace(1,0,nbElements),dataFiltered['Dice'].values,label=f"${name}$")
         ax2.set_xlabel('threshold')
         ax2.set_ylabel('dice')
         ax2.set_ylim(0,1)
@@ -170,14 +172,14 @@ if(not noPlot):
         ax3.set_xlim(0,1)
         ax3.set_ylim(0,1)
         
-        # sensitivity plot
-        ax4.plot(np.linspace(1,0,101),dataFiltered['sensitivity'].values,label=f"${name}$")
+        # Hausdorff plot
+        ax4.plot(np.linspace(1,0,nbElements),dataFiltered['Hausdorff'].values,marker="x",label=f"${name}$")
         ax4.set_xlabel('threshold')
-        ax4.set_ylabel('sensitivity')
+        ax4.set_ylabel('Hausdorff')
         ax4.set_xlim(1,0)
     
         # specificity plot
-        ax5.plot(np.linspace(1,0,101),dataFiltered['specificity'].values,label=f"${name}$")
+        ax5.plot(np.linspace(1,0,nbElements),dataFiltered['specificity'].values,label=f"${name}$")
         ax5.set_xlabel('threshold')
         ax5.set_ylabel('specificity')
         ax5.set_xlim(1,0)
