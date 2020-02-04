@@ -17,7 +17,8 @@ def scaleSpaceSingleScale(minBoundary,factor,step):
             {"scaleMin":\""""+str(minBoundary)+"""\"},
             {"factor":\""""+str(factor)+"""\"},
             {"nbScales":\""""+str(step)+"""\"},
-            {"core":"3"}"""
+            {"core":"3"},
+            {"verbose":""}"""
     print(st)
 
 minBoundaryStart = decimal.Decimal(sys.argv[1])

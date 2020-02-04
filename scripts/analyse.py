@@ -12,7 +12,7 @@ data = pd.read_csv(sys.argv[1])
 print(data.columns)
 
 noPlot=False
-if( len(sys.argv)>3):
+if( len(sys.argv)>4):
     noPlot=True
 
 if 'Name' in data.columns:
@@ -36,7 +36,7 @@ heap = []
 
 ######################
 
-topLength = 20
+topLength = int(sys.argv[3])
 globMinDist = 10000
 globMaxValue = 0
 globMinValue = 100000000000
@@ -53,30 +53,22 @@ for name,dataFiltered in grp:
     minRocDist = np.min(dist)
 
     #TODO avoid copy paste
+    
     if( rankingMethod == "ROC"): # ROC is min distance from the top left corner of the graph (0,1)
         # using heap instead of queue for top
-        if( len(heap) < topLength ):
-            heapq.heappush(heap, (minRocDist,id,dataFiltered.iloc[indexROC,:]) )
-        else:
-            heapq.heappushpop(heap, (minRocDist,id,dataFiltered.iloc[indexROC,:]) )
+        heapq.heappush(heap, (minRocDist,id,dataFiltered.iloc[indexROC,:]) )
         
     elif( rankingMethod == "FP" or rankingMethod == "FN" or rankingMethod =="Hausdorff") : # interested in minimizing these results
         index = np.argmin(dataFiltered[rankingMethod].values)
         minValue = np.min(dataFiltered[rankingMethod].values)
-        
-        if( len(heap) < topLength ):
-            heapq.heappush(heap, (minValue,id,dataFiltered.iloc[index,:]) )
-        else:
-            heapq.heappushpop(heap, (minValue,id,dataFiltered.iloc[index,:]) )
+    
+        heapq.heappush(heap, (minValue,id,dataFiltered.iloc[index,:]) )
         # printing resultats in terminal and preparing# printing resultats in terminal and preparing
     else: # interested in maximizing those values (MCC, dice, sensitivity, specificity, precision, accuracy)
         index = np.argmax(dataFiltered[rankingMethod].values)
         maxValue = np.max(dataFiltered[rankingMethod].values)
         # Python heap is a min heap, using minus values to emulate max heap
-        if( len(heap) < topLength ):
-            heapq.heappush(heap, (-maxValue,id,dataFiltered.iloc[index,:]) )
-        else:
-            heapq.heappushpop(heap, (-maxValue,id,dataFiltered.iloc[index,:]) )
+        heapq.heappush(heap, (-maxValue,id,dataFiltered.iloc[index,:]) )
     id += 1
         
 print("--------------")
@@ -88,16 +80,18 @@ orderedDisplayList = []
 # poping results from the stack
 
 ################
-
+c = 0
 while( heap ):
     (d,i,e) = heapq.heappop(heap)
-
+    c += 1
     if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" or rankingMethod == "Hausdorff" ):
         topList.append( e )
         orderedDisplayList.append((d,i,e))
     else: # max queue was used
         topList.append( e )
         orderedDisplayList.append((-d,i,e))
+    if(c>=topLength):
+        break
 
 ############
 
@@ -122,6 +116,8 @@ for d,i,e in reversed(orderedDisplayList):
 # display results on plot
 
 ##########
+
+
     
 if(not noPlot):
     fig,axes = plt.subplots(2,3)

@@ -5,12 +5,15 @@ import random
 
 
 def drange(x, y, jump):
-    while x<=y:
+    count = 0
+    if(x>y):
+        return []
+    if( (y-x/float(jump)) > 10000 ):
+        return []
+    while x<y:
         yield x
-        if(x < 0 or y < 0):
-            return []
-        x+= jump
-
+        x+= decimal.Decimal(jump)
+        
 def scaleSpaceSingleScale(start,end,step):
     st = """
 	    "Output":\""""+str(start)+"-"+str(end)+"-"+str(step)+""".nii\",

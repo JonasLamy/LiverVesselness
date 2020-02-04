@@ -65,7 +65,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
 
         if(m_removeResultsVolume)
         {
-          remove(m_outputDir+ "/" + outputName);
+          remove( (m_outputDir+ "/" + outputName).c_str() );
         }
 
        m_nbAlgorithms++;
@@ -91,7 +91,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
       
       if(m_removeResultsVolume)
       {
-        remove(m_outputDir+ "/" + outputName);
+        remove( (m_outputDir+ "/" + outputName).c_str());
       }
       
       m_nbAlgorithms++;
@@ -143,7 +143,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
   int step = 2;
   int maxBound = 100;
   float maxBoundf = 100.0f;
-  for(int i=maxBound-step; i>0; i-=step)
+  for(int i=maxBound; i>0; i-=step)
   {
     // thresholding for all values ( keeping upper value and adding more incertainty as lower probabilities are accepted )
     auto tFilter = ThresholdFilterType::New();

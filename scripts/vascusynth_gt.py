@@ -4,10 +4,8 @@ import os
 import numpy as np
 import glob
 import fnmatch
+import vascuSynth
 
-# import for noise generation
-import itk
-from scipy.stats import rice
 
 # vascusynth database collection
 inputDir = sys.argv[1]
@@ -19,6 +17,7 @@ maskWholeImage = "/DATA/March_2013_VascuSynth_Dataset/maskWholeImage.nii"
 #running through top level directories
 listDir = next(os.walk(inputDir))
 
+generator = vascuSynth.Generator()
 for dirName in listDir[1]:
     if dirName.startswith('Group'):
         # creating group dirs in destination folder
@@ -38,65 +37,32 @@ for dirName in listDir[1]:
 
                 print(dirName +"_"+ data)
                 for file in listFiles:
-                    # create bifurcation coordiates file
-                    #if file.endswith('.mat'):
-                    #    filePath = listDir[0] + "/" +dirName + "/" + data + "/" + file
-                    #    fileBif = listDir[0] + "/" +dirName + "/" + data + "/bifurcations_coordinates.txt"
-
-                    #    matlabCall = "matlab -nojvm -nodisplay -nosplash -r"
-                    #    scriptCall = " \"load('"+filePath+"');matTotxt(node,'"+fileBif+"');exit; \" "
-                    #    os.system(matlabCall + scriptCall)
+                    filePath = listDir[0] + "/" +dirName + "/" + data
 
                     #  create GT files
 
-                    #if file.endswith('.mhd'):
+                    if file.endswith('.mhd'):
                         #    #now we call the script
+                        #bifurcation files extraction
+                        #spliting file
+                        dataNumber = data.rpartition('a')[2]
+                        generator.bifurcationCoordinatesFile(filePath,"treeStructure_"+dataNumber+".mat")
                         # groundTruth generation
-                        #filePath = listDir[0] + "/" +dirName + "/" + data + "/" + file
-                        #fileGT = listDir[0] + "/" +dirName + "/" + data + "/gt.nii"
-                        #os.system("./MakeVascuSynthGT "+filePath +" "+fileGT)
-
-                        #print(filePath)
-                        #print(fileGT)
-                        
+                        generator.groundTruth(filePath,file)
                         # bifurcation mask Generation
-                        #filePath = listDir[0] + "/" +dirName + "/" + data + "/" + file
-                        #bifurcationFilePath = listDir[0] + "/" +dirName + "/" + data + "/bifurcations_coordinates.txt"
-                        #bifurcationGTpath = listDir[0] + "/" +dirName + "/" + data + "/bifurcationGT.nii"
-                        #os.system("./MakeVascuSynthBifurcationGT "+filePath+" "+bifurcationFilePath+" "+bifurcationGTpath+" 5")
+                        generator.groundTruthBifurcation(filePath,file)
+                        # background generation
+                        generator.vesselsAndBackground(filePath,file)
 
-                        #print(filePath)
-                        #print(bifurcationFilePath)
-                        #print(fileGT)
+                         
+                        generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyPoisson" ,"poisson")
+                        generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyRician" ,"rician")
+
+                        # adding non homogeneous illumination to 
+                        # Reading input arguments
+                        generator.vesselsIllumination(filePath,"vesselsAndBackground.nii")
+                
+                        generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_poisson" ,"poisson")
+                        generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_rician" ,"rician")
                         
-    
-                    if( file == "vesselsAndBackground.nii" ):
-                        imgPath = listDir[0] + "/" +dirName + "/" + data + "/" + file
-
-                        print(dirName)
-                        print(imgPath)
                         
-                        for id,i in enumerate([0.0, 2.0, 5.0, 10.0, 15.0, 20.0]):
-                            img = itk.imread(imgPath)
-                            dat = itk.GetArrayFromImage(img)
-
-                            minValue = np.min(dat[dat>0])
-                            print(minValue)
-                            dat[dat == 0 ] = minValue
-                            # simulated CT noise poisson + gaussian noise
-                            if(id == 0):
-                                datNoisy = dat
-                            else:
-                                datNoisy = rice.rvs(dat/i,scale=i)#np.random.poisson(dat,None) + np.random.normal(dat,i,None)
-                                datNoisy[datNoisy < 0] = 0
-                                datNoisy[datNoisy > 255] = 255
-                            # writing image on disk
-                            if(dat.dtype == np.uint8):
-                                noisyImg = itk.GetImageFromArray(datNoisy.astype(np.uint8))
-                            else:
-                                noisyImg = itk.GetImageFromArray(datNoisy.astype(np.float32)) # data is in double but it is not supported in itk
-                            print(i)
-                            outputPath = listDir[0] + "/" +dirName + "/" + data + "/noisyRician_"+str(i)+".nii"
-                            itk.imwrite(noisyImg,outputPath)
-                            
-                            print(outputPath)
