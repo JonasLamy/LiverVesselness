@@ -5,55 +5,57 @@ import random
 
 #fixed scale space
 sigmaMin = 2.4
-sigmaMax = 2.8
+sigmaMax = 3.1
 nbSigmaSteps = 4
 
 def drange(x, y, jump):
-    while x<y:
+    count = 0
+    if(x>y):
+        return []
+    if( (y-x/jump) > 10000 ):
+        return []
+    while x<=y:
         yield x
         x+= decimal.Decimal(jump)
 
-def varyingPart(start,end,step):
-    print("{") 
-    print("""    "Sato":
-    [""")
-    for i in list(drange(decimal.Decimal(start),decimal.Decimal(end),step)):
-        for j in list(drange(decimal.Decimal(start),decimal.Decimal(end),step)):
-            if( i==0 or j==0):
-                continue
-            st = """
-        {
-            "Output":\""""+str(i)+"-"+str(j)+""".nii",
-            "Arguments":[
-            {"sigmaMin":\""""+str(sigmaMin)+"""\"},
-            {"sigmaMax":\""""+str(sigmaMax)+"""\"},
-            {"nbSigmaSteps":\""""+str(nbSigmaSteps)+"""\"},
-            {"alpha1":\""""+str(i)+"""\"},
-            {"alpha2":\""""+str(j)+"""\"}
-            ]
-        },"""
-            print(st)
+def varyingPart(i,j):
+    st = """
+           "Output":\""""+str(i)+"-"+str(j)+""".nii",
+           "Arguments":[
+           {"sigmaMin":\""""+str(sigmaMin)+"""\"},
+           {"sigmaMax":\""""+str(sigmaMax)+"""\"},
+           {"nbSigmaSteps":\""""+str(nbSigmaSteps)+"""\"},
+           {"alpha1":\""""+str(i)+"""\"},
+           {"alpha2":\""""+str(j)+"""\"}"""
+    print(st)
 
 # -----------------------------
 # -----------------------------
 
-start = float(sys.argv[1])
-end = float(sys.argv[2])
-step = sys.argv[3]
+start = decimal.Decimal(sys.argv[1])
+end = decimal.Decimal(sys.argv[2])
+step = decimal.Decimal(sys.argv[3])
 
-varyingPart(start,end,step)
+decimal.getcontext().prec = 3
 
-st = """
-	{
-	    "Output":\""""+str(end)+"-"+str(end)+""".nii",
-	    "Arguments":[
-		{"sigmaMin":\""""+str(sigmaMin)+"""\"},
-		{"sigmaMax":\""""+str(sigmaMax)+"""\"},
-		{"nbSigmaSteps":\""""+str(nbSigmaSteps)+"""\"},
-		{"alpha1":\""""+str(end)+"""\"},
-		{"alpha2":\""""+str(end)+"""\"}
-	    ]
-	}"""
-print(st)
+name = "Sato"
+print("{")
+print("""    \""""+str(name)+"""\":
+     [""")
+
+for i in drange(start,end,step) :
+    if(i == 0):
+        continue
+    for j in drange(start,end,step) : 
+        if(j == 0):
+            continue
+        if(j<=i): # Sato condition
+            continue
+        print("\t{",end="") 
+        varyingPart(i,j)
+        if( i==end and j==end):
+            print("\t\t]\n\t}")
+        else:
+            print("\t\t]\n\t},")
 print(" ]")
 print("}")

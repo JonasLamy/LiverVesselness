@@ -85,8 +85,8 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
     std::pair<PixelType,PixelType> minmax = image.min_max_value();
 
     if (verbose){
-        std::cout<< "Image intensity range: "<< minmax.first << ", "
-                 << minmax.second << std::endl;
+        std::cout<< "Image intensity range: "<< (int)minmax.first << ", "
+                 << (int)minmax.second << std::endl;
         std::cout<<std::endl;
 	}
 
@@ -156,8 +156,8 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
 
             if(verbose){
                 std::cout << "Convert image intensity range from [";
-                std::cout << minmax.first << ", " << minmax.second << "] to [";
-                std::cout << "0" << ", " << minmax.second - minmax.first << "]"
+                std::cout << (int)minmax.first << ", " << (int)minmax.second << "] to [";
+                std::cout << "0" << ", " << (int)minmax.second - (int)minmax.first << "]"
                             << std::endl;
             }
         }
@@ -198,12 +198,13 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
 
         for(unsigned int i=0; i<multiscale.size();i++)
         {
-            multiscale_normalized.get_data()[i] = (multiscale.get_data()[i]-min)/(float)(max-min); //general form of normalization, this should work on all type of data.
+            //multiscale_normalized.get_data()[i] = (multiscale.get_data()[i]-min)/(float)(max-min); //general form of normalization, this should work on all type of data.
+            multiscale_normalized.get_data()[i] = (multiscale.get_data()[i])/(float)(max); // testing using [0,max] interval 
         }
 
         if(verbose)
         {
-            std::cout<<"converting output image intensity :"<<min<<"-"<<max<<" to [0;1]"<<std::endl;
+            std::cout<<"converting output image intensity :"<<(int)min<<"-"<<(int)max<<" to [0;1]"<<std::endl;
         }
 
         // Write the result to nifti image
