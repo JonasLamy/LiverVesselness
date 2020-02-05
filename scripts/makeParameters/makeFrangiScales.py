@@ -8,11 +8,11 @@ def drange(x, y, jump):
     count = 0
     if(x>y):
         return []
-    if( (y-x/float(jump)) > 10000 ):
+    if( (y-x/jump) > 10000 ):
         return []
-    while x<y:
+    while x<=y:
         yield x
-        x+= decimal.Decimal(jump)
+        x+= jump
         
 def scaleSpaceSingleScale(start,end,step):
     st = """
@@ -54,16 +54,11 @@ for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
             continue
         print("\t{",end="") 
         scaleSpaceSingleScale(i,j,step)
-        if( maxBoundaryEnd == maxBoundaryStart ):
-            if( i == (maxBoundaryStart-stepBoundaryStart)  and j == maxBoundaryEnd ):
-                print("\t\t]\n\t}")
-            else:
-                print("\t\t]\n\t},")
+        
+        if( i==(maxBoundaryStart-stepBoundaryStart)  and j == maxBoundaryEnd ):
+            print("\t\t]\n\t}")
         else:
-            if( i==maxBoundaryStart  and j == maxBoundaryEnd ):
-                print("\t\t]\n\t}")
-            else:
-                print("\t\t]\n\t},")
+            print("\t\t]\n\t},")
             
 print("    ]")
 print("}")

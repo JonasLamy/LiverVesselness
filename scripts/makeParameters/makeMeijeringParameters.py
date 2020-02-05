@@ -3,11 +3,6 @@ import sys
 import numpy as np
 import random
 
-#fixed scale space
-sigmaMin = 0.6
-sigmaMax = 1.6
-nbSigmaSteps = 10
-
 def drange(x, y, jump):
     count = 0
     if(x>y):
@@ -18,7 +13,7 @@ def drange(x, y, jump):
         yield x
         x+= decimal.Decimal(jump)
 
-def varyingPart(i):
+def varyingPart(i,sigmaMin,sigmaMax,nbSigmaSteps):
     st = """
            "Output":\""""+str(i)+""".nii",
            "Arguments":[
@@ -34,6 +29,11 @@ def varyingPart(i):
 start = decimal.Decimal(sys.argv[1])
 end = decimal.Decimal(sys.argv[2])
 step = decimal.Decimal(sys.argv[3])
+#fixed scale space
+sigmaMin = decimal.Decimal(sys.argv[4])
+sigmaMax = decimal.Decimal(sys.argv[5])
+nbSigmaSteps = decimal.Decimal(sys.argv[6])
+
 
 decimal.getcontext().prec = 3
 
@@ -47,7 +47,7 @@ for i in drange(start,end,step) :
         continue
     
     print("\t{",end="") 
-    varyingPart(i)
+    varyingPart(i,sigmaMin,sigmaMax,nbSigmaSteps)
     if( i == end):
         print("\t\t]\n\t}")
     else:

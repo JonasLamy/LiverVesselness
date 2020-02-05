@@ -5,10 +5,13 @@ import random
 
 
 def drange(x, y, jump):
+    count = 0
+    if(x>y):
+        return []
+    if( (y-x/jump) > 10000 ):
+        return []
     while x<=y:
         yield x
-        if(x < 0 or y < 0):
-            return []
         x+= jump
 
 def scaleSpaceSingleScale(start,end,step):
@@ -50,16 +53,10 @@ for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
             continue
         print("\t{",end="") 
         scaleSpaceSingleScale(i,j,step)
-        if( maxBoundaryEnd == maxBoundaryStart ):
-            if( i == (maxBoundaryStart-stepBoundaryStart)  and j == maxBoundaryEnd ):
-                print("\t\t]\n\t}")
-            else:
-                print("\t\t]\n\t},")
+        if( i==(maxBoundaryStart-stepBoundaryStart)  and j == maxBoundaryEnd ):
+            print("\t\t]\n\t}")
         else:
-            if( i==maxBoundaryStart  and j == maxBoundaryEnd ):
-                print("\t\t]\n\t}")
-            else:
-                print("\t\t]\n\t},")
+            print("\t\t]\n\t},")
             
 print("    ]")
 print("}")
