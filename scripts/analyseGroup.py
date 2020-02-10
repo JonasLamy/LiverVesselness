@@ -11,12 +11,17 @@ rankingMethod = sys.argv[2]
 data = pd.read_csv(sys.argv[1])
 print(data.columns)
 
+noPlot=False
+if( len(sys.argv)>4):
+    noPlot=True
+
 if 'Name' in data.columns:
     attribute ='Name'
 else:
     attribute = 'AlgoID'
 
 grp = data.groupby([attribute])
+
 
 count = 0
 
@@ -25,17 +30,22 @@ topMinRocDist = deque()
 heap = []
 
 
-topLength = 20
+######################
+
+#Finding top parameter's sets depending
+
+######################
+
+topLength = int(sys.argv[3])
 globMinDist = 10000
 globMaxValue = 0
 globMinValue = 100000000000
 
+print(grp)
 id = 0
 for name,dataGroup in grp:
-    dataFiltered = dataGroup.groupby(["Threshold"]).mean()
+    dataFiltered = dataGroup.groupby(["Threshold"],as_index=False).mean()
     dataFiltered.insert(0,"Name",name)
-    print(dataFiltered.columns)
-    
     # computing ROC curve
     TruePositiveRate = dataFiltered['sensitivity'].values
     FalsePositiveRate = 1 - dataFiltered['specificity'].values
@@ -45,30 +55,22 @@ for name,dataGroup in grp:
     minRocDist = np.min(dist)
 
     #TODO avoid copy paste
+    
     if( rankingMethod == "ROC"): # ROC is min distance from the top left corner of the graph (0,1)
         # using heap instead of queue for top
-        if( len(heap) < topLength ):
-            heapq.heappush(heap, (minRocDist,id,dataFiltered.iloc[indexROC,:]) )
-        else:
-            heapq.heappushpop(heap, (minRocDist,id,dataFiltered.iloc[indexROC,:]) )
+        heapq.heappush(heap, (minRocDist,id,dataFiltered.iloc[indexROC,:]) )
         
-    elif( rankingMethod == "FP" or rankingMethod == "FN") : # interested in minimizing these results
+    elif( rankingMethod == "FP" or rankingMethod == "FN" or rankingMethod =="Hausdorff") : # interested in minimizing these results
         index = np.argmin(dataFiltered[rankingMethod].values)
         minValue = np.min(dataFiltered[rankingMethod].values)
         
-        if( len(heap) < topLength ):
-            heapq.heappush(heap, (minValue,id,dataFiltered.iloc[index,:]) )
-        else:
-            heapq.heappushpop(heap, (minValue,id,dataFiltered.iloc[index,:]) )
+        heapq.heappush(heap, (minValue,id,dataFiltered.iloc[index,:]) )
         # printing resultats in terminal and preparing# printing resultats in terminal and preparing
     else: # interested in maximizing those values (MCC, dice, sensitivity, specificity, precision, accuracy)
         index = np.argmax(dataFiltered[rankingMethod].values)
         maxValue = np.max(dataFiltered[rankingMethod].values)
         # Python heap is a min heap, using minus values to emulate max heap
-        if( len(heap) < topLength ):
-            heapq.heappush(heap, (-maxValue,id,dataFiltered.iloc[index,:]) )
-        else:
-            heapq.heappushpop(heap, (-maxValue,id,dataFiltered.iloc[index,:]) )
+        heapq.heappush(heap, (-maxValue,id,dataFiltered.iloc[index,:]) )
     id += 1
         
 print("--------------")
@@ -80,16 +82,19 @@ orderedDisplayList = []
 # poping results from the stack
 
 ################
-
+c = 0
 while( heap ):
     (d,i,e) = heapq.heappop(heap)
-
-    if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" ):
+    c += 1
+    print(d,i,e)
+    if( rankingMethod =="ROC" or rankingMethod == "FP" or rankingMethod == "FN" or rankingMethod == "Hausdorff" ):
         topList.append( e )
         orderedDisplayList.append((d,i,e))
     else: # max queue was used
         topList.append( e )
         orderedDisplayList.append((-d,i,e))
+    if(c>=topLength):
+        break
 
 ############
 
@@ -109,72 +114,79 @@ for d,i,e in reversed(orderedDisplayList):
     print(e)
     rank-=1
 
+##########
 
+# display results on plot
+
+##########
 
 
     
-# printing stuff
-fig,axes = plt.subplots(2,3)
-ax = axes[0,0]
-ax1 = axes[0,1]
-ax2 = axes[0,2]
-ax3 = axes[1,0]
-ax4 = axes[1,1]
-ax5 = axes[1,2]
+if(not noPlot):
+    fig,axes = plt.subplots(2,3)
+    ax = axes[0,0]
+    ax1 = axes[0,1]
+    ax2 = axes[0,2]
+    ax3 = axes[1,0]
+    ax4 = axes[1,1]
+    ax5 = axes[1,2]
 
-ax.set_title("click to see lines label")
+    ax.set_title("click to see lines label")
 
-for top in topList:
-    name = top[attribute]
+    for top in topList:
+        name = top[attribute]
+        
+        dataGroup = grp.get_group(name)
+        dataFiltered = dataGroup.groupby(["Threshold"]).mean()
+        dataFiltered.insert(0,"Name",name)
+        dataFiltered=dataFiltered.sort_values(by="Threshold", ascending=False)
+        
+        # computing ROC curve
+        TruePositiveRate = dataFiltered['sensitivity'].values
+        FalsePositiveRate = 1 - dataFiltered['specificity'].values
 
-    dataGroup = grp.get_group(name)
-    dataFiltered = dataGroup.groupby(["Threshold"]).mean()
-    dataFiltered.insert(0,"Name",name)
+        nbElements = TruePositiveRate.size
+        
+        ax.plot(FalsePositiveRate,TruePositiveRate,marker="x",label=f"${name}$")
+        ax.set_xlabel('False Positive Rate')
+        ax.set_ylabel('True Postive Rate')
+        ax.set_ylim(0,1)
+        ax.set_xlim(0,1)
+
+        # MCC plot
+        ax1.plot(np.linspace(1,0,nbElements),dataFiltered['MCC'].values,label=f"${name}$")
+        ax1.set_xlabel('threshold')
+        ax1.set_ylabel('MCC')
+        ax1.set_ylim(-1,1)
+        ax1.set_xlim(1,0)
     
-    # computing ROC curve
-    TruePositiveRate = dataFiltered['sensitivity'].values
-    FalsePositiveRate = 1 - dataFiltered['specificity'].values
+        # Dice plot
+        ax2.plot(np.linspace(1,0,nbElements),dataFiltered['Dice'].values,label=f"${name}$")
+        ax2.set_xlabel('threshold')
+        ax2.set_ylabel('dice')
+        ax2.set_ylim(0,1)
+        ax2.set_xlim(1,0)
+        
+        # Precision recall plot
+        ax3.plot(dataFiltered['sensitivity'].values,dataFiltered['precision'].values,label=f"${name}$")
+        ax3.set_xlabel('recall')
+        ax3.set_ylabel('precision')
+        ax3.set_xlim(0,1)
+        ax3.set_ylim(0,1)
+        
+        # Hausdorff plot
+        ax4.plot(np.linspace(1,0,nbElements),dataFiltered['Hausdorff'].values,marker="x",label=f"${name}$")
+        ax4.set_xlabel('threshold')
+        ax4.set_ylabel('Hausdorff')
+        ax4.set_xlim(1,0)
+    
+        # specificity plot
+        ax5.plot(np.linspace(1,0,nbElements),dataFiltered['specificity'].values,label=f"${name}$")
+        ax5.set_xlabel('threshold')
+        ax5.set_ylabel('specificity')
+        ax5.set_xlim(1,0)
 
-    ax.plot(FalsePositiveRate,TruePositiveRate,marker="x",label=f"${name}$")
-    ax.set_xlabel('False Positive Rate')
-    ax.set_ylabel('True Positive Rate')
-    ax.set_ylim(0,1)
-    ax.set_xlim(0,1)
-
-    # MCC plot
-    ax1.plot(np.linspace(1,0,101),dataFiltered['MCC'].values,label=f"${name}$")
-    ax1.set_xlabel('threshold')
-    ax1.set_ylabel('MCC')
-    ax1.set_ylim(-1,1)
-    ax1.set_xlim(1,0)
-
-    # Dice plot
-    ax2.plot(np.linspace(1,0,101),dataFiltered['Dice'].values,label=f"${name}$")
-    ax2.set_xlabel('threshold')
-    ax2.set_ylabel('dice')
-    ax2.set_ylim(0,1)
-    ax2.set_xlim(1,0)
-
-    # Precision recall plot
-    ax3.plot(dataFiltered['sensitivity'].values,dataFiltered['precision'].values,label=f"${name}$")
-    ax3.set_xlabel('recall')
-    ax3.set_ylabel('precision')
-    ax3.set_xlim(0,1)
-    ax3.set_ylim(0,1)
-
-    # sensitivity plot
-    ax4.plot(np.linspace(1,0,101),dataFiltered['sensitivity'].values,label=f"${name}$")
-    ax4.set_xlabel('threshold')
-    ax4.set_ylabel('sensitivity')
-    ax4.set_xlim(1,0)
-
-    # specificity plot
-    ax5.plot(np.linspace(1,0,101),dataFiltered['specificity'].values,label=f"${name}$")
-    ax5.set_xlabel('threshold')
-    ax5.set_ylabel('specificity')
-    ax5.set_xlim(1,0)
-
-plt.legend(loc='best',ncol=4)
-mplcursors.cursor().connect(
-    "add", lambda sel: sel.annotation.set_text(sel.artist.get_label()+"\n x="+str(sel.target[0]) +"\n y=" + str(sel.target[1])))
-plt.show()
+    plt.legend(loc='best',ncol=4)
+    mplcursors.cursor().connect(
+        "add", lambda sel: sel.annotation.set_text(sel.artist.get_label()+"\n x="+str(sel.target[0]) +"\n y=" + str(sel.target[1])))
+    plt.show()
