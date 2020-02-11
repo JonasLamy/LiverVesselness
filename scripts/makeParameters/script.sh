@@ -26,21 +26,69 @@ stepRORPO=2
 #python3 makeRORPOScales.py $minBoundStartRORPO $minBoundEndRORPO $minBoundStepRORPO $factorStart $factorEnd $factorStep $stepRORPO > Psearch/RORPOScalesSearch.json
 
 
+metric=MCC
+# sato
+Sato_Smin=1.8
+Sato_Smax=2
+# frangi
+Frangi_Smin=2.4
+Frangi_Smax=2.6
+# OOF
+OOF_Smin=2.0
+OOF_Smax=3.0
+# Jerman
+Jerman_Smin=2.0
+Jerman_Smax=2.2
+# Zhang
+Zhang_Smin=1.8
+Zhang_Smax=3.0
+# steps by scale intervals
+nbSteps=4
+
+python3 makeFrangiParameters.py 0 1 0.2 $Frangi_Smin $Frangi_Smax $nbSteps > Psearch/FrangiParametersSearch_$metric.json
+python3 makeSatoParameters.py 0 3 0.3 $Sato_Smin $Sato_Smax $nbSteps > Psearch/SatoParametersSearch_$metric.json
+python3 makeJermanParameters.py 0 1 0.2 $Jerman_Smin $Jerman_Smax $nbSteps > Psearch/JermanParametersSearch_$metric.json
+python3 makeOOFParameters.py 0 3 0.5 $OOF_Smin $OOF_Smax $nbSteps > Psearch/OOFParametersSearch_$metric.json
+#python3 makeRuiZhangParameters.py 0 1 0.2 $Zhang_Smin $Zhang_Smax $nbSteps> Psearch/RuiZhangParametersSearch_$metric.json
+
+
+metric=Dice
+# sato
+Sato_Smin=2.0
+Sato_Smax=2.4
+# frangi
+Frangi_Smin=2.4
+Frangi_Smax=2.6
+# OOF
+OOF_Smin=1.8
+OOF_Smax=3.0
+# Jerman
+Jerman_Smin=2.2
+Jerman_Smax=2.4
+# Zhang
+Zhang_Smin=1.8
+Zhang_Smax=3.0
+# steps by scale intervals
+nbSteps=4
+
+python3 makeFrangiParameters.py 0 1 0.2 $Frangi_Smin $Frangi_Smax $nbSteps > Psearch/FrangiParametersSearch_$metric.json
+python3 makeSatoParameters.py 0 3 0.3 $Sato_Smin $Sato_Smax $nbSteps > Psearch/SatoParametersSearch_$metric.json
+python3 makeJermanParameters.py 0 1 0.2 $Jerman_Smin $Jerman_Smax $nbSteps > Psearch/JermanParametersSearch_$metric.json
+python3 makeOOFParameters.py 0 3 0.5 $OOF_Smin $OOF_Smax $nbSteps > Psearch/OOFParametersSearch_$metric.json
+#python3 makeRuiZhangParameters.py 0 1 0.2 $Zhang_Smin $Zhang_Smax $nbSteps> Psearch/RuiZhangParametersSearch_$metric.json
+
 metric=ROC
 # sato
-Sato_Smin=1.4
+Sato_Smin=1.8
 Sato_Smax=3.0
 # frangi
 Frangi_Smin=2.2
 Frangi_Smax=3.0
 # OOF
-OOF_Smin=1.4
+OOF_Smin=1.2
 OOF_Smax=3.0
-# Meijering
-#Meijering_Smin=0
-#Meijering_Smax=1
 # Jerman
-Jerman_Smin=1.2
+Jerman_Smin=1.8
 Jerman_Smax=3.0
 # Zhang
 Zhang_Smin=1.8
@@ -49,8 +97,7 @@ Zhang_Smax=3.0
 nbSteps=4
 
 python3 makeFrangiParameters.py 0 1 0.2 $Frangi_Smin $Frangi_Smax $nbSteps > Psearch/FrangiParametersSearch_$metric.json
-#python3 makeMeijeringParameters.py -2 2 0.2 $Meijering_Smin $Meijering_Smax $nbSteps > Psearch/MeijeringParametersSearch_$metric.json
 python3 makeSatoParameters.py 0 3 0.3 $Sato_Smin $Sato_Smax $nbSteps > Psearch/SatoParametersSearch_$metric.json
 python3 makeJermanParameters.py 0 1 0.2 $Jerman_Smin $Jerman_Smax $nbSteps > Psearch/JermanParametersSearch_$metric.json
-python3 makeOOFParameters.py 0 5 0.5 $OOF_Smin $OOF_Smax $nbSteps > Psearch/OOFParametersSearch_$metric.json
-python3 makeRuiZhangParameters.py 0 1 0.2 $Zhang_Smin $Zhang_Smax $nbSteps> Psearch/RuiZhangParametersSearch_$metric.json
+python3 makeOOFParameters.py 0 3 0.5 $OOF_Smin $OOF_Smax $nbSteps > Psearch/OOFParametersSearch_$metric.json
+#python3 makeRuiZhangParameters.py 0 1 0.2 $Zhang_Smin $Zhang_Smax $nbSteps> Psearch/RuiZhangParametersSearch_$metric.json

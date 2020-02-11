@@ -93,8 +93,8 @@ int main( int argc, char* argv[] )
     double step = (max - min) / nbClasses;
     for(int i=1; i<nbClasses-1;i++)
     {
-        kMeansFilter->AddClassWithInitialMean(step * i);
-        std::cout<<"seed: "<<step*i<<std::endl;
+        kMeansFilter->AddClassWithInitialMean(step * i + min);
+        std::cout<<"seed: "<<step*i+min<<std::endl;
     }
     kMeansFilter->AddClassWithInitialMean(max);
 
