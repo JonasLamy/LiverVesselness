@@ -10,6 +10,17 @@ def drange(x, y, jump):
             return []
         x+= jump
 
+def isOK(i,j,step,minImageSize):
+
+    print("path length:",i,"for step=0")
+
+    for k in range(1,int(step)):
+        print("path length:",i*j**k,"for step="+str(k))
+        if(int(i * j**k) >= minImageSize):
+            print("skipping",i,j,step,"because:"+str(int(i * j**k))+" for step= "+str(k))
+            return False
+    return True
+        
 def scaleSpaceSingleScale(minBoundary,factor,step):
     st = """
 	    "Output":\""""+str(minBoundary)+"-"+str(factor)+"-"+str(step)+""".nii\",
@@ -17,7 +28,7 @@ def scaleSpaceSingleScale(minBoundary,factor,step):
             {"scaleMin":\""""+str(minBoundary)+"""\"},
             {"factor":\""""+str(factor)+"""\"},
             {"nbScales":\""""+str(step)+"""\"},
-            {"core":"3"},
+            {"core":"4"},
             {"verbose":""}"""
     print(st)
 
@@ -30,6 +41,7 @@ maxFactor = decimal.Decimal(sys.argv[5])
 stepFactor = decimal.Decimal(sys.argv[6])
 
 step = decimal.Decimal(sys.argv[7])
+minImageSize = 130
 
 decimal.getcontext().prec = 3
 
@@ -51,13 +63,19 @@ for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
     else:
         
         for j in drange(minFactor,maxFactor,stepFactor) :
+            # checking that the paths are not over
+            # the desired threshold
+            
+            if not isOK(i,j,step,minImageSize):
+                break
+            #print("scales:",i,j,step+1,int(i * j**k))
+            
             print("\t{",end="") 
             scaleSpaceSingleScale(i,j,step)
             
             if( i==maxBoundaryStart  and j == maxFactor ):
                 print("\t\t]\n\t}")
             else:
-                print("\t\t]\n\t},")
-                    
+                print("\t\t]\n\t},")    
 print("    ]")
 print("}")
