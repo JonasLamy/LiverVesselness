@@ -107,7 +107,7 @@ stepLength=1
 
 --
 
-+ : RORPO and Meijering doesn't have parameters to optimize except scale space.
+ RORPO and Meijering doesn't have parameters to optimize except scale space.
 
 Scales are fixed based on best scales for each metric.
 Scale Search -> ParameterSearch
@@ -134,7 +134,7 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 ### Scale Space Optimization
 
 *** Metrics
-
+```
 | Method                        |     MCC |    DICE |     ROC |
 |-------------------------------+---------+---------+---------|
 | Sato                          |   0.830 |   0.830 |   0.055 |
@@ -144,9 +144,9 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        | *0.836* | *0.833* |   0.055 |
 | RORPO                         |   0.420 |   0.350 |   0.411 |
 | Zhang                         |   0.760 |   0.759 | *0.052* |
-
+```
 *** Best scales
-
+```
 | Method                        |       MCC |      DICE |       ROC |
 |-------------------------------+-----------+-----------+-----------|
 | Sato                          | 1.4-3.0-4 | 1.4-2.6-4 | 1.6-3.0-4 |
@@ -156,11 +156,11 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        | 1.4-2.4-4 | 1.4-2.4-4 | 1.6-3.0-4 |
 | RORPO                         |  70-1.2-2 |  70-1.2-2 |  70-1.4-2 |
 | Zhang                         | 1.8-2.8-4 | 1.8-2.8-4 | 1.4-2.8-4 |
-
+```
 ### Parameters Optimization
 
 *** Metrics
-
+```
 | Method                        |     MCC |    DICE |     ROC |
 |-------------------------------+---------+---------+---------|
 | Sato                          | *0.846* | *0.842* | *0.052* |
@@ -170,9 +170,9 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        |   0.837 |   0.833 |   0.054 |
 | RORPO                         |   0.420 |   0.350 |   0.411 |
 | Zhang                         |   0.767 |   0.760 |   0.100 |
-
+```
 *** Best Parameters
-
+```
 | Method                        |     MCC |    DICE |     ROC |
 |-------------------------------+---------+---------+---------|
 | Sato                          | 1.5-1.8 | 0.9-1.2 | 1.8-3.0 |
@@ -182,10 +182,10 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        |     0.8 |     0.8 |     0.6 |
 | RORPO                         |       X |       X |       X |
 | Zhang                         |     0.1 |     0.1 |    0.02 |
-
+```
 ## IRCAD
 ## Scale Parameters Optimization
-
+```
 *** Metrics
 
 | Method                        |     MCC |    DICE |     ROC |
@@ -197,9 +197,9 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        |   0.314 |   0.320 |   0.370 |
 | RORPO                         |   0.292 |   0.284 |   0.748 |
 | Zhang                         | *0.392* | *0.395* |   0.348 |
-
+```
 *** Best scales
-
+```
 | Method                        |       MCC |      DICE |         ROC |
 |-------------------------------+-----------+-----------+-------------|
 | Sato                          | 2.0-2.2-4 | 2.0-2.2-4 |   2.0-3.0-4 |
@@ -209,11 +209,10 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        | 2.0-2.2-4 |   2.0-2.2 |   1.8-3.0-4 |
 | RORPO                         |  50-1.4-3 |  70-1.4-2 |    50-1.4-3 |
 | Zhang                         | *2.4-2.6* | *2.4-2.6* |   2.2-3.0-4 |
-
-
+```
 ## Parameters optimization
 *** Metrics
-
+```
 | Method                        |     MCC |    DICE |   ROC |
 |-------------------------------+---------+---------+-------|
 | Sato                          |   0.345 |   0.360 | 0.349 |
@@ -223,9 +222,9 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        |   0.322 |   0.330 | 0.368 |
 | RORPO +                       |   0.292 |   0.284 | 0.748 |
 | Zhang                         | *0.392* | *0.398* | 0.347 |
-
+```
 *** Best Parameters
-
+```
 | Method                        |     MCC |    DICE |     ROC |
 |-------------------------------+---------+---------+---------|
 | Sato                          | 0.6-3.0 | 0.6-3.0 | 0.6-3.0 |
@@ -235,3 +234,4 @@ We might investigate ROC->MCC, ROC->Dice. As ROC has a larger Scale distribution
 | Jerman                        |     0.2 |     0.2 |     0.2 |
 | RORPO                         |       X |       X |       X |
 | Zhang                         |     1.0 |     1.0 |     1.0 |
+```
