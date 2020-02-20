@@ -1,9 +1,10 @@
 # LiverVesselness
 testRepository for vesselness trials
 
-Attention, tester dans un premier temps avec des valeurs sigmaMin/sigmaMax proches, pour tester les besoins en RAM de l'algo.
+Warning : a wide range of scales can cause a big memory consuption.
+All methods support Dicom inputs using the option --InPutIsDicom or -d
 
-## Antiga (Frangi Généralisé)
+## Antiga (generalized Frangi's vesselness)
 ```
 ./Antiga --input liver.nii --output result.nii --sigmaMin 1 --sigmaMax 5 --nbSigmaSteps 5 --alpha 0.5 --beta 0.5 --gamma 0.5
 ```
@@ -20,7 +21,6 @@ Attention, tester dans un premier temps avec des valeurs sigmaMin/sigmaMax proch
 ```
 ./MeijeringNeuriteness --input liver.nii --output result.nii --alpha -0.5 --sigmaMin 0.3 --sigmaMax 2 --nbSigmaSteps 4
 ```
-Todo : Checker la valeur optimal de lambda pour la hessienne modifiée. Obara donne une valeur sans preuve formelle.
 
 ## Rui Zhang's Vesselness
 ```
@@ -28,7 +28,9 @@ Todo : Checker la valeur optimal de lambda pour la hessienne modifiée. Obara do
 ```
 
 ## RORPO
-syntaxe des arguments de RORPO différente du dépôt original pour automatiser le benchmark (docopt est toujours utilisé)
+The syntax of RORPO's arguments have been changed to match the benchmark.
+Futhermore, the Image class has been improved to take into account input image spacing, origin and transformation matrix.
+This allows overlapping of output volumes and GT in 3D Slicer visualization.
 
 ```
 ./RORPO --input liver.nii --output result.nii --scaleMin 1 --factor 2 --nbScales 4 --core 3
@@ -37,14 +39,36 @@ syntaxe des arguments de RORPO différente du dépôt original pour automatiser 
 ```
 ./OOF --input liver.nii --output result.nii --sigmaMin 1 --sigmaMax 5 --nbSigmaSteps 5
 ```
-
-TODO : mettre a jour les licences, auteurs, etc.
-
 ## Benchmark 
 ```
 (Nifti support - type:float/double)
-./Benchmark --input liver.nii --groundTruth gt_liver.nii --mask mask_liver.nii --parametersFile parameters.json
+./Benchmark --input filePath.txt --parametersFile parameters.json
 (Dicom series support - type: int16)
-./Benchmark --input liver_directory/ --groundTruth gt_directory/ --mask mask_directory/ --parametersFile parameters.json
+./Benchmark --input filePath.txt --parametersFile parameters.json
 ```
-Le benchmark détecte si les images en input (input,gt,mask) sont du DICOM en regardant si le chemin du gt est un répertoire.
+
+The filePath file must have the following architeture
+```
+Name of the folder 1
+Path to input image 1
+Path to mask image 1
+Path to ground truth image 1
+Name of the folder 2
+Path to input image 2
+Path to mask image 2
+Path to ground truth image 2
+
+example:
+
+Group4_data4
+/DATA/March_2013_VascuSynth_Dataset/Group4/data4/testVascuSynth4_101_101_101_uchar.mhd
+/DATA/March_2013_VascuSynth_Dataset/maskWholeImage.nii
+/DATA/March_2013_VascuSynth_Dataset/Group4/data4/gt.nii
+Group4_data10
+/DATA/March_2013_VascuSynth_Dataset/Group4/data10/testVascuSynth10_101_101_101_uchar.mhd
+/DATA/March_2013_VascuSynth_Dataset/maskWholeImage.nii
+/DATA/March_2013_VascuSynth_Dataset/Group4/data10/gt.nii
+```
+
+The benchmark detects if input images (input,gt,mask) are DICOMs by checking if GT path leads to a directory or not.
+It is possible to compute metrics without keeping output volumes (for memory management) using the option -r.
