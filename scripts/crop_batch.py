@@ -7,7 +7,6 @@ import fnmatch
 
 inputDir = sys.argv[1]
 outputDir = sys.argv[2]
-
 for patientDirectory in fnmatch.filter( os.listdir(inputDir),'3D*'):
     print(patientDirectory)
 
@@ -39,5 +38,5 @@ for patientDirectory in fnmatch.filter( os.listdir(inputDir),'3D*'):
 
     print(commandLine)
     
-    os.system(commandLine)
+    #os.system(commandLine)
     

@@ -75,9 +75,9 @@ It is possible to compute metrics without keeping output volumes (for memory man
 
 # Results
 
-MCC = Matthew's correlation
-Dice = Sørensen–Dice index
-ROC = min distance of points on the curve from the point(TPR=1,FPR=0)
+-MCC = Matthew's correlation
+-Dice = Sørensen–Dice index
+-ROC = min distance of points on the curve from the point(TPR=1,FPR=0)
 
 Scale search is performed with the followings parameters :
 

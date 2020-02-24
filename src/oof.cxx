@@ -67,7 +67,7 @@ int main(int argc, char** argv)
     float sigmaMax = vm["sigmaMax"].as<float>();
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     double fixedSigma = vm["sigma"].as<double>();
-
+    
     //********************************************************
     //                    Reading inputs
     //********************************************************

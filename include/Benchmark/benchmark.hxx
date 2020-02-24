@@ -140,7 +140,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
   double minDist = 1000;
 
   // trying out new way of tresholding for complete ROC curve...
-  int step = 2;
+  int step = 1;
   int maxBound = 100;
   float maxBoundf = 100.0f;
   for(int i=maxBound; i>0; i-=step)
