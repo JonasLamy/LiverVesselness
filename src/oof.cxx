@@ -3,12 +3,11 @@ Author : Jonas lamy
 Based on work of Turetken & Fethallah Benmansour
 */
 
-#include "itkMultiScaleTubularityMeasureImageFilter.h"
-#include "itkOrientedFluxCrossSectionTraceMeasure.h"
+#include "itkOptimallyOrientedFlux.h"
 
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include "itkImage.h"
+#include "itkTimeProbe.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -84,37 +83,14 @@ int main(int argc, char** argv)
     //                   Filter
     //********************************************************
 
-    typedef InputImageType OutputImageType;
-    typedef float OFScalarType;
-    typedef itk::SymmetricSecondRankTensor< OFScalarType,maxDimension> OFPixelType;
-    typedef itk::Image<OFPixelType,maxDimension> OFImageType;
-    typedef itk::Image<PixelType,maxDimension> ScoreImageType;
-    typedef itk::Image<PixelType, maxDimension+1> NPlus1ScoreImage;
-    typedef itk::OrientedFluxCrossSectionTraceMeasureFilter<OFImageType, OutputImageType> OFCrossSectionTraceObjectnessFilterType;
-    typedef itk::MultiScaleTubularityMeasureImageFilter<InputImageType,
-                                                      OFImageType,
-                                                      ScoreImageType,
-                                                      OFCrossSectionTraceObjectnessFilterType,
-                                                      OutputImageType>
-      OFCrossSectionTraceMultiScaleFilterType;
-
-    typename OFCrossSectionTraceMultiScaleFilterType::Pointer ofMultiscaleFilter = OFCrossSectionTraceMultiScaleFilterType::New();
-
-    // setting parameters
-    ofMultiscaleFilter->SetInput(inputImage);
-    ofMultiscaleFilter->SetSigmaMinimum(sigmaMin);
-    ofMultiscaleFilter->SetSigmaMaximum(sigmaMax);
-    ofMultiscaleFilter->SetNumberOfSigmaSteps(nbSigmaSteps);
-    ofMultiscaleFilter->SetFixedSigmaForOrientedFluxImage(fixedSigma);
-    ofMultiscaleFilter->SetGenerateScaleOutput(false);
-    ofMultiscaleFilter->SetGenerateOrientedFluxOutput(true);
-    ofMultiscaleFilter->SetGenerateNPlus1DOrientedFluxOutput(false);
-    ofMultiscaleFilter->SetGenerateNPlus1DOrientedFluxMeasureOutput(false);
-
+    auto OOFfilter = itk::OptimallyOrientedFlux<InputImageType,InputImageType>::New();
+    OOFfilter->SetInput(inputImage);
     try{
         itk::TimeProbe timer;
         timer.Start();
-        ofMultiscaleFilter->Update();
+        //
+        OOFfilter->Update();
+        //
         timer.Stop();
         std::cout<<"Computation time:"<<timer.GetMean()<<std::endl;
     }
@@ -123,11 +99,12 @@ int main(int argc, char** argv)
         std::cerr << e << std::endl;
     }
 
-    ScoreImageType::Pointer scoreImage = ofMultiscaleFilter->GetOutput();
+    //ScoreImageType::Pointer scoreImage = ofMultiscaleFilter->GetOutput();
+    
 
-    typedef itk::ImageFileWriter<ScoreImageType> ScoreImageWriter;
+    typedef itk::ImageFileWriter<InputImageType> ScoreImageWriter;
     auto writer = ScoreImageWriter::New();
-    writer->SetInput(scoreImage);
+    writer->SetInput( OOFfilter->GetOutput() );
     writer->SetFileName(outputFile);
 
     try{
