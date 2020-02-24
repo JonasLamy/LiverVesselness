@@ -178,7 +178,7 @@ namespace itk
 			}
 			else
 			{
-				outputIt.Set( value / (2 * abs(m_maxImageEigenValue) ) );
+				outputIt.Set( value /* (2 * abs(m_maxImageEigenValue)  ) */ );
 			}
 			
 			

@@ -12,12 +12,12 @@ def drange(x, y, jump):
 
 def isOK(i,j,step,minImageSize):
 
-    print("path length:",i,"for step=0")
+    #print("path length:",i,"for step=0")
 
     for k in range(1,int(step)):
-        print("path length:",i*j**k,"for step="+str(k))
+        #print("path length:",i*j**k,"for step="+str(k))
         if(int(i * j**k) >= minImageSize):
-            print("skipping",i,j,step,"because:"+str(int(i * j**k))+" for step= "+str(k))
+            #print("skipping",i,j,step,"because:"+str(int(i * j**k))+" for step= "+str(k))
             return False
     return True
         
@@ -40,8 +40,10 @@ minFactor = decimal.Decimal(sys.argv[4])
 maxFactor = decimal.Decimal(sys.argv[5])
 stepFactor = decimal.Decimal(sys.argv[6])
 
-step = decimal.Decimal(sys.argv[7])
-minImageSize = 130
+stepMin = int(sys.argv[7])
+stepMax = int(sys.argv[8])
+
+minImageSize = 101
 
 decimal.getcontext().prec = 3
 
@@ -63,19 +65,20 @@ for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
     else:
         
         for j in drange(minFactor,maxFactor,stepFactor) :
-            # checking that the paths are not over
-            # the desired threshold
-            
-            if not isOK(i,j,step,minImageSize):
-                break
-            #print("scales:",i,j,step+1,int(i * j**k))
-            
-            print("\t{",end="") 
-            scaleSpaceSingleScale(i,j,step)
-            
-            if( i==maxBoundaryStart  and j == maxFactor ):
-                print("\t\t]\n\t}")
-            else:
-                print("\t\t]\n\t},")    
+            for step in range(stepMin,stepMax+1):
+                # checking that the paths are not over
+                # the desired threshold
+                
+                if not isOK(i,j,step,minImageSize):
+                    break
+                #print("scales:",i,j,step+1,int(i * j**k))
+                
+                print("\t{",end="") 
+                scaleSpaceSingleScale(i,j,step)
+                
+                if( i==maxBoundaryStart  and j == maxFactor ):
+                    print("\t\t]\n\t}")
+                else:
+                    print("\t\t]\n\t},")    
 print("    ]")
 print("}")
