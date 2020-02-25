@@ -7,7 +7,9 @@
 #include "itkComplexToImaginaryImageFilter.h"
 #include "itkComplexToRealImageFilter.h"
 #include "itkImageFileWriter.h"
+#include "itkMultiplyImageFilter.h"
 
+#include "boost/math/special_functions/bessel.hpp"
 
 #include <vector>
 
