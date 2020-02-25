@@ -6,6 +6,7 @@
 #include "itkFFTShiftImageFilter.h"
 #include "itkComplexToImaginaryImageFilter.h"
 #include "itkComplexToRealImageFilter.h"
+#include "itkImageFileWriter.h"
 
 
 #include <vector>
@@ -34,6 +35,8 @@ namespace itk{
         using IndexType = typename TInputImage::IndexType;
         using PixelType = typename TInputImage::PixelType;
 
+        using CoordImageType = typename itk::Image<float,3>;
+
         protected:
         OptimallyOrientedFlux();
         ~OptimallyOrientedFlux() override = default;
@@ -49,7 +52,7 @@ namespace itk{
         int m_normalizationType;
         bool m_useAbsolute;
 
-        void ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
+        std::vector<CoordImageType::Pointer> ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
         
     };
 }
