@@ -68,14 +68,16 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatri
     for(int row=0; row<size[0];row++)
         for(int col=0;col<size[1];col++)
         {
+            int  g = 0;
             for(int depth=0;depth<p[2];depth++)
             {
                 pixelIndexX[0] = row;
                 pixelIndexX[1] = col;
                 pixelIndexX[2] = depth;
                 //computing value for the slice;
-                X->SetPixel(pixelIndexX, depth-1);
+                X->SetPixel(pixelIndexX, depth);
                 std::cout<<pixelIndexX<<std::endl;
+                g++;
             }
             for(int depth=p[2];depth<size[2];depth++)
             {
@@ -84,6 +86,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatri
                 pixelIndexX[2] = depth;
                 //computing value for the slice;
                 X->SetPixel(pixelIndexX, depth-p[size[2]]);
+                g++;
                 std::cout<<pixelIndexX<<std::endl;
             }
         }
@@ -92,7 +95,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatri
     {   
         for(int col=0;col<size[1];col++)
         {
-            for(int depth=1;depth<size[2];depth++)
+            for(int depth=0;depth<size[2];depth++)
             {
                 pixelIndexX[0] = row;
                 pixelIndexX[1] = col;
