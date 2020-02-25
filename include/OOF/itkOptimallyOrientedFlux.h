@@ -49,7 +49,7 @@ namespace itk{
         int m_normalizationType;
         bool m_useAbsolute;
 
-        void ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension);
+        void ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
         
     };
 }
