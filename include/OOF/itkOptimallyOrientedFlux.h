@@ -48,6 +48,8 @@ namespace itk{
 
         private:
 
+        // Debug function
+
         std::vector<int> m_radii;
         float m_sigma;
         int m_responseType;
