@@ -1,7 +1,7 @@
 #include "bench_evaluation.h"
 
 // Change QuickView.h for itkViewImage.h
-#include "itkViewImage.h"
+//#include "itkViewImage.h"
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id)
