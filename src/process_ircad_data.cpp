@@ -38,6 +38,8 @@ int main(int argc,char** argv)
     std::cout<<"vessels "<<imgVessels->GetLargestPossibleRegion().GetSize()<<std::endl;
     std::cout<<"portal "<<imgPortal->GetLargestPossibleRegion().GetSize()<<std::endl;
 
+    // Todo : need to check if data is beetween [0,1]. If it is, rescale to 255
+
     MaskImageType::IndexType index;
     index[0] = 255;
     index[1] = 233;
