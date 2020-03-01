@@ -233,13 +233,15 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
 
         itBesselJBuffer.GoToBegin();
         itRadius.GoToBegin();
+
+        float besselValue = 0.0;
         while( !itBesselJBuffer.IsAtEnd() )
         {
             // radius^2 ./ radius^1.5 <-> (radius * radius) / (radius* sqrt(radius)) <-> sqrt(radius) 
-            itBesselJBuffer.Value() =  normalization * exp( (-m_sigma*m_sigma)*2*M_PI*M_PI* sqrt(itRadius.Get()) );
+            besselValue =  normalization * exp( (-m_sigma*m_sigma)*2*M_PI*M_PI *(itRadius.Get()*itRadius.Get()) )/ std::pow(itRadius.Get(),1.5);
             //std::cout<<itBesselJBuffer.Get()<<std::endl;
-            itBesselJBuffer.Value() = std::complex<float>( sin(2*M_PI*rad*itRadius.Get()) / (2*M_PI*rad*itRadius.Get()) - cos(2*M_PI*rad*itRadius.Get()) ) 
-                                    * itBesselJBuffer.Get()* std::complex<float>( (1/M_PI/M_PI/rad/itRadius.Get() ) );
+            itBesselJBuffer.Value() = std::complex<float>( sin(2*M_PI*rad*itRadius.Get() ) / ( 2*M_PI*rad*itRadius.Get() ) - cos(2*M_PI * rad* itRadius.Get() ) )
+                                        * std::complex<float>( besselValue * std::sqrt(1.0/M_PI/M_PI/rad/itRadius.Get() ) );
             ++itBesselJBuffer;
             ++itRadius;
         }
@@ -249,7 +251,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
         multiplyImageFilter->SetInput2(FFTfilter->GetOutput());
         multiplyImageFilter->Update();
         
-        for(int row=0; row<1;row++)
+        for(int row=0; row<size[0];row++)
         {   
             for(int col=0;col<size[1];col++)
             {
@@ -258,7 +260,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
                     index[0] = row;
                     index[1] = col;
                     index[2] = depth;
-                    std::cout<<radius->GetPixel(index)<<" ";
+                    std::cout<<BesselJBuffer->GetPixel(index)<<" ";
                 }
             
                 std::cout<<std::endl;
