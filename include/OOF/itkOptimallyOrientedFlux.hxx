@@ -19,10 +19,8 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::PrintSelf(std::ostrea
 }
 
 template <typename TInputImage, typename TOutputImage>
-std::vector<itk::Image<float,3>::Pointer> itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing)
+itk::Image<float,3>::Pointer itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatrixX(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing)
 {
-    int dim = 3;
-    
     CoordImageType::SizeType p;
     p[0] = std::floor(dimension[0]/2.0);
     p[1] = std::floor(dimension[1]/2.0);
@@ -40,53 +38,15 @@ std::vector<itk::Image<float,3>::Pointer> itk::OptimallyOrientedFlux<TInputImage
     region.SetIndex(index);
 
     auto X = CoordImageType::New();
-    auto Y = CoordImageType::New();
-    auto Z = CoordImageType::New();
 
     X->SetRegions(region);
-    Y->SetRegions(region);
-    Z->SetRegions(region);
 
     X->Allocate();
     X->FillBuffer(0.0);
-    Y->Allocate();
-    Y->FillBuffer(0.0);
-    Z->Allocate();
-    Z->FillBuffer(0.0);
 
     CoordImageType::IndexType pixelIndexX;
-    CoordImageType::IndexType pixelIndexY;
-    CoordImageType::IndexType pixelIndexZ;
 
-    std::vector<int> a;
     float value = 0;
-
-    // TODO take spacing into account
-
-    std::cout<<"computing coord image"<<std::endl;
-    // do it for Z
-    for(int row=0; row<size[0];row++)
-        for(int col=0;col<size[1];col++)
-        {
-            for(int depth=0;depth<p[2];depth++)
-            {
-                pixelIndexZ[0] = row;
-                pixelIndexZ[1] = col;
-                pixelIndexZ[2] = depth;
-                //computing value for the slice;
-                value = depth / static_cast<float>(size[2]) / static_cast<float>(spacing[2]);
-                Z->SetPixel(pixelIndexZ, value );
-            }
-            for(int depth=p[2];depth<size[2];depth++)
-            {
-                pixelIndexZ[0] = row;
-                pixelIndexZ[1] = col;
-                pixelIndexZ[2] = depth;
-                //computing value for the slice;
-                value = ( depth - static_cast<int>( p[2]*2 ) ) / static_cast<float>(size[2]) / static_cast<float>(spacing[2]);
-                Z->SetPixel(pixelIndexZ, value );
-            }
-        }
 
     // do it for X
     for(int row=0; row<size[0];row++)
@@ -111,8 +71,38 @@ std::vector<itk::Image<float,3>::Pointer> itk::OptimallyOrientedFlux<TInputImage
                 X->SetPixel(pixelIndexX, value );
             }
         }
-    
-    // do it for Y
+    return X;
+}
+
+
+template <typename TInputImage, typename TOutputImage>
+itk::Image<float,3>::Pointer itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatrixY(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing)
+{    
+    CoordImageType::SizeType p;
+    p[0] = std::floor(dimension[0]/2.0);
+    p[1] = std::floor(dimension[1]/2.0);
+    p[2] = std::floor(dimension[2]/2.0);
+
+    CoordImageType::SizeType size;
+    size[0] = dimension[0];
+    size[1] = dimension[1];
+    size[2] = dimension[2];
+
+    CoordImageType::IndexType index = {0,0,0};
+
+    CoordImageType::RegionType region;
+    region.SetSize(size);
+    region.SetIndex(index);
+
+    auto Y = CoordImageType::New();
+    Y->SetRegions(region);
+    Y->Allocate();
+    Y->FillBuffer(0.0);
+
+    CoordImageType::IndexType pixelIndexY;
+
+    float value = 0;
+        // do it for Y
     for(int col=0; col<size[1];col++)
     {
         for(int depth=0;depth<size[2];depth++)
@@ -141,7 +131,100 @@ std::vector<itk::Image<float,3>::Pointer> itk::OptimallyOrientedFlux<TInputImage
             
         }
     }
+    return Y;
+}
 
+template <typename TInputImage, typename TOutputImage>
+itk::Image<float,3>::Pointer itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatrixZ(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing)
+{
+    CoordImageType::SizeType p;
+    p[0] = std::floor(dimension[0]/2.0);
+    p[1] = std::floor(dimension[1]/2.0);
+    p[2] = std::floor(dimension[2]/2.0);
+
+    CoordImageType::SizeType size;
+    size[0] = dimension[0];
+    size[1] = dimension[1];
+    size[2] = dimension[2];
+
+    CoordImageType::IndexType index = {0,0,0};
+
+    CoordImageType::RegionType region;
+    region.SetSize(size);
+    region.SetIndex(index);
+
+    auto Z = CoordImageType::New();
+
+    Z->SetRegions(region);
+
+    Z->Allocate();
+    Z->FillBuffer(0.0);
+
+    CoordImageType::IndexType pixelIndexZ;
+
+    float value = 0;
+
+    // TODO take spacing into account
+
+    std::cout<<"computing coord image"<<std::endl;
+    // do it for Z
+    for(int row=0; row<size[0];row++)
+        for(int col=0;col<size[1];col++)
+        {
+            for(int depth=0;depth<p[2];depth++)
+            {
+                pixelIndexZ[0] = row;
+                pixelIndexZ[1] = col;
+                pixelIndexZ[2] = depth;
+                //computing value for the slice;
+                value = depth / static_cast<float>(size[2]) / static_cast<float>(spacing[2]);
+                Z->SetPixel(pixelIndexZ, value );
+            }
+            for(int depth=p[2];depth<size[2];depth++)
+            {
+                pixelIndexZ[0] = row;
+                pixelIndexZ[1] = col;
+                pixelIndexZ[2] = depth;
+                //computing value for the slice;
+                value = ( depth - static_cast<int>( p[2]*2 ) ) / static_cast<float>(size[2]) / static_cast<float>(spacing[2]);
+                Z->SetPixel(pixelIndexZ, value );
+            }
+        }
+    return Z;
+}
+
+template<typename TInputImage, typename TOutputImage>
+itk::Image<float,3>::Pointer itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftshiftedcoordinate(typename TInputImage::SizeType dimension,int index,typename TInputImage::SpacingType spacing)
+{
+    CoordImageType::Pointer img;
+
+    switch(index)
+    {
+        case 0:
+        img = ifftShiftedCoordMatrixX(dimension,spacing);
+        break;
+        case 1: // Z is second so that itk/matlab correspondance is the same
+        img = ifftShiftedCoordMatrixZ(dimension,spacing);
+        break;
+        case 2:
+        img = ifftShiftedCoordMatrixY(dimension,spacing);
+        break;
+        default:
+            throw "dimensions error";
+    }
+    
+
+    return img;
+}
+
+template <typename TInputImage, typename TOutputImage>
+std::vector<itk::Image<float,3>::Pointer> itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing)
+{
+
+    CoordImageType::Pointer X = ifftShiftedCoordMatrixX(dimension,spacing);
+    CoordImageType::Pointer Y = ifftShiftedCoordMatrixY(dimension,spacing);
+    CoordImageType::Pointer Z = ifftShiftedCoordMatrixZ(dimension,spacing);
+    
     std::vector<CoordImageType::Pointer> vect;
     vect.push_back(X);
     vect.push_back(Y);
@@ -250,6 +333,8 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
         multiplyImageFilter->SetInput1(BesselJBuffer);
         multiplyImageFilter->SetInput2(FFTfilter->GetOutput());
         multiplyImageFilter->Update();
+
+        CoordImageType::Pointer u = ifftshiftedcoordinate(size,2,BesselJBuffer->GetSpacing());
         
         for(int row=0; row<size[0];row++)
         {   
@@ -260,7 +345,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
                     index[0] = row;
                     index[1] = col;
                     index[2] = depth;
-                    std::cout<<BesselJBuffer->GetPixel(index)<<" ";
+                    std::cout<<u->GetPixel(index)<<" ";
                 }
             
                 std::cout<<std::endl;

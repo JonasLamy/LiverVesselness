@@ -56,8 +56,13 @@ namespace itk{
         int m_normalizationType;
         bool m_useAbsolute;
 
+
+        CoordImageType::Pointer ifftShiftedCoordMatrixX(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
+        CoordImageType::Pointer ifftShiftedCoordMatrixY(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
+        CoordImageType::Pointer ifftShiftedCoordMatrixZ(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
+
         std::vector<CoordImageType::Pointer> ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
-        
+        CoordImageType::Pointer ifftshiftedcoordinate(typename TInputImage::SizeType dimension,int index,typename TInputImage::SpacingType spacing);
     };
 }
 
