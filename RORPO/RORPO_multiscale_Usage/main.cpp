@@ -198,8 +198,7 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
 
         for(unsigned int i=0; i<multiscale.size();i++)
         {
-            //multiscale_normalized.get_data()[i] = (multiscale.get_data()[i]-min)/(float)(max-min); //general form of normalization, this should work on all type of data.
-            multiscale_normalized.get_data()[i] = (multiscale.get_data()[i])/(float)(max); // testing using [0,max] interval 
+            multiscale_normalized.get_data()[i] = (multiscale.get_data()[i])/(float)(max); //
         }
 
         if(verbose)

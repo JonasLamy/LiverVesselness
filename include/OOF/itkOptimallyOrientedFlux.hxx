@@ -275,12 +275,12 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
     radius->SetSpacing(vector[0]->GetSpacing());
     radius->Allocate();
 
-    SizeType size = input->GetLargestPossibleRegion().GetSize();
+    SizeType sizeInput = input->GetLargestPossibleRegion().GetSize();
     CoordImageType::IndexType index;
     float value;
-    for(int i=0; i<size[0];i++)
-        for(int j=0; j<size[1];j++)
-            for(int k=0; k<size[2]; k++)
+    for(int i=0; i<sizeInput[0];i++)
+        for(int j=0; j<sizeInput[1];j++)
+            for(int k=0; k<sizeInput[2]; k++)
             {
                 index[0] = i;
                 index[1] = j;
@@ -334,18 +334,35 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
         multiplyImageFilter->SetInput2(FFTfilter->GetOutput());
         multiplyImageFilter->Update();
 
-        CoordImageType::Pointer u = ifftshiftedcoordinate(size,2,BesselJBuffer->GetSpacing());
+        BesselJBuffer = multiplyImageFilter->GetOutput();
+        // computing all 6 ifft for each radius
+        using InverseFFTFilter = itk::InverseFFTImageFilter<FFTOutputImageType,FloatImageType>;
+
+        auto multiplyShiftedCoordinates = itk::MultiplyImageFilter<CoordImageType,CoordImageType>::New();
+        multiplyShiftedCoordinates->SetInput1( ifftshiftedcoordinate( sizeInput,0,BesselJBuffer->GetSpacing() ) );
+        multiplyShiftedCoordinates->SetInput2( ifftshiftedcoordinate( sizeInput,0,BesselJBuffer->GetSpacing() ) );
+
+        auto multiplyWithBesselBuffer = itk::MultiplyImageFilter<CoordImageType,BesselBufferImageType,BesselBufferImageType>::New();
+        multiplyWithBesselBuffer->SetInput1( multiplyShiftedCoordinates->GetOutput() );
+        multiplyWithBesselBuffer->SetInput2( BesselJBuffer );
+
+        auto inverseFilter = InverseFFTFilter::New();
+        inverseFilter->SetInput( multiplyWithBesselBuffer->GetOutput() );  
+        inverseFilter->Update();
+
+        //FFTOutputImageType::Pointer buffer = ifftshiftedcoordinate(size(image),1,BesselJBuffer->GetSpacing())
+
         
-        for(int row=0; row<size[0];row++)
+        for(int row=0; row<sizeInput[0];row++)
         {   
-            for(int col=0;col<size[1];col++)
+            for(int col=0;col<sizeInput[1];col++)
             {
-                for(int depth=0;depth<size[2];depth++)
+                for(int depth=0;depth<sizeInput[2];depth++)
                 {
                     index[0] = row;
                     index[1] = col;
                     index[2] = depth;
-                    std::cout<<u->GetPixel(index)<<" ";
+                    //std::cout<<u->GetPixel(index)<<" ";
                 }
             
                 std::cout<<std::endl;

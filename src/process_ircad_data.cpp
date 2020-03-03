@@ -44,6 +44,15 @@ int main(int argc,char** argv)
     index[2] = 125;
     std::cout<<(int)imgMask->GetPixel(index)<<std::endl;
 
+    itk::ImageRegionIterator<MaskImageType> it( imgMask,imgMask->GetLargestPossibleRegion() );
+    it.GoToBegin();
+    while( !it.IsAtEnd() )
+    {
+        if(it.Get() == 1)
+            it.Value() = 255;
+        ++it;
+    }
+
     // computing mask bounding box
 
     using BinaryImageToShapeLabelMapFilterType = itk::BinaryImageToShapeLabelMapFilter<MaskImageType>;

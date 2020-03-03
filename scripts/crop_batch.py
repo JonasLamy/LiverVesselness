@@ -38,5 +38,5 @@ for patientDirectory in fnmatch.filter( os.listdir(inputDir),'3D*'):
 
     print(commandLine)
     
-    #os.system(commandLine)
+    os.system(commandLine)
     

@@ -6,6 +6,7 @@ import numpy as np
 import glob
 
 outputDir = sys.argv[1]
+IdentitySpacing = sys.argv[2]
 
 for patientDirectory in glob.glob(outputDir +'/3D*'):
     print(patientDirectory)
@@ -30,7 +31,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     # calling external program
     # missing outputs
     commandLine = "./MakeIso " + patientPath + " " + liverPath + " " + venousPath + " " + portalPath + " "
-    commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath + " " + maskedLiverOutPath
+    commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath + " " + maskedLiverOutPath + " " + IdentitySpacing
 
     print(commandLine)
     
