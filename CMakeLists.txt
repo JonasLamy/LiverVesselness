@@ -126,7 +126,7 @@ target_include_directories(MakeVascuSynthGT PUBLIC
 target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
 set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
-
+# TODO remove this - no longer needed
 add_executable(testScaleSpace src/testScaleSpace.cpp)
 target_include_directories(testScaleSpace PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -135,6 +135,17 @@ target_include_directories(testScaleSpace PUBLIC
   )
 target_link_libraries(testScaleSpace ${ITK_LIBRARIES} Boost::filesystem)
 set_target_properties(testScaleSpace PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+# Test ftt
+add_executable(testFFT src/testFFT.cpp)
+target_include_directories(testFFT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(testFFT ${ITK_LIBRARIES} Boost::filesystem)
+set_target_properties(testFFT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
 
 add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
 target_include_directories(MakeVascuSynthBifurcationGT PUBLIC

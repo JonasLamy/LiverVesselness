@@ -13,16 +13,26 @@
 #include "utils.h"
 
 template<typename TImageType>
-typename TImageType::Pointer makeIso(typename TImageType::Pointer inputImage,bool isMask )
+typename TImageType::Pointer makeIso(typename TImageType::Pointer inputImage,bool isMask, bool identitySpacing )
 {
     typename TImageType::SizeType size = inputImage->GetLargestPossibleRegion().GetSize();
     typename TImageType::SpacingType spacing = inputImage->GetSpacing();
 
     typename TImageType::SpacingType newSpacing;
     double minSpacing = std::min( spacing[0],std::min(spacing[1],spacing[2]) );
-    newSpacing[0] = minSpacing;
-    newSpacing[1] = minSpacing;
-    newSpacing[2] = minSpacing;
+
+    if(identitySpacing)
+    {
+        newSpacing[0] = 1;
+        newSpacing[1] = 1;
+        newSpacing[2] = 1;
+    }
+    else
+    {
+        newSpacing[0] = minSpacing;
+        newSpacing[1] = minSpacing;
+        newSpacing[2] = minSpacing;
+    }
 
     std::cout<<"new spacing:"<<newSpacing<<std::endl;
     typename TImageType::SizeType newSize;
@@ -67,6 +77,8 @@ int main(int argc,char** argv)
     std::string outputVesselsFileName( argv[7] );
     std::string outputMaskedLiverFileName( argv[8] );
 
+    bool identitySpacing = std::atoi(argv[9]);
+
     // settings images types
     using DicomImageType = itk::Image<int16_t,3>;
     using MaskImageType = itk::Image<uint8_t,3>;
@@ -96,10 +108,10 @@ int main(int argc,char** argv)
     maskFilter->SetMaskImage(imgMask);
     maskFilter->Update();
     
-    auto imgMaskedLiverIso = makeIso<DicomImageType>(maskFilter->GetOutput(),false);
-    auto imgPatientIso = makeIso<DicomImageType>(imgPatient,false);
-    auto imgMaskIso = makeIso<MaskImageType>(imgMask,true);
-    auto imgVesselsIso = makeIso<VesselsImageType>(imgVessels,true);
+    auto imgMaskedLiverIso = makeIso<DicomImageType>(maskFilter->GetOutput(),false,identitySpacing);
+    auto imgPatientIso = makeIso<DicomImageType>(imgPatient,false,identitySpacing);
+    auto imgMaskIso = makeIso<MaskImageType>(imgMask,true,identitySpacing);
+    auto imgVesselsIso = makeIso<VesselsImageType>(imgVessels,true,identitySpacing);
     
 
     std::cout<<"patient "<<imgPatientIso->GetLargestPossibleRegion().GetSize()<<std::endl;
