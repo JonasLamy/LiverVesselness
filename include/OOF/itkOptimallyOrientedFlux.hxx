@@ -201,13 +201,13 @@ itk::Image<float,3>::Pointer itk::OptimallyOrientedFlux<TInputImage,TOutputImage
     switch(index)
     {
         case 0:
-        img = ifftShiftedCoordMatrixX(dimension,spacing);
+        img = ifftShiftedCoordMatrixY(dimension,spacing);
         break;
         case 1: // Z is second so that itk/matlab correspondance is the same
-        img = ifftShiftedCoordMatrixZ(dimension,spacing);
+        img = ifftShiftedCoordMatrixX(dimension,spacing);
         break;
         case 2:
-        img = ifftShiftedCoordMatrixY(dimension,spacing);
+        img = ifftShiftedCoordMatrixZ(dimension,spacing);
         break;
         default:
             throw "dimensions error";
@@ -352,17 +352,18 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
 
         //FFTOutputImageType::Pointer buffer = ifftshiftedcoordinate(size(image),1,BesselJBuffer->GetSpacing())
 
+
+        for(int depth=0;depth<5;depth++)
         
-        for(int row=0; row<sizeInput[0];row++)
-        {   
-            for(int col=0;col<sizeInput[1];col++)
+        {
+            for(int row=0; row<5;row++)   
             {
-                for(int depth=0;depth<sizeInput[2];depth++)
+                for(int col=0;col<5;col++)    
                 {
                     index[0] = row;
                     index[1] = col;
                     index[2] = depth;
-                    //std::cout<<u->GetPixel(index)<<" ";
+                    std::cout<<inverseFilter->GetOutput()->GetPixel(index)<<" ";
                 }
             
                 std::cout<<std::endl;
