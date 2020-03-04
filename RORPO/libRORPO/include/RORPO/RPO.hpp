@@ -153,7 +153,7 @@ template<typename T, typename MaskType>
 void RPO(const Image3D<T> &image, int L, Image3D<T> &RPO1,
          Image3D<T> &RPO2, Image3D<T> &RPO3, Image3D<T> &RPO4,
          Image3D<T> &RPO5,Image3D<T> &RPO6,Image3D<T> &RPO7,
-         int nb_core, Image3D<MaskType> &Mask){
+         int nb_core,int dilationSize, Image3D<MaskType> &Mask){
 
 
 // #################### Definition of the orientations #########################
@@ -194,7 +194,7 @@ void RPO(const Image3D<T> &image, int L, Image3D<T> &RPO1,
     Image3D<T> imageDilat=image.copy_image();
 
     rect3dminmax(imageDilat.get_pointer(), imageDilat.dimX(), imageDilat.dimY(),
-                 imageDilat.dimZ(), 3, 3, 3, false);
+                 imageDilat.dimZ(), dilationSize, dilationSize, dilationSize, false);
 
     Image3D<T> dilatImageWithBorders=imageDilat.add_border(2);
     imageDilat.clear_image();

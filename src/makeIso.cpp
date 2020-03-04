@@ -8,6 +8,10 @@
 #include "itkXorImageFilter.h"
 #include "itkMaskImageFilter.h"
 
+#include "itkFlatStructuringElement.h"
+#include "itkBinaryDilateImageFilter.h"
+
+
 #include <string>
 
 #include "utils.h"
@@ -75,9 +79,11 @@ int main(int argc,char** argv)
     std::string outputPatientFileName( argv[5] );
     std::string outputMaskFileName( argv[6] );
     std::string outputVesselsFileName( argv[7] );
-    std::string outputMaskedLiverFileName( argv[8] );
+    std::string outputVesselsMaskFileName( argv[8] );
+    std::string outputMaskedLiverFileName( argv[9] );
 
-    bool identitySpacing = std::atoi(argv[9]);
+    bool identitySpacing = std::atoi(argv[10]);
+    int radiusValue = 3;
 
     // settings images types
     using DicomImageType = itk::Image<int16_t,3>;
@@ -112,12 +118,27 @@ int main(int argc,char** argv)
     auto imgPatientIso = makeIso<DicomImageType>(imgPatient,false,identitySpacing);
     auto imgMaskIso = makeIso<MaskImageType>(imgMask,true,identitySpacing);
     auto imgVesselsIso = makeIso<VesselsImageType>(imgVessels,true,identitySpacing);
-    
+
+    // creating the iso dilated vessels mask
+
+    using StructuringElementType = itk::FlatStructuringElement<3>;
+    StructuringElementType::RadiusType radius;
+    radius.Fill(radiusValue);
+    StructuringElementType structuringElement = StructuringElementType::Ball(radius);
+
+    using BinaryDilateImageFilterType = itk::BinaryDilateImageFilter<VesselsImageType, MaskImageType, StructuringElementType>;
+
+    BinaryDilateImageFilterType::Pointer dilateFilter = BinaryDilateImageFilterType::New();
+    dilateFilter->SetInput( imgVesselsIso );
+    dilateFilter->SetKernel(structuringElement);
+    dilateFilter->Update();
+    auto imgMaskedDilatedVessels = dilateFilter->GetOutput();
 
     std::cout<<"patient "<<imgPatientIso->GetLargestPossibleRegion().GetSize()<<std::endl;
     std::cout<<"mask "<<imgMaskIso->GetLargestPossibleRegion().GetSize()<<std::endl;
     std::cout<<"vessels "<<imgVesselsIso->GetLargestPossibleRegion().GetSize()<<std::endl;
     std::cout<<"maskedLiver "<<imgMaskedLiverIso->GetLargestPossibleRegion().GetSize()<<std::endl;
+    std::cout<<"maskDilatedVessels "<<imgMaskedDilatedVessels->GetLargestPossibleRegion().GetSize()<<std::endl;
 
 
 
@@ -142,6 +163,12 @@ int main(int argc,char** argv)
     maskWriter->SetInput(imgMaskIso );
     maskWriter->SetFileName( outputMaskFileName);
     maskWriter->Update();
+
+    using WriterType = itk::ImageFileWriter<MaskImageType>;
+    WriterType::Pointer vesselsMaskWriter = WriterType::New();
+    vesselsMaskWriter->SetInput(imgMaskedDilatedVessels);
+    vesselsMaskWriter->SetFileName(outputVesselsMaskFileName);
+    vesselsMaskWriter->Update();
 
     return 0;
 }

@@ -24,14 +24,15 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
         os.makedirs(patientDirectory)
 
     patientOutPath = patientDirectory+"/patientIso.nii"
-    liverOutPath = patientDirectory+ "/liverIso.nii"
+    liverOutPath = patientDirectory+ "/liverMaskIso.nii"
     vesselsOutPath = patientDirectory+ "/vesselsIso.nii"
     maskedLiverOutPath = patientDirectory+"/maskedLiverIso.nii"
-    
+    dilatedVesselsMask = patientDirectory + "/dilatedVesselsMaskIso.nii"
+
     # calling external program
     # missing outputs
     commandLine = "./MakeIso " + patientPath + " " + liverPath + " " + venousPath + " " + portalPath + " "
-    commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath + " " + maskedLiverOutPath + " " + IdentitySpacing
+    commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath + " " + dilatedVesselsMask + " " + maskedLiverOutPath  + " " + IdentitySpacing
 
     print(commandLine)
     

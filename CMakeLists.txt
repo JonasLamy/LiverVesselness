@@ -92,7 +92,7 @@ set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 
 # process ircad -------------------
 
-add_executable(CropImages src/process_ircad_data.cpp)
+add_executable(CropImages src/crop_ircad_data.cpp)
 target_include_directories(CropImages PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"

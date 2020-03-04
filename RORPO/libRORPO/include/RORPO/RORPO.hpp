@@ -48,7 +48,7 @@ odyssee.merveille@gmail.com
 
 
 template<typename T, typename MaskType>
-Image3D<T> RORPO(const Image3D<T> &image, int L, int nbCores,
+Image3D<T> RORPO(const Image3D<T> &image, int L, int nbCores,int dilationSize,
                  Image3D<MaskType> &mask)
 {
 
@@ -63,7 +63,7 @@ Image3D<T> RORPO(const Image3D<T> &image, int L, int nbCores,
     Image3D<T> RPO6(image.dimX() + 4, image.dimY() + 4, image.dimZ() + 4, 2);
     Image3D<T> RPO7(image.dimX() + 4, image.dimY() + 4, image.dimZ() + 4, 2);
 
-    RPO(image, L, RPO1, RPO2, RPO3, RPO4, RPO5,RPO6, RPO7, nbCores, mask);
+    RPO(image, L, RPO1, RPO2, RPO3, RPO4, RPO5,RPO6, RPO7, nbCores,dilationSize, mask);
 
 
      // ################### Limit Orientations Treatment #######################
