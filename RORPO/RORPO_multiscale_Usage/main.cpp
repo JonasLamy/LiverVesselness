@@ -64,6 +64,7 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
                 std::vector<int>& scaleList,
                 std::vector<int>& window,
                 int nbCores,
+                int dilationSize,
                 int verbose,
                 std::string maskPath)
 {
@@ -137,6 +138,7 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
                 RORPO_multiscale<uint8_t, uint8_t>(imageChar,
                                                    scaleList,
                                                    nbCores,
+                                                   dilationSize,
                                                    verbose,
                                                    mask);
 
@@ -167,6 +169,7 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
                 RORPO_multiscale<PixelType, uint8_t>(image,
                                                     scaleList,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     mask);
 
@@ -220,18 +223,19 @@ static const char USAGE[] =
 R"(RORPO_multiscale_usage.
 
     USAGE:
-    RORPO_multiscale_usage --input=ImagePath --output=OutputPath --scaleMin=MinScale --factor=F --nbScales=NBS [--window=min,max] [--core=nbCores] [--mask=maskPath] [--verbose] [--series]
+    RORPO_multiscale_usage --input=ImagePath --output=OutputPath --scaleMin=MinScale --factor=F --nbScales=NBS [--window=min,max] [--core=nbCores] [--dilationSize=Size] [--mask=maskPath] [--verbose] [--series]
 
     Options:
-         --core=<nbCores>   Number of CPUs used for RPO computation
-         --window=min,max   Convert intensity range [min, max] of the intput \
-                            image to [0,255] and convert to uint8 image\
-                            (strongly decrease computation time).
-         --mask=maskPath    Path to a mask for the input image \
-                            (0 for the background; not 0 for the foreground).\
-                            mask image type must be uint8.
-         --verbose          Activation of a verbose mode.
-         --dicom            Specify that <imagePath> is a DICOM image.
+         --core=<nbCores>      Number of CPUs used for RPO computation \
+         --dilationSize=<Size> Size of the dilation for the noise robustness step \ 
+         --window=min,max      Convert intensity range [min, max] of the intput \
+                               image to [0,255] and convert to uint8 image\
+                               (strongly decrease computation time).
+         --mask=maskPath       Path to a mask for the input image \
+                               (0 for the background; not 0 for the foreground).\
+                               mask image type must be uint8.
+         --verbose             Activation of a verbose mode.
+         --dicom               Specify that <imagePath> is a DICOM image.
         )";
 
 
@@ -257,6 +261,7 @@ int main(int argc, char **argv)
     int nbScales = std::stoi(args["--nbScales"].asString());
     std::vector<int> window(3);
     int nbCores = 1;
+    int dilationSize = 3;
     std::string maskPath;
     bool verbose = args["--verbose"].asBool();
     bool dicom = args.count("--dicom");
@@ -266,6 +271,12 @@ int main(int argc, char **argv)
 
     if (args["--core"])
         nbCores = std::stoi(args["--core"].asString());
+
+    if(args["--dilationSize"])
+        dilationSize = std::stoi(args["--dilationSize"].asString());
+    
+    if(verbose)
+        std::cout<<"dilation size:"<<dilationSize<<std::endl;
 
     if (args["--window"]){
         std::vector<std::string> windowVector =
@@ -319,6 +330,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -331,6 +343,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -343,6 +356,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -355,6 +369,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -367,6 +382,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -379,6 +395,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -391,6 +408,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -403,6 +421,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -415,6 +434,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -427,6 +447,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -439,6 +460,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;
@@ -451,6 +473,7 @@ int main(int argc, char **argv)
                                                     scaleList,
                                                     window,
                                                     nbCores,
+                                                    dilationSize,
                                                     verbose,
                                                     maskPath);
             break;

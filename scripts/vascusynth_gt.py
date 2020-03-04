@@ -42,10 +42,9 @@ for dirName in listDir[1]:
                     #  create GT files
 
                     if file.endswith('.mhd'):
-                        print(filePath + "/vbi_rician_20.0.nii")
                         print("/DATA/March_2013_VascuSynth_Dataset/maskWholeImage.nii")
                         print(filePath + "/gt.nii")
-                        """
+                        
                         #    #now we call the script
                         #bifurcation files extraction
                         #spliting file
@@ -59,14 +58,13 @@ for dirName in listDir[1]:
                         generator.vesselsAndBackground(filePath,file)
 
                          
-                        generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyPoisson" ,"poisson")
+                        #generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyPoisson" ,"poisson")
                         generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyRician" ,"rician")
 
                         # adding non homogeneous illumination to 
                         # Reading input arguments
                         generator.vesselsIllumination(filePath,"vesselsAndBackground.nii")
                 
-                        generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_poisson" ,"poisson")
-                        generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_rician" ,"rician")"""
-                        
+                        #generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_poisson" ,"poisson")
+                        generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_rician" ,"rician")
                         
