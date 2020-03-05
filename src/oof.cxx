@@ -8,6 +8,8 @@ Based on work of Turetken & Fethallah Benmansour
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkTimeProbe.h"
+#include "itkDiscreteGaussianImageFilter.h"
+#include "itkRescaleIntensityImageFilter.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -29,8 +31,8 @@ int main(int argc, char** argv)
     ("help,h", "display this message")
     ("input,i", po::value<std::string>(), "inputName : input img" )
     ("output,o", po::value<std::string>(), "ouputName : output img" )
-    ("sigmaMin,m", po::value<float>(), "scale space sigma min")
-    ("sigmaMax,M", po::value<float>(), "scale space sigma max")
+    ("sigmaMin,m", po::value<double>(), "scale space sigma min")
+    ("sigmaMax,M", po::value<double>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
     ("sigma,s",po::value<double>(),"sigma for smoothing")
     ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
@@ -62,8 +64,8 @@ int main(int argc, char** argv)
 
     std::string inputFile = vm["input"].as<std::string>();
     std::string outputFile = vm["output"].as<std::string>();
-    float sigmaMin = vm["sigmaMin"].as<float>();
-    float sigmaMax = vm["sigmaMax"].as<float>();
+    double sigmaMin = vm["sigmaMin"].as<double>();
+    double sigmaMax = vm["sigmaMax"].as<double>();
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     double fixedSigma = vm["sigma"].as<double>();
     
@@ -83,13 +85,40 @@ int main(int argc, char** argv)
     //                   Filter
     //********************************************************
 
+    using GaussianFilterType = itk::DiscreteGaussianImageFilter<InputImageType,InputImageType>;
+    auto gFilter = GaussianFilterType::New();
+    gFilter->SetVariance(fixedSigma);
+    gFilter->SetInput(inputImage);
+
+    // creating radii from parameters
+
+    double step = (sigmaMax - sigmaMin) / (double)(nbSigmaSteps-2);
+    
+    std::vector<double> radii;
+    radii.push_back( sigmaMin );
+    double i=sigmaMin+step;
+    while(i<sigmaMax)
+    {
+      radii.push_back(i);
+      i += step;
+    }
+    radii.push_back( sigmaMax );
+
+    std::cout<<"scales: ";
+    for(auto r :radii )
+      std::cout<<r<<" ; ";
+    std::cout<<std::endl;
+
+
     auto OOFfilter = itk::OptimallyOrientedFlux<InputImageType,InputImageType>::New();
-    OOFfilter->SetInput(inputImage);
+    OOFfilter->SetInput( gFilter->GetOutput() );
+    OOFfilter->SetRadii(radii);
     try{
         itk::TimeProbe timer;
         timer.Start();
         //
         OOFfilter->Update();
+
         //
         timer.Stop();
         std::cout<<"Computation time:"<<timer.GetMean()<<std::endl;
@@ -99,12 +128,15 @@ int main(int argc, char** argv)
         std::cerr << e << std::endl;
     }
 
-    //ScoreImageType::Pointer scoreImage = ofMultiscaleFilter->GetOutput();
+    auto rescaleFilter = itk::RescaleIntensityImageFilter<InputImageType>::New();
+    rescaleFilter->SetInput(OOFfilter->GetOutput());
+    rescaleFilter->SetOutputMinimum(0);
+    rescaleFilter->SetOutputMaximum(1);
     
 
     typedef itk::ImageFileWriter<InputImageType> ScoreImageWriter;
     auto writer = ScoreImageWriter::New();
-    writer->SetInput( OOFfilter->GetOutput() );
+    writer->SetInput( rescaleFilter->GetOutput() );
     writer->SetFileName(outputFile);
 
     try{

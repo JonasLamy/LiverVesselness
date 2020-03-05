@@ -2,7 +2,6 @@ template<typename TInputImage, typename TOutputImage>
 itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::OptimallyOrientedFlux()
 :m_sigma(1.0),m_normalizationType(1),m_responseType(1)
 {
-    m_radii.push_back(3);
 }
 /*
 template<typename TInputImage, typename TOutputImage>
@@ -290,7 +289,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
 
     // creating radius image 
     double normalization = 0;
-    for(auto &rad : m_radii)
+    for(auto &rad : m_Radii)
     {
         std::cout<<"radius:"<<rad<<std::endl;
 
@@ -427,7 +426,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
 
                     eigenCalculator.ComputeEigenValues( hessianMat,eigenValues );
 
-                    if( abs(eigenValues[1] + eigenValues[2]) > abs(outputImage->GetPixel(index)) )
+                    if( eigenValues[1] + eigenValues[2] > abs(outputImage->GetPixel(index)) )
                         outputImage->SetPixel(index, eigenValues[1] + eigenValues[2] ); 
                 }
             }
