@@ -6,7 +6,7 @@ from scipy.stats import rice
 
 class Generator:
     def __init__(self):
-        self.noiseLevels = [0.0, 2.0, 5.0, 10.0, 15.0, 20.0]
+        self.noiseLevels = [5.0, 10.0, 20.0]
 
     def gauss3d(self,x=0,y=0,z=0,mx=0,my=0,mz=0,sx=1,sy=1,sz=1):  
         return  1 / (sx*sy*sz * np.sqrt(2. * np.pi ) * np.sqrt(2. * np.pi ) ) * np.exp(-( (x - mx)**2. / (2. * sx**2.) + (y - my)**2. / (2. * sy**2.) + (z - mz)**2. / (2. * sz**2.) ) )  
@@ -25,7 +25,8 @@ class Generator:
         # groundTruth generation
         filePath = DirPath + "/" + file
         fileGT = DirPath + "/gt.nii"
-        os.system("./MakeVascuSynthGT "+filePath +" "+fileGT)
+        fileDilatedGT = DirPath + "/gtDilated.nii"
+        os.system("./MakeVascuSynthGT "+filePath +" "+fileGT+" "+fileDilatedGT)
         
         print(filePath)
         print(fileGT)
@@ -53,18 +54,15 @@ class Generator:
             dat = itk.GetArrayFromImage(img)
             
             # simulated CT noise poisson + gaussian noise
-            if(id == 0):
-                datNoisy = dat
+            if( noiseType == "poisson"):
+                datNoisy = 0.5 * np.random.poisson(dat,None) + 0.5 * np.random.normal(dat,i,None)
+            elif( noiseType == "rician"):
+                datNoisy = rice.rvs(dat/i,scale=i)
             else:
-                if( noiseType == "poisson"):
-                    datNoisy = 0.5 * np.random.poisson(dat,None) + 0.5 * np.random.normal(dat,i,None)
-                elif( noiseType == "rician"):
-                    datNoisy = rice.rvs(dat/i,scale=i)
-                else:
-                    print("error noise type not supported")
-                    
-                datNoisy[datNoisy < 0] = 0
-                datNoisy[datNoisy > 255] = 255
+                print("error noise type not supported")
+                
+            datNoisy[datNoisy < 0] = 0
+            datNoisy[datNoisy > 255] = 255
                 # writing image on disk
             if(dat.dtype == np.uint8):
                 noisyImg = itk.GetImageFromArray(datNoisy.astype(np.uint8))
@@ -80,7 +78,7 @@ class Generator:
         imgPath = DirPath + "/" + file
 
         Imin = 50
-        Imax = 150
+        Imax = 80
         
         img = itk.imread(imgPath)
         dat = itk.GetArrayFromImage(img)
@@ -103,9 +101,9 @@ class Generator:
     def vesselsIllumination(self,DirPath,file ):
         imgPath = DirPath + "/" + file
         outputPath = DirPath + "/vesselsAndBackgroundIlluminated"+".nii"
-        sigma = 30
-        IMin = 50 
-        IMax = 200
+        sigma = 40
+        IMin = 30
+        IMax = 100
                     
         # Retrieving nifti data into arrays
         img = itk.imread(imgPath)
@@ -142,7 +140,7 @@ class Generator:
         d1 = self.gauss3d(x, y, z,mx=0,my=0,mz=0,sx=sd1,sy=sd1,sz=sd1)
         d1 *= 1.0/d1.max() * (IMax-IMin) + IMin 
                         
-        d2 = self.gauss3d(x, y, z,mx=halfSpaceX,my=halfSpaceY,mz=endZ,sx=sd2,sy=sd2,sz=sd2)
+        d2 = self.gauss3d(x, y, z,mx=halfSpaceX,my=halfSpaceY,mz=halfSpaceZ,sx=sd2,sy=sd2,sz=sd2)
         d2 *= 1.0/d2.max() * (IMax-IMin) + IMin
         
         d3 = self.gauss3d(x, y, z,mx=endX,my=endY,mz=endZ,sx=sd3,sy=sd3,sz=sd3)

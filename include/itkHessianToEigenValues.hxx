@@ -9,21 +9,6 @@ namespace itk
     HessianToEigenValuesImageFilter<TInputImage,TOutputImage>::HessianToEigenValuesImageFilter()
     :m_maxEigenValue(0.0f), m_minEigenValue(0.0f), m_maxEigenValueNorm(0.0f)
     {
-        /*
-      // first output is a copy of the image, DataObject created by superlass
-      // allocate the data objects for the outputs which are just decorators around pixels type
-      for( int i=1; i<3; i++)
-      {
-          typename PixelObjectType::Pointer output = static_cast<PixelObjectType *>(this->MakeOutput(i).GetPointer() );
-          this->ProcessObject::SetNthInput(i,output.GetPointer() );
-      } 
-      // allocate the data objects for the outputs which are
-      // just decorators around real types
-      for( int i=3; i<8;i++)
-      {
-          typename RealObjectType::Pointer output = static_cast<RealObject *>(this->makeOutput(i).GetPointer() );
-          this->ProcessObject::SetNthOutput(i,output.GetPointer());
-      }  */
 
         // max eigen value
         typename RealObjectType::Pointer outputMaxEV = 

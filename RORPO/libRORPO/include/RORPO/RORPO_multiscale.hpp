@@ -46,6 +46,7 @@ template<typename PixelType, typename MaskType>
 Image3D<PixelType> RORPO_multiscale(Image3D<PixelType> &I,
                                     const std::vector<int>& S_list,
                                     int nb_core,
+                                    int dilationSize,
                                     int debug_flag,
                                     Image3D<MaskType> &Mask)
 {
@@ -59,7 +60,7 @@ Image3D<PixelType> RORPO_multiscale(Image3D<PixelType> &I,
 	for (it=S_list.begin();it!=S_list.end();++it)
 	{
         Image3D<PixelType> One_Scale =
-                RORPO<PixelType, MaskType>(I, *it, nb_core, Mask);
+                RORPO<PixelType, MaskType>(I, *it, nb_core,dilationSize, Mask);
 
         // Max of scales
 	    max_crush(Multiscale, One_Scale);
