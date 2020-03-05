@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 
     const unsigned int maxDimension = 3;
 
-    typedef float PixelType;
+    typedef double PixelType;
     typedef itk::Image<PixelType,maxDimension> InputImageType;
 
     InputImageType::Pointer inputImage = vUtils::readImage<InputImageType>(inputFile,isInputDicom);
