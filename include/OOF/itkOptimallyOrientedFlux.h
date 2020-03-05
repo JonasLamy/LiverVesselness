@@ -33,6 +33,9 @@ namespace itk{
         itkNewMacro(Self);
         itkTypeMacro(OptimallyOrientedFlux,ImageToImageFilter);
 
+        itkSetMacro(Radii,std::vector<double>);
+        itkGetMacro(Radii,std::vector<double>);
+
         /* image related type alias */
         using ImageType = TInputImage;
         using RegionType = typename TInputImage::RegionType;
@@ -53,7 +56,7 @@ namespace itk{
 
         // Debug function
 
-        std::vector<int> m_radii;
+        std::vector<double> m_Radii;
         float m_sigma;
         int m_responseType;
         int m_normalizationType;
