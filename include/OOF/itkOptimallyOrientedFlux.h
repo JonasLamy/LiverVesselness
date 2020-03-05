@@ -9,6 +9,8 @@
 #include "itkImageFileWriter.h"
 #include "itkMultiplyImageFilter.h"
 #include "itkInverseFFTImageFilter.h"
+#include "itkSymmetricSecondRankTensor.h"
+
 
 #include "boost/math/special_functions/bessel.hpp"
 
@@ -38,7 +40,7 @@ namespace itk{
         using IndexType = typename TInputImage::IndexType;
         using PixelType = typename TInputImage::PixelType;
 
-        using CoordImageType = typename itk::Image<float,3>;
+        using CoordImageType = typename itk::Image<double,3>;
 
         protected:
         OptimallyOrientedFlux();
@@ -58,12 +60,12 @@ namespace itk{
         bool m_useAbsolute;
 
 
-        CoordImageType::Pointer ifftShiftedCoordMatrixX(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
-        CoordImageType::Pointer ifftShiftedCoordMatrixY(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
-        CoordImageType::Pointer ifftShiftedCoordMatrixZ(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
+        CoordImageType::Pointer ifftShiftedCoordMatrixX(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing, typename TInputImage::PointType origin);
+        CoordImageType::Pointer ifftShiftedCoordMatrixY(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing, typename TInputImage::PointType origin);
+        CoordImageType::Pointer ifftShiftedCoordMatrixZ(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing, typename TInputImage::PointType origin);
 
-        std::vector<CoordImageType::Pointer> ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing);
-        CoordImageType::Pointer ifftshiftedcoordinate(typename TInputImage::SizeType dimension,int index,typename TInputImage::SpacingType spacing);
+        std::vector<CoordImageType::Pointer> ifftShiftedCoordMatrix(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing, typename TInputImage::PointType origin);
+        CoordImageType::Pointer ifftshiftedcoordinate(typename TInputImage::SizeType dimension,int index,typename TInputImage::SpacingType spacing, typename TInputImage::PointType origin);
     };
 }
 
