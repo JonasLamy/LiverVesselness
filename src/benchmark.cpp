@@ -139,7 +139,7 @@ int main(int argc, char** argv)
   // opening resultFileStream
   std::ofstream csvFileStream;
   std::cout<<"creating csv file :"<<csvFileName<<std::endl;
-  csvFileStream.open(csvFileName, ios::out | ios::trunc); // if the file already exists, we discard content
+  csvFileStream.open(csvFileName, std::ios::out | std::ios::trunc); // if the file already exists, we discard content
   if( csvFileStream.is_open() )
   {
     csvFileStream <<"SerieName,Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,Hausdorff"<<std::endl;
