@@ -12,7 +12,7 @@
 #include "itkImageDuplicator.h"
 #include "itkConstantPadImageFilter.h"
 
-#include "QuickView.h"
+//#include "QuickView.h"
 
 #include <string>
 

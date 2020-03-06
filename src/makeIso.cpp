@@ -10,6 +10,7 @@
 
 #include "itkFlatStructuringElement.h"
 #include "itkBinaryDilateImageFilter.h"
+#include "itkBinaryMorphologicalOpeningImageFilter.h"
 
 
 #include <string>
@@ -105,23 +106,48 @@ int main(int argc,char** argv)
     xorImageFilter->Update();
     auto imgVessels = xorImageFilter->GetOutput();
 
+    // making mask bigger on iso data
+
+    using StructuringElementType = itk::FlatStructuringElement<3>;
+    StructuringElementType::RadiusType MaskradiusOpening;
+    MaskradiusOpening.Fill(3);
+    StructuringElementType MaskstructuringElementOpening = StructuringElementType::Ball(MaskradiusOpening);
+
+
+    using BinaryOpeningFilter = itk::BinaryMorphologicalOpeningImageFilter<MaskImageType,MaskImageType,StructuringElementType>;
+    auto openingFilter = BinaryOpeningFilter::New();
+    openingFilter->SetKernel(MaskstructuringElementOpening);
+    openingFilter->SetInput(imgMask);
+    openingFilter->Update();
+
+    StructuringElementType::RadiusType Maskradius;
+    Maskradius.Fill(9);
+    StructuringElementType MaskstructuringElement = StructuringElementType::Ball(Maskradius);
+
+    
+    using BinaryDilateImageFilterType = itk::BinaryDilateImageFilter<MaskImageType, MaskImageType, StructuringElementType>;
+
+    BinaryDilateImageFilterType::Pointer maskDilateFilter = BinaryDilateImageFilterType::New();
+    maskDilateFilter->SetInput( openingFilter->GetOutput() );
+    maskDilateFilter->SetKernel(MaskstructuringElement);
+    maskDilateFilter->Update();
+    
+
     // making maskedLiver
 
     using MaskFilterType = itk::MaskImageFilter<DicomImageType,MaskImageType>;
     auto maskFilter = MaskFilterType::New();
 
     maskFilter->SetInput(imgPatient);
-    maskFilter->SetMaskImage(imgMask);
+    maskFilter->SetMaskImage( maskDilateFilter->GetOutput() );
     maskFilter->Update();
     
     auto imgMaskedLiverIso = makeIso<DicomImageType>(maskFilter->GetOutput(),false,identitySpacing);
     auto imgPatientIso = makeIso<DicomImageType>(imgPatient,false,identitySpacing);
-    auto imgMaskIso = makeIso<MaskImageType>(imgMask,true,identitySpacing);
+    auto imgMaskIso = makeIso<MaskImageType>(maskDilateFilter->GetOutput(),true,identitySpacing);
     auto imgVesselsIso = makeIso<VesselsImageType>(imgVessels,true,identitySpacing);
 
     // creating the iso dilated vessels mask
-
-    using StructuringElementType = itk::FlatStructuringElement<3>;
     StructuringElementType::RadiusType radius;
     radius.Fill(radiusValue);
     StructuringElementType structuringElement = StructuringElementType::Ball(radius);

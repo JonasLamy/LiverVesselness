@@ -154,3 +154,12 @@ target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
   )
 target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
 set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+
+
+add_executable(MakeIrcadBifurcationGT src/makeIrcadBifurcation.cpp)
+target_include_directories(MakeIrcadBifurcationGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
+set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
