@@ -122,15 +122,15 @@ for d,i,e in reversed(orderedDisplayList):
 
 
 if(not noPlot):
-    plt.rcParams.update({'font.size': 30})
+    #plt.rcParams.update({'font.size': 30})
     fig,axes = plt.subplots(1,1,squeeze=False)
-    #fig,axes = plt.subplots(2,3)
+    fig,axes = plt.subplots(2,3)
     ax = axes[0,0]
-    #ax1 = axes[0,1]
-    #ax2 = axes[0,2]
-    #ax3 = axes[1,0]
-    #ax4 = axes[1,1]
-    #ax5 = axes[1,2]
+    ax1 = axes[0,1]
+    ax2 = axes[0,2]
+    ax3 = axes[1,0]
+    ax4 = axes[1,1]
+    ax5 = axes[1,2]
 
     #ax.set_title("ROC curve after maximization of the MCC")
 
@@ -153,7 +153,7 @@ if(not noPlot):
         ax.set_ylabel('True Postive Rate')
         ax.set_ylim(0,1)
         ax.set_xlim(0,1)
-        """
+        
         # MCC plot
         ax1.plot(np.linspace(1,0,nbElements),dataFiltered['MCC'].values,label=f"${name}$")
         ax1.set_xlabel('threshold')
@@ -186,7 +186,7 @@ if(not noPlot):
         ax5.set_xlabel('threshold')
         ax5.set_ylabel('specificity')
         ax5.set_xlim(1,0)
-        """
+        
     plt.legend(loc='best',ncol=4)
 
     #mplcursors.cursor().connect("add", lambda sel: sel.annotation.set_text(sel.artist.get_label()+"\n x="+str(sel.target[0]) +"\n y=" + str(sel.target[1])))

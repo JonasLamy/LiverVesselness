@@ -28,6 +28,23 @@
   #include <stdio.h>
 #endif
 
+
+std::ofstream initCSVFile(std::string csvFileName)
+{
+  std::ofstream csvFileStream;
+  std::cout<<"creating csv file :"<<csvFileName<<std::endl;
+  csvFileStream.open(csvFileName, std::ios::out | std::ios::trunc); // if the file already exists, we discard content
+  if( csvFileStream.is_open() )
+  {
+    csvFileStream <<"SerieName,Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,Hausdorff"<<std::endl;
+  } 
+  else{ 
+    throw "Error opening csv file....";
+  }
+
+  return csvFileStream;
+}
+
 int main(int argc, char** argv)
 {
   // ------------------
@@ -96,9 +113,11 @@ int main(int argc, char** argv)
     std::cout<<"couldn't open "<< inputFileName<<std::endl;
     return 2;
   };
-  std::string patientName;
-  std::string imgName;
-  std::string maskName;
+  std::string patientName; // name of the folder
+  std::string imgName; // name of the input image
+  std::string maskName; // name of the liver mask
+  std::string maskBifurcationsName; // name of the bifurcation mask
+  std::string maskDilatedVesselsName; // name of the dilated vessels mask
   std::string gtName;
 
   std::string benchDir = "bench/";
@@ -126,36 +145,30 @@ int main(int argc, char** argv)
       benchName = inputFileName.substr(0,posInput-backSlashInput-1) + std::string("_") + parameterFileName.substr (0,posParam-backSlashParam-1);
   }
 
-  std::string csvFileName;
-  if( computeMetricsOnly )
-  {
-    csvFileName = benchDir + benchName +".csv";
-  }
-  else
-  {
-    csvFileName = benchDir + benchName + ".csv";
-  }
+  std::string csvFileMaskLiver;
+  std::string csvFileMaskBifurcation;
+  std::string csvFileMaskDilatedVessels;
+
+  csvFileMaskLiver = benchDir + benchName +".csv";
+  csvFileMaskBifurcation = benchDir + benchName +"_bifurcations.csv";
+  csvFileMaskDilatedVessels = benchDir + benchName +"_dilatedVessels.csv";
+
+
   
   // opening resultFileStream
-  std::ofstream csvFileStream;
-  std::cout<<"creating csv file :"<<csvFileName<<std::endl;
-  csvFileStream.open(csvFileName, std::ios::out | std::ios::trunc); // if the file already exists, we discard content
-  if( csvFileStream.is_open() )
-  {
-    csvFileStream <<"SerieName,Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,Hausdorff"<<std::endl;
-  } 
-  else{ 
-    throw "Error opening csv file....";
-  }
-
-
+  std::ofstream csvFileStreamMaskLiver = initCSVFile(csvFileMaskLiver);
+  std::ofstream csvFileStreamMaskDilatedVessels = initCSVFile(csvFileMaskBifurcation);
+  std::ofstream csvFileStreamMaskBifurcations = initCSVFile(csvFileMaskDilatedVessels);
+  
   //creating root directory
   #ifdef __unix__
     int error = mkdir(benchDir.c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
     if( errno != EEXIST)
       {
         std::cout<<"couldn't create root directory "<<benchDir.c_str()<<std::endl; 
-        csvFileStream.close();
+        csvFileStreamMaskLiver.close();
+        csvFileStreamMaskDilatedVessels.close();
+        csvFileStreamMaskBifurcations.close();
         return 1;
       }
   #else
@@ -174,11 +187,15 @@ int main(int argc, char** argv)
   {
     std::getline(f,imgName);
     std::getline(f,maskName);
+    std::getline(f,maskBifurcationsName);
+    std::getline(f,maskDilatedVesselsName);
     std::getline(f,gtName);
 
     std::cout<<patientName<<std::endl;
     std::cout<<imgName<<std::endl;
     std::cout<<maskName<<std::endl;
+    std::cout<<maskBifurcationsName<<std::endl;
+    std::cout<<maskDilatedVesselsName<<std::endl;
     std::cout<<gtName<<std::endl;
 
     //creating root directory
@@ -193,7 +210,7 @@ int main(int argc, char** argv)
         std::cout<<"creating directory "<< (benchDir+benchName).c_str()<<std::endl;
       }
     #else
-      mkdir("bench/"+patientName);
+      throw "Non Unix directory creation not supported";
     #endif
 
     //creating subdirectory with patient
@@ -208,7 +225,12 @@ int main(int argc, char** argv)
         std::cout<<"creating directory "<< (benchDir+benchName+"/"+patientName).c_str()<<std::endl;
       }
     #else
-      mkdir("bench/"+patientName);
+      throw "Non Unix directory creation not supported";
+    #endif
+
+    // creating subdir for patient - best  * TODO work in progess *
+    #ifdef __unix__
+      mkdir( (benchDir+benchName+"/"+patientName+"/best").c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
     #endif
 
     // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
@@ -221,8 +243,18 @@ int main(int argc, char** argv)
       std::cout<<"Using dicom groundTruth data...."<<std::endl;
       DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(gtName,false);
       DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskName,false);
+      DicomMaskImageType::Pointer maskBifurcationImage = vUtils::readImage<DicomMaskImageType>(maskBifurcationsName,false);
+      DicomMaskImageType::Pointer maskDilatedVesselsImage = vUtils::readImage<DicomMaskImageType>(maskDilatedVesselsName,false);
       
-      Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,imgName,csvFileStream,groundTruth,maskImage);
+      Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,
+                                                                              imgName,
+                                                                              groundTruth,
+                                                                              csvFileStreamMaskLiver,
+                                                                              maskImage,
+                                                                              csvFileStreamMaskDilatedVessels,
+                                                                              maskDilatedVesselsImage,
+                                                                              csvFileStreamMaskBifurcations,
+                                                                              maskBifurcationImage);
       b.SetOutputDirectory(benchDir+benchName+"/"+patientName);
       b.SetPatientDirectory(benchName+"/"+patientName);
       b.SetDicomInput();
@@ -235,8 +267,18 @@ int main(int argc, char** argv)
       std::cout<<"Using NIFTI groundtruth data...."<<std::endl;
       GroundTruthImageType::Pointer groundTruth = vUtils::readImage<GroundTruthImageType>(gtName,false);
       MaskImageType::Pointer maskImage = vUtils::readImage<MaskImageType>(maskName,false);
+      MaskImageType::Pointer maskBifurcationImage = vUtils::readImage<MaskImageType>(maskBifurcationsName,false);
+      MaskImageType::Pointer maskDilatedVesselsImage = vUtils::readImage<MaskImageType>(maskDilatedVesselsName,false);
       
-      Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,imgName,csvFileStream,groundTruth,maskImage);
+      Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,
+                                                                imgName,
+                                                                groundTruth,
+                                                                csvFileStreamMaskLiver,
+                                                                maskImage,
+                                                                csvFileStreamMaskDilatedVessels,
+                                                                maskDilatedVesselsImage,
+                                                                csvFileStreamMaskBifurcations,
+                                                                maskBifurcationImage);
       b.SetOutputDirectory(benchDir+benchName+"/"+patientName);
       b.SetPatientDirectory(benchName+"/"+patientName);
       b.SetNiftiInput();
@@ -251,5 +293,7 @@ int main(int argc, char** argv)
     }
   }
   f.close();
-  csvFileStream.close();
+  csvFileStreamMaskLiver.close();
+  csvFileStreamMaskDilatedVessels.close();
+  csvFileStreamMaskBifurcations.close();
 }

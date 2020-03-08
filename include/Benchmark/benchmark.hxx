@@ -4,20 +4,35 @@
 
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
-Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json::Value root, 
-                                                std::string inputFileName,
-                                                std::ofstream &csvFileStream,
-                                                typename TGroundTruthImageType::Pointer gtImage, 
-                                                typename TMaskImageType::Pointer maskImage)
+Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json::Value root,
+                                                                      std::string inputFileName,
+                                                                      typename TGroundTruthImageType::Pointer gtImage,
+                                                                      std::ofstream & csvFileStream,
+                                                                      typename TMaskImageType::Pointer maskImage,
+                                                                      std::ofstream & csvFileVesselsDilated,
+                                                                      typename TMaskImageType::Pointer maskVesselsDilated,
+                                                                      std::ofstream & csvFileBifurcation,
+                                                                      typename TMaskImageType::Pointer maskBifurcation)
 {
+
+    // filter options
     m_removeResultsVolume = false;
     m_computeMetricsOnly = false;
+    
+    // json root node
     m_rootNode = root;
+    
+    // benchmark images
     m_gt = gtImage;
-    m_mask = maskImage;
+    m_maskLiver = maskImage;
+    m_maskVesselsDilated = maskVesselsDilated;
+    m_maskBifurcation = maskBifurcation;
     m_inputFileName = inputFileName;
 
-    m_resultFileStream = &csvFileStream;
+    // csv file streams
+    m_resultMaskLiver = &csvFileStream;
+    m_resultMaskVesselsDilated = &csvFileVesselsDilated;
+    m_resultMaskBifurcation = &csvFileBifurcation;
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
@@ -124,7 +139,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     }
   }
 
-  
   std::cout<<"opening result"<<std::endl;
   auto outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
   
@@ -134,6 +148,8 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       std::cout<<"output from program and groundTruth size does not match...No stats computed"<<std::endl;
       return;
     }
+
+
 
   // Computing roc curve for the image segmentation
   double bestThreshold = 0;
@@ -156,7 +172,10 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     tFilter->Update();
     auto segmentationImage = tFilter->GetOutput();
     
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_mask,std::to_string(i/maxBoundf));
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_maskLiver,std::to_string(i/maxBoundf));
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalBifurcations(segmentationImage,m_gt,m_maskBifurcation,std::to_string(i/maxBoundf));
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalDilatedVessels(segmentationImage,m_gt,m_maskVesselsDilated,std::to_string(i/maxBoundf));
+
     if( i%10 == 0)
     {
       std::cout<<"threshold:"<<i/maxBoundf<<std::endl;
@@ -170,17 +189,16 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       minDist = euclideanDistance;
       bestThreshold = i/maxBoundf;
     }
-    (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< eval;
 
-    // TODO uncomment for debug
-    /*
-    auto writer = itk::ImageFileWriter<TGroundTruthImageType>::New();
-    writer->SetFileName( std::string("toto/") + std::to_string(i) + std::string(".nii") );
-	  writer->SetInput(segmentationImage);
-	  writer->Update();
-    */
+    // writing results to file
+    (*m_resultMaskLiver)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< eval;
+    (*m_resultMaskBifurcation)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< evalBifurcations;
+    (*m_resultMaskVesselsDilated)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< evalDilatedVessels;
+
   }   
-  
+  std::cout<<"done"<<std::endl;
+}
+
   // computing the special case 0 because looping on float is annoying....
   /*
   auto tFilter = ThresholdFilterType::New();
@@ -214,6 +232,3 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
   }
   (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<0<<","<< eval;
   */
-
-  std::cout<<"done"<<std::endl;
-}

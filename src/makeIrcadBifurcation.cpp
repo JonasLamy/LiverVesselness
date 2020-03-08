@@ -48,7 +48,6 @@ void CreateKernel(ImageType::Pointer kernel, unsigned int width)
 
 int main(int argc,char** argv)
  {
-     std::cout<<"heeeeelp"<<std::endl;
 
     std::string inputFileName(argv[1]);
     std::string maskFileName(argv[2]);
