@@ -19,7 +19,17 @@ template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 class Benchmark
 {
 public:
-    Benchmark(const Json::Value root,std::string inputFileName,std::ofstream & csvFileStream, typename TGroundTruthImageType::Pointer gtImage, typename TMaskImageType::Pointer maskImage);
+    Benchmark(const Json::Value root,
+                std::string inputFileName,
+                typename TGroundTruthImageType::Pointer gtImage,
+                std::ofstream & csvFileStream,
+                typename TMaskImageType::Pointer maskImage,
+                std::ofstream & csvFileVesselsDilated,
+                typename TMaskImageType::Pointer maskVesselsDilated,
+                std::ofstream & csvFileBifurcation,
+                typename TMaskImageType::Pointer maskBifurcation);
+
+
     ~Benchmark();   
     void SetDicomInput(){m_inputIsDicom = true;}
     void SetNiftiInput(){m_inputIsDicom = false;}
@@ -29,6 +39,7 @@ public:
     void SetPatientDirectory(const std::string &patient){m_patient = patient;}
 
     void run();
+    
 private:
     std::string m_inputFileName;
     std::string m_outputDir;
@@ -40,13 +51,17 @@ private:
     bool m_removeResultsVolume;
     Json::Value m_rootNode;
 
-    std::ofstream * m_resultFileStream;
+    std::ofstream * m_resultMaskLiver;
+    std::ofstream * m_resultMaskVesselsDilated;
+    std::ofstream * m_resultMaskBifurcation;
 
     typename TGroundTruthImageType::Pointer m_gt;
-    typename TMaskImageType::Pointer m_mask;
+    typename TMaskImageType::Pointer m_maskLiver;
+    typename TMaskImageType::Pointer m_maskVesselsDilated;
+    typename TMaskImageType::Pointer m_maskBifurcation;
 
     void launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName);
-    void addResultsToFile(int algoID,int threshold, const Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType>& eval);
+    //void addResultsToFile(int algoID,int threshold, const Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType>& eval);
 };
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
