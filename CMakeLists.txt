@@ -136,16 +136,7 @@ target_include_directories(testScaleSpace PUBLIC
 target_link_libraries(testScaleSpace ${ITK_LIBRARIES} Boost::filesystem)
 set_target_properties(testScaleSpace PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
-# Test ftt
-add_executable(testFFT src/testFFT.cpp)
-target_include_directories(testFFT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(testFFT ${ITK_LIBRARIES} Boost::filesystem)
-set_target_properties(testFFT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
-
+# Bifurcations VascuSynth
 
 add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
 target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
@@ -155,6 +146,7 @@ target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
 target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
 set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
+# Bifurcation IRCAD 
 
 add_executable(MakeIrcadBifurcationGT src/makeIrcadBifurcation.cpp)
 target_include_directories(MakeIrcadBifurcationGT PUBLIC
