@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.9.5)
  
 project(Vesselness)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
  
 find_package(ITK 5.0 REQUIRED)
 include(${ITK_USE_FILE})
@@ -76,18 +79,21 @@ set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DI
 
 # RORPO ----------------------------
 
-add_subdirectory(RORPO)
+#add_subdirectory(RORPO)
 
 # benchmark ------------------------
 
 find_package(jsoncpp REQUIRED)
+get_target_property(JSON_INC_PATH jsoncpp_lib INTERFACE_INCLUDE_DIRECTORIES)
+include_directories(${JSON_INC_PATH})
+
 add_executable(Benchmark src/benchmark.cpp)
 target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
   "$<INSTALL_INTERFACE:include/Benchmark>"
   )
-target_link_libraries(Benchmark ${ITK_LIBRARIES} Boost::program_options jsoncpp)
+target_link_libraries(Benchmark ${ITK_LIBRARIES} Boost::program_options jsoncpp_lib)
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # process ircad -------------------

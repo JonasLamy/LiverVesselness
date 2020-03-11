@@ -18,14 +18,14 @@
 #include <boost/program_options/variables_map.hpp>
 
 // system depedant Unix include to create folders....
-#ifdef __unix__ //
-  #include <sys/stat.h>
-  #include <sys/types.h>
-#else // assume windows
+#ifdef __WIN32__ // assume windows
   #include <conio.h>
   #include <dir.h>
   #include <process.h>
   #include <stdio.h>
+#else  // linux and mac os
+  #include <sys/stat.h>
+  #include <sys/types.h>
 #endif
 
 
@@ -161,7 +161,9 @@ int main(int argc, char** argv)
   std::ofstream csvFileStreamMaskBifurcations = initCSVFile(csvFileMaskDilatedVessels);
   
   //creating root directory
-  #ifdef __unix__
+  #ifdef __WIN32__
+    mkdir("bench");
+  #else
     int error = mkdir(benchDir.c_str(),S_IRWXG | S_IRWXO | S_IRWXU);
     if( errno != EEXIST)
       {
@@ -171,8 +173,6 @@ int main(int argc, char** argv)
         csvFileStreamMaskBifurcations.close();
         return 1;
       }
-  #else
-    mkdir("bench");
   #endif
 
   using ImageType = itk::Image<double,3>;
