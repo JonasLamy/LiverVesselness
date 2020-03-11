@@ -8,8 +8,12 @@
 #include "itkFlatStructuringElement.h"
 #include "itkBinaryDilateImageFilter.h"
 #include "itkMaskImageFilter.h"
+#include "itkSignedMaurerDistanceMapImageFilter.h"
 
-
+#include "itkEllipseSpatialObject.h"
+#include "itkSpatialObjectToImageFilter.h"
+#include "itkImageRegionConstIterator.h"
+#include "itkMaximumImageFilter.h"
 //#include "QuickView.h"
 
 
@@ -18,7 +22,7 @@
 
 using PixelType = unsigned char;
 using ImageType = itk::Image<PixelType,3>;
-
+using FloatImageType = itk::Image<float,3>;
 
 void CreateKernel(ImageType::Pointer kernel, unsigned int width)
 {
@@ -106,6 +110,7 @@ int main(int argc,char** argv)
     maskFilter->SetInput( thinningFilter->GetOutput() );
     maskFilter->SetMaskImage( maskReader->GetOutput() );
     maskFilter->SetOutsideValue(0);
+    maskFilter->Update();
 
     std::cout<<"2"<<std::endl;
 
@@ -120,6 +125,11 @@ int main(int argc,char** argv)
     convFilter->SetKernelImage(kernel);
     convFilter->Update();
 
+    auto maskFilter2 = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
+    maskFilter2->SetInput(convFilter->GetOutput());
+    maskFilter2->SetMaskImage(thinningFilter->GetOutput());
+    
+
     std::cout<<"3"<<std::endl;
 
     auto thresholdFilter = itk::BinaryThresholdImageFilter<ImageType,ImageType>::New();
@@ -127,28 +137,115 @@ int main(int argc,char** argv)
     thresholdFilter->SetUpperThreshold(255);
     thresholdFilter->SetInsideValue(255);
     thresholdFilter->SetOutsideValue(0);
-    thresholdFilter->SetInput(convFilter->GetOutput());
+    
+    thresholdFilter->SetInput( maskFilter2->GetOutput() );
     thresholdFilter->Update();
     
     std::cout<<"4"<<std::endl;
 
-    using StructuringElementType = itk::FlatStructuringElement<3>;
-    StructuringElementType::RadiusType radius;
-    radius.Fill(boxSize);
-    StructuringElementType structuringElement = StructuringElementType::Box(radius);
+    // create the gt
 
-    auto dilateFilter = itk::BinaryDilateImageFilter<ImageType,ImageType,StructuringElementType>::New();
-    dilateFilter->SetInput( thresholdFilter->GetOutput() );
-    dilateFilter->SetForegroundValue(255);
-    dilateFilter->SetKernel( structuringElement );
-    dilateFilter->Update();
+    // 1) inverse image
+    // 2) distance transform
+    // 3) mask filter with bifurcations
+    // 4) draw balls from filter
+
+    auto inverseFilter = itk::BinaryThresholdImageFilter<ImageType,ImageType>::New();
+    inverseFilter->SetLowerThreshold(255);
+    inverseFilter->SetUpperThreshold(255);
+    inverseFilter->SetInsideValue(0);
+    inverseFilter->SetOutsideValue(255);
+
+    inverseFilter->SetInput( maskReader->GetOutput() );
+    
+    auto distanceTransform = itk::SignedMaurerDistanceMapImageFilter<ImageType,FloatImageType>::New();
+    distanceTransform->SquaredDistanceOff();
+    //distanceTransform->SquaredDistanceOn();
+    distanceTransform->SetInput( inverseFilter->GetOutput() );
+
+    auto maskDistanceFilter = itk::MaskImageFilter<FloatImageType,ImageType>::New();
+    maskDistanceFilter->SetInput( distanceTransform->GetOutput() );
+    maskDistanceFilter->SetMaskImage( thresholdFilter->GetOutput() );
+    maskDistanceFilter->Update();
+
+    auto imgBifurcationNode = maskDistanceFilter->GetOutput();
+
+
+    // creating image
+    auto resultImage = ImageType::New();
+    resultImage->SetRegions( imgBifurcationNode->GetLargestPossibleRegion() );
+    resultImage->Allocate();
+    resultImage->FillBuffer(0);
+
+    // creating ellipses
+
+    using EllipseType = itk::EllipseSpatialObject<3>;
+    using SpacialObjectToImageFilterType = itk::SpatialObjectToImageFilter<EllipseType,ImageType>;
+    int radius;
+
+    itk::ImageRegionConstIterator<FloatImageType> it( imgBifurcationNode, imgBifurcationNode->GetLargestPossibleRegion() );
+    it.GoToBegin();
+    while( !it.IsAtEnd() )
+    {
+        if(it.Value() == 0)
+        {
+            ++it;
+            continue;
+        }
+
+        auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
+        ellipseToImageFilter->SetSize( imgBifurcationNode->GetLargestPossibleRegion().GetSize() );
+        ellipseToImageFilter->SetSpacing( imgBifurcationNode->GetSpacing() );
+
+        auto ellipse = EllipseType::New();
+        EllipseType::ArrayType radiusArray;
+        int radius = static_cast<int>( std::sqrt( it.Value() ) ) | 1 ;
+        radiusArray[0] = radius;
+        radiusArray[1] = radius;
+        radiusArray[2] = radius;
+
+        ellipse->SetRadiusInObjectSpace(radiusArray);
+        // move the ellipse
+        auto transform = EllipseType::TransformType::New();
+        transform->SetIdentity();
+        EllipseType::TransformType::OutputVectorType translation;
+        ImageType::IndexType index;
+        index = it.GetIndex();
+
+        std::cout<<"index:"<<index<<" radius: "<<radius<<std::endl;
+
+        translation[0] = index[0];
+        translation[1] = index[1];
+        translation[2] = index[2];
+        transform->Translate(translation);
+
+        ellipse->SetObjectToParentTransform(transform);
+
+        ellipseToImageFilter->SetInput(ellipse);
+        ellipse->SetDefaultInsideValue(radius);
+        ellipse->SetDefaultOutsideValue(0);
+        ellipseToImageFilter->SetUseObjectValue(true);
+        ellipseToImageFilter->SetOutsideValue(0);
+        ellipseToImageFilter->Update();
+
+        auto maxFilter = itk::MaximumImageFilter<ImageType,ImageType>::New();
+        maxFilter->SetInput(0,resultImage);
+        maxFilter->SetInput(1,ellipseToImageFilter->GetOutput());
+        maxFilter->Update();
+        resultImage = maxFilter->GetOutput();
+
+        ++it;
+    }
+
+    resultImage->SetOrigin( imgBifurcationNode->GetOrigin() );
+    resultImage->SetSpacing( imgBifurcationNode->GetSpacing() );
 
     std::cout<<"5"<<std::endl;
-
-    WriterType::Pointer writer = WriterType::New();
+    using OutputWriterType = itk::ImageFileWriter<ImageType>;
+    auto writer = OutputWriterType::New();
 
     writer->SetFileName(gtFileName);
-    writer->SetInput(dilateFilter->GetOutput());
+    writer->SetInput( resultImage );
     try
     {
         writer->Update();
