@@ -195,14 +195,14 @@ namespace itk
                 eigenCalculator.ComputeEigenValues(it.Get(), eigenValues);
                 // noise removal on eigenValues
                 
-                if( std::isinf(eigenValues[0]) || abs(eigenValues[0]) < 1e-4){ eigenValues[0] = 0; }
-                if( std::isinf(eigenValues[1]) || abs(eigenValues[1]) < 1e-4){ eigenValues[1] = 0; }
-                if( std::isinf(eigenValues[2]) || abs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
+                if( std::isinf(eigenValues[0]) || fabs(eigenValues[0]) < 1e-4){ eigenValues[0] = 0; }
+                if( std::isinf(eigenValues[1]) || fabs(eigenValues[1]) < 1e-4){ eigenValues[1] = 0; }
+                if( std::isinf(eigenValues[2]) || fabs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
                 
                 itOut.Set(eigenValues);
 
-                max = std::max(max,abs(eigenValues[2]) );
-                min = std::min(min,abs(eigenValues[0]) );
+                max = std::max(max,fabs(eigenValues[2]) );
+                min = std::min(min,fabs(eigenValues[0]) );
                 // norm of the eigen values vector, the comparison is done on the squared norm for efficiency
                 norm = std::max(norm,eigenValues[0]*eigenValues[0] + eigenValues[1]*eigenValues[1] + eigenValues[2]*eigenValues[2]);
                  

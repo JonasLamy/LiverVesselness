@@ -49,7 +49,11 @@ for dirName in listDir[1]:
                         #bifurcation files extraction
                         #spliting file
                         dataNumber = data.rpartition('a')[2]
-                        generator.bifurcationCoordinatesFile(filePath,"treeStructure_"+dataNumber+".mat")
+
+                        
+                        #generator.bifurcationCoordinatesFile(filePath,"treeStructure_"+dataNumber+".mat")
+
+
                         # groundTruth generation
                         generator.groundTruth(filePath,file)
                         # bifurcation mask Generation

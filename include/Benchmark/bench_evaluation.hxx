@@ -148,7 +148,7 @@ long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorr
 	a *= (m_trueNegative + m_falsePositive);
 	a *= (m_trueNegative + m_falseNegative);
 
-	if( abs(a) < m_epsilon)
+	if( fabs(a) < m_epsilon)
 		return 0;
 
 	long double b = (m_truePositive * m_trueNegative) - (m_falsePositive * m_truePositive);
