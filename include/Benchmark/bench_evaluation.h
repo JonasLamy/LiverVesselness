@@ -14,7 +14,7 @@ using MetricsMap = std::map<std::string,std::vector<double> >;
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 class Eval{
  public:
-  Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id);
+  Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id, const char* evalName = "eval");
 
   long TP(){return m_truePositive;}
   long TN(){return m_trueNegative;}
@@ -43,6 +43,7 @@ class Eval{
   long m_falseNegative;
   float m_epsilon;
   double m_hausdorff_distance;
+  std::string m_evalName;
 };
 
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>

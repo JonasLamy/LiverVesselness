@@ -173,8 +173,8 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     auto segmentationImage = tFilter->GetOutput();
     
     Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_maskLiver,std::to_string(i/maxBoundf));
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalBifurcations(segmentationImage,m_gt,m_maskBifurcation,std::to_string(i/maxBoundf));
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalDilatedVessels(segmentationImage,m_gt,m_maskVesselsDilated,std::to_string(i/maxBoundf));
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalBifurcations(segmentationImage,m_gt,m_maskBifurcation,std::to_string(i/maxBoundf),"bifurcations");
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalDilatedVessels(segmentationImage,m_gt,m_maskVesselsDilated,std::to_string(i/maxBoundf),"vessels");
 
     if( i%10 == 0)
     {

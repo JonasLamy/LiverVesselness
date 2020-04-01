@@ -222,7 +222,7 @@ int main(int argc,char** argv)
         ellipse->SetObjectToParentTransform(transform);
 
         ellipseToImageFilter->SetInput(ellipse);
-        ellipse->SetDefaultInsideValue(radius);
+        ellipse->SetDefaultInsideValue(255);
         ellipse->SetDefaultOutsideValue(0);
         ellipseToImageFilter->SetUseObjectValue(true);
         ellipseToImageFilter->SetOutsideValue(0);

@@ -37,7 +37,7 @@ class Generator:
         filePath = DirPath + "/" + file
         bifurcationFilePath = DirPath + "/bifurcations_coordinates.txt"
         bifurcationGTPath = DirPath + "/bifurcationGT.nii"
-        os.system("./MakeVascuSynthBifurcationGT "+filePath+" "+bifurcationFilePath+" "+bifurcationGTPath+" 7")
+        os.system("./MakeVascuSynthBifurcationGT "+filePath+" "+bifurcationFilePath+" "+bifurcationGTPath)
         
         print(filePath)
         print(bifurcationFilePath)
@@ -52,7 +52,7 @@ class Generator:
         for id,i in enumerate(self.noiseLevels):
             img = itk.imread(imgPath)
             dat = itk.GetArrayFromImage(img)
-            
+            dat = dat.astype(np.float32)
             # simulated CT noise poisson + gaussian noise
             if( noiseType == "poisson"):
                 datNoisy = 0.5 * np.random.poisson(dat,None) + 0.5 * np.random.normal(dat,i,None)
@@ -64,10 +64,7 @@ class Generator:
             datNoisy[datNoisy < 0] = 0
             datNoisy[datNoisy > 255] = 255
                 # writing image on disk
-            if(dat.dtype == np.uint8):
-                noisyImg = itk.GetImageFromArray(datNoisy.astype(np.uint8))
-            else:
-                noisyImg = itk.GetImageFromArray(datNoisy.astype(np.float32)) # data is in double but it is not supported in itk
+            noisyImg = itk.GetImageFromArray(datNoisy.astype(np.uint8))
 
             print(i)                
             outputPath = DirPath + "/"+outputFile+"_"+str(i)+".nii"
