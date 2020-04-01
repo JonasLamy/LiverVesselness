@@ -123,7 +123,7 @@ for d,i,e in reversed(orderedDisplayList):
 
 if(not noPlot):
     #plt.rcParams.update({'font.size': 30})
-    fig,axes = plt.subplots(1,1,squeeze=False)
+    #fig,axes = plt.subplots(1,1,squeeze=False)
     fig,axes = plt.subplots(2,3)
     ax = axes[0,0]
     ax1 = axes[0,1]
@@ -189,5 +189,5 @@ if(not noPlot):
         
     plt.legend(loc='best',ncol=4)
 
-    #mplcursors.cursor().connect("add", lambda sel: sel.annotation.set_text(sel.artist.get_label()+"\n x="+str(sel.target[0]) +"\n y=" + str(sel.target[1])))
+    mplcursors.cursor().connect("add", lambda sel: sel.annotation.set_text(sel.artist.get_label()+"\n x="+str(sel.target[0]) +"\n y=" + str(sel.target[1])))
     plt.show()

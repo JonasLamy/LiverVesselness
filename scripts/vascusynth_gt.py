@@ -18,7 +18,8 @@ maskWholeImage = "/DATA/March_2013_VascuSynth_Dataset/maskWholeImage.nii"
 listDir = next(os.walk(inputDir))
 
 generator = vascuSynth.Generator()
-for dirName in listDir[1]:
+
+for dirName in listDir[1][ :int( len(listDir[1])/2 ) ]:
     if dirName.startswith('Group'):
         # creating group dirs in destination folder
         if not os.path.exists( outputDir + "/" + dirName):
@@ -42,32 +43,36 @@ for dirName in listDir[1]:
                     #  create GT files
 
                     if file.endswith('.mhd'):
-                        print("/DATA/March_2013_VascuSynth_Dataset/maskWholeImage.nii")
-                        print(filePath + "/gt.nii")
+                        
+                        print(filePath +"/"+ "vbi_rician_5.0.nii")
+                        print("vascu_2013/maskWholeImage.nii") # only image at root directory
+                        print(filePath +"/"+ "bifurcationGT.nii")
+                        print(filePath +"/"+ "gtDilated.nii")
+                        print(filePath +"/"+ "gt.nii")
                         
                         #    #now we call the script
                         #bifurcation files extraction
                         #spliting file
-                        dataNumber = data.rpartition('a')[2]
+                        #dataNumber = data.rpartition('a')[2]
 
                         
                         #generator.bifurcationCoordinatesFile(filePath,"treeStructure_"+dataNumber+".mat")
 
 
                         # groundTruth generation
-                        generator.groundTruth(filePath,file)
+                        #generator.groundTruth(filePath,file)
                         # bifurcation mask Generation
-                        generator.groundTruthBifurcation(filePath,file)
+                        #generator.groundTruthBifurcation(filePath,"gt.nii")
                         # background generation
-                        generator.vesselsAndBackground(filePath,file)
+                        #generator.vesselsAndBackground(filePath,file)
 
                          
                         #generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyPoisson" ,"poisson")
-                        generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyRician" ,"rician")
+                        #generator.noisyImage(filePath,"vesselsAndBackground.nii","noisyRician" ,"rician")
 
                         # adding non homogeneous illumination to 
                         # Reading input arguments
-                        generator.vesselsIllumination(filePath,"vesselsAndBackground.nii")
+                        #generator.vesselsIllumination(filePath,"vesselsAndBackground.nii")
                 
                         #generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_poisson" ,"poisson")
                         generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_rician" ,"rician")
