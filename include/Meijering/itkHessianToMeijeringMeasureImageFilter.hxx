@@ -5,14 +5,15 @@
 #include "itkStatisticsImageFilter.h"
 
 namespace itk{
-    template< typename TInputImage,typename TOutputImage>
-    HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage>::HessianToMeijeringMeasureImageFilter()
+    template< typename TInputImage,typename TOutputImage,typename TMaskImage>
+    HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage, TMaskImage>::HessianToMeijeringMeasureImageFilter()
+    :m_BrightObject(true),m_Alpha(-0.33)
     {
         //this->DynamicMultiThreadingOn();
     }
 
-    template< typename TInputImage,typename TOutputImage>
-    void HessianToMeijeringMeasureImageFilter<TInputImage,TOutputImage>::VerifyPreconditions() ITKv5_CONST
+    template< typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void HessianToMeijeringMeasureImageFilter<TInputImage,TOutputImage, TMaskImage>::VerifyPreconditions() ITKv5_CONST
     {
         Superclass::VerifyPreconditions();
         if ( ImageDimension != 3 )
@@ -21,22 +22,32 @@ namespace itk{
         }
     }
 
-    template<typename TInputImage, typename TOutputImage>
-    void HessianToMeijeringMeasureImageFilter<TInputImage,TOutputImage>::BeforeThreadedGenerateData()
+    template<typename TInputImage, typename TOutputImage,typename TMaskImage>
+    void HessianToMeijeringMeasureImageFilter<TInputImage,TOutputImage, TMaskImage>::BeforeThreadedGenerateData()
     {
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void HessianToMeijeringMeasureImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread)
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void HessianToMeijeringMeasureImageFilter<TInputImage,TOutputImage, TMaskImage>::DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread)
     {
         OutputImageType * output = this->GetOutput();
         const InputImageType* input = this->GetInput();
 
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage>::GenerateData()
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage, TMaskImage>::GenerateData()
     {   
+        if(this->m_maskImage)
+            withMask();
+        else
+            noMask();
+    }
+
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage, TMaskImage>
+    ::withMask()
+    {
         // Grafting and allocating data
         OutputImageType * output = this->GetOutput();
         const InputImageType* input = this->GetInput();
@@ -48,6 +59,7 @@ namespace itk{
 
         // computing eigenValues
         auto ptr_filter = ModifiedHessianToEigenValuesImageFilter<TInputImage>::New();
+        ptr_filter->SetMaskImage(m_maskImage);
         ptr_filter->SetInput(input);
         ptr_filter->SetAlpha(m_Alpha);
         ptr_filter->Update();
@@ -65,7 +77,90 @@ namespace itk{
         
         // Walk the region of eigen values and get the objectness measure
         ImageRegionConstIterator< Image<EigenValueArrayType,3> > itEV(eigenValuesImage, eigenValuesImage->GetLargestPossibleRegion());
+        ImageRegionConstIterator< MaskImageType > itMask(m_maskImage, m_maskImage->GetLargestPossibleRegion());
+
         ImageRegionIterator< OutputImageType >     oit(output, output->GetLargestPossibleRegion());
+
+        oit.GoToBegin();
+        itEV.GoToBegin();
+        itMask.GoToBegin();
+        while( !itEV.IsAtEnd() )
+        {
+            if( itMask.Get() == 0)
+            {
+                oit.Set(0); 
+
+                ++oit;
+                ++itEV;
+                ++itMask;
+                continue; 
+            }
+
+            lambda1 = itEV.Value()[0];   
+            lambda2 = itEV.Value()[1];
+            lambda3 = itEV.Value()[2];
+
+            // Meijering's ratio
+            if( lambda3 > 0 )
+                neuritenessMesure = 0;
+            else
+                neuritenessMesure = lambda1 /  minLambda;
+            
+            oit.Set( neuritenessMesure);   
+
+            ++oit;
+            ++itEV;
+            ++itMask;
+        }
+
+        std::cout<<"before stats"<<std::endl;
+
+        auto stats = StatisticsImageFilter<TOutputImage>::New();
+        stats->SetInput(output);
+        stats->Update();
+
+        std::cout<<"min"
+        <<stats->GetMinimum()<<std::endl
+        <<"mean:"<<stats->GetMean()<<std::endl
+        <<"max:"<<stats->GetMaximum()<<std::endl;
+    }
+    
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage, TMaskImage>
+    ::noMask()
+    {
+                // Grafting and allocating data
+        OutputImageType * output = this->GetOutput();
+        const InputImageType* input = this->GetInput();
+
+        OutputImageRegionType outputRegion;
+        outputRegion.SetSize( input->GetLargestPossibleRegion().GetSize() );
+        output->SetBufferedRegion(outputRegion);
+        output->Allocate();
+
+        // computing eigenValues
+        auto ptr_filter = ModifiedHessianToEigenValuesImageFilter<TInputImage>::New();
+        ptr_filter->SetMaskImage(m_maskImage);
+        ptr_filter->SetInput(input);
+        ptr_filter->SetAlpha(m_Alpha);
+        ptr_filter->Update();
+
+        auto eigenValuesImage = ptr_filter->GetOutput();
+        std::cout<<"min eigen value:"<<ptr_filter->GetMinEigenValue()<<std::endl;
+
+        EigenValueType minLambda = ptr_filter->GetMinEigenValue();
+        OutputPixelType neuritenessMesure = NumericTraits< OutputPixelType >::ZeroValue();
+
+        std::cout<<"computing eigenvalues"<<std::endl;
+        EigenValueType lambda1;
+        EigenValueType lambda2;
+        EigenValueType lambda3;
+        
+        // Walk the region of eigen values and get the objectness measure
+        ImageRegionConstIterator< Image<EigenValueArrayType,3> > itEV(eigenValuesImage, eigenValuesImage->GetLargestPossibleRegion());
+
+        ImageRegionIterator< OutputImageType >     oit(output, output->GetLargestPossibleRegion());
+
         oit.GoToBegin();
         itEV.GoToBegin();
         while( !itEV.IsAtEnd() )
@@ -98,8 +193,8 @@ namespace itk{
         <<"max:"<<stats->GetMaximum()<<std::endl;
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage>
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void HessianToMeijeringMeasureImageFilter<TInputImage, TOutputImage, TMaskImage>
     ::PrintSelf(std::ostream & os, Indent indent) const
     {
         Superclass::PrintSelf(os,indent);

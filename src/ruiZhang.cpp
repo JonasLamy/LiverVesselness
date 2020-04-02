@@ -34,7 +34,7 @@ int main( int argc, char* argv[] )
     ("nbSeeds,s",po::value<int>()->default_value(5),"number of kmean seeds")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
     ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
-    ("mask,a",po::value<std::string>()->default_value(""),"mask response by image");
+    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -70,7 +70,7 @@ int main( int argc, char* argv[] )
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     float tau = vm["tau"].as<float>();
     unsigned int nbClasses = vm["nbSeeds"].as<int>();
-     std::string maskFile = vm["mask"].as<std::string>();
+    std::string maskFile = vm["mask"].as<std::string>();
 
     constexpr unsigned int Dimension = 3;
     using PixelType = double;

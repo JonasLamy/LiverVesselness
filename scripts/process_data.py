@@ -7,7 +7,6 @@ import glob
 
 outputDir = sys.argv[1]
 IdentitySpacing = sys.argv[2]
-bifurcationBoxSize = "5"
 for patientDirectory in glob.glob(outputDir +'/3D*'):
     print(patientDirectory.rsplit('/')[-1])
 
@@ -42,7 +41,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     #print(commandLine)
     #os.system(commandLine)
 
-    commandLine = "./MakeIrcadBifurcationGT " + vesselsOutPath + " " + liverOutPath  + " " + bifurcationsOutPath  + " "+ bifurcationBoxSize
+    commandLine = "./MakeIrcadBifurcationGT " + vesselsOutPath + " " + liverOutPath  + " " + bifurcationsOutPath
     
     print(commandLine)
     os.system(commandLine)
