@@ -5,14 +5,14 @@
 #include "itkStatisticsImageFilter.h"
 
 namespace itk{
-    template< typename TInputImage,typename TOutputImage>
-    HessianToJermanMeasureImageFilter<TInputImage, TOutputImage>::HessianToJermanMeasureImageFilter()
+    template< typename TInputImage,typename TOutputImage, typename TMaskImage>
+    HessianToJermanMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>::HessianToJermanMeasureImageFilter()
     {
         //this->DynamicMultiThreadingOn();
     }
 
-    template< typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage,TOutputImage>::VerifyPreconditions() ITKv5_CONST
+    template< typename TInputImage,typename TOutputImage, typename TMaskImage>
+    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>::VerifyPreconditions() ITKv5_CONST
     {
         Superclass::VerifyPreconditions();
         if ( ImageDimension != 3 )
@@ -21,21 +21,21 @@ namespace itk{
         }
     }
 
-    template<typename TInputImage, typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage,TOutputImage>::BeforeThreadedGenerateData()
+    template<typename TInputImage, typename TOutputImage, typename TMaskImage>
+    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>::BeforeThreadedGenerateData()
     {
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread)
+    template<typename TInputImage,typename TOutputImage, typename TMaskImage>
+    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>::DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread)
     {
         OutputImageType * output = this->GetOutput();
         const InputImageType* input = this->GetInput();
 
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage>::GenerateData()
+    template<typename TInputImage,typename TOutputImage, typename TMaskImage>
+    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>::GenerateData()
     {   
         // Grafting and allocating data
         OutputImageType * output = this->GetOutput();
@@ -48,6 +48,7 @@ namespace itk{
 
         // computing eigenValues
         auto ptr_filter = HessianToEigenValuesImageFilter<TInputImage>::New();
+        ptr_filter->SetMaskImage(m_maskImage);
         ptr_filter->SetInput(input);
         ptr_filter->Update();
 
@@ -137,8 +138,8 @@ namespace itk{
         <<"max:"<<stats->GetMaximum()<<std::endl;
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage>
+    template<typename TInputImage,typename TOutputImage, typename TMaskImage>
+    void HessianToJermanMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>
     ::PrintSelf(std::ostream & os, Indent indent) const
     {
         Superclass::PrintSelf(os,indent);

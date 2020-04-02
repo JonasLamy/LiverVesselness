@@ -29,7 +29,8 @@ int main( int argc, char* argv[] )
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
+    ("mask,a",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -64,13 +65,16 @@ int main( int argc, char* argv[] )
     float sigmaMax = vm["sigmaMax"].as<float>();
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     float tau = vm["tau"].as<float>();
+    std::string maskFile = vm["mask"].as<std::string>();
 
     constexpr unsigned int Dimension = 3;
     using PixelType = double;
     using ImageType = itk::Image< PixelType, Dimension >;
 
+    using MaskPixelType = uint8_t;
+    using MaskImageType = itk::Image<MaskPixelType, Dimension>;
     ImageType::Pointer image = vUtils::readImage<ImageType>(inputFile,isInputDicom);
-
+    MaskImageType::Pointer maskImage;
 
     using HessianPixelType = itk::SymmetricSecondRankTensor< double, Dimension >;
     using HessianImageType = itk::Image< HessianPixelType, Dimension >;
@@ -80,6 +84,13 @@ int main( int argc, char* argv[] )
     using JermanFilterType = itk::HessianToJermanMeasureImageFilter<HessianImageType, OutputImageType>;
     auto jermanFilter = JermanFilterType::New();
     jermanFilter->SetTau(tau);
+
+    if( !maskFile.empty() )
+    {
+      maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
+      jermanFilter->SetMaskImage(maskImage);
+    }
+    
 
     using MultiScaleEnhancementFilterType = itk::MultiScaleHessianBasedMeasureImageFilter< ImageType, HessianImageType, OutputImageType >;
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
