@@ -18,6 +18,7 @@ Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json
     // filter options
     m_removeResultsVolume = false;
     m_computeMetricsOnly = false;
+    m_maskFileName = "";
     
     // json root node
     m_rootNode = root;
@@ -58,59 +59,34 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
 
     const Json::Value algo = m_rootNode[algoName];
 
-    if (algo.isArray()) // the algorithm contains several sets of parameters
+    const std::string outputName = algo["Output"].asString();
+    const Json::Value arguments = algo["Arguments"];
+
+    std::stringstream sStream;
+    sStream << "./" << algoName << " "
+            << "--input"
+            << " " << m_inputFileName << " "
+            << "--output " << m_outputDir+ "/" + outputName << " ";
+
+    for (auto &arg : arguments)
     {
-      for (auto &p : algo)
-      {
-        const std::string outputName = p["Output"].asString();
-        const Json::Value arguments = p["Arguments"];
-
-        std::stringstream sStream;
-        sStream << "./" << algoName << " "
-                << "--input"
-                << " " << m_inputFileName << " "
-                << "--output " << m_outputDir+ "/" + outputName << " ";
-
-        for (auto &arg : arguments)
-        {
-          std::string m = arg.getMemberNames()[0]; // only one name in the array
-          sStream << "--" << m << " " << arg[m].asString() << " ";
-        }
-        launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
-
-        if(m_removeResultsVolume)
-        {
-          remove( (m_outputDir+ "/" + outputName).c_str() );
-        }
-
-       m_nbAlgorithms++;
-      }
+      std::string m = arg.getMemberNames()[0]; // only one name in the array
+      sStream << m << " " << arg[m].asString() << " ";
     }
-    else // the algorithm contains only one set of parameters
+
+    if( !m_maskFileName.empty() )
     {
-      const std::string outputName = algo["Output"].asString();
-      const Json::Value arguments = algo["Arguments"];
-
-      std::stringstream sStream;
-      sStream << "./" << algoName << " "
-              << "--input"
-              << " " << m_inputFileName << " "
-              << "--output " << m_outputDir+ "/" + outputName << " ";
-
-      for (auto &arg : arguments)
-      {
-        std::string m = arg.getMemberNames()[0]; // only one name in the array
-        sStream << m << " " << arg[m].asString() << " ";
-      }
-      launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
-      
-      if(m_removeResultsVolume)
-      {
-        remove( (m_outputDir+ "/" + outputName).c_str());
-      }
-      
-      m_nbAlgorithms++;
+      sStream << "--mask " << m_maskFileName << " ";
     }
+
+    launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
+    
+    if(m_removeResultsVolume)
+    {
+      remove( (m_outputDir+ "/" + outputName).c_str());
+    }
+    
+    m_nbAlgorithms++;
   }
 }
 
