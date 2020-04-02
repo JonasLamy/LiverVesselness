@@ -3,6 +3,7 @@
 #include "itkHessian3DToVesselnessMeasureImageFilter.h"
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
+#include "itkMaskImageFilter.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -28,7 +29,8 @@ int main( int argc, char* argv[] )
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
+    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -62,6 +64,7 @@ int main( int argc, char* argv[] )
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     float alpha = vm["alpha1"].as<float>();
     float beta = vm["alpha2"].as<float>();
+    std::string maskFile = vm["mask"].as<std::string>();
 
     constexpr unsigned int Dimension = 3;
     using PixelType = float;
@@ -91,13 +94,31 @@ int main( int argc, char* argv[] )
     multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );
 
     // end Antiga vesselness operator
+    using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, ImageType >;
+    RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
+    
+    typedef itk::Image<uint8_t, Dimension> MaskImageType;
+    MaskImageType::Pointer maskImage;
+    if( !maskFile.empty() )
+    {
+      maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
+    
+      auto maskFilter = itk::MaskImageFilter<ImageType,MaskImageType>::New();
+      maskFilter->SetInput( multiScaleEnhancementFilter->GetOutput() );
+      maskFilter->SetMaskImage(maskImage);
+      maskFilter->SetMaskingValue(0);
+      maskFilter->SetOutsideValue(0);
+
+      maskFilter->Update();
+      rescaleFilter->SetInput( maskFilter->GetOutput() );
+    }
+    else{
+      rescaleFilter->SetInput(multiScaleEnhancementFilter->GetOutput());
+    }
 
     using OutputImageType = ImageType;
-    using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, OutputImageType >;
-    RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
     rescaleFilter->SetOutputMinimum(0.0f);
     rescaleFilter->SetOutputMaximum(1.0f);
-    rescaleFilter->SetInput( multiScaleEnhancementFilter->GetOutput() );
 
     using imageWriterType = itk::Image<PixelType,Dimension>;
     typedef  itk::ImageFileWriter< imageWriterType  > WriterType;
