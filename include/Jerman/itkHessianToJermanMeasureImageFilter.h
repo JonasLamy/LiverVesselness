@@ -2,11 +2,11 @@
 #define itkHessianToJermanMeasureImageFilter_h
 
 #include <cmath>
-#include "itkHessianToEigenValues.h"
+#include <itkHessianToEigenValues.h>
 
 namespace itk{
 
-template< typename TInputImage, typename TOutputImage>
+template< typename TInputImage, typename TOutputImage, typename TMaskImage = itk::Image<uint8_t,3> >
 class ITK_TEMPLATE_EXPORT HessianToJermanMeasureImageFilter : 
 public ImageToImageFilter<TInputImage, TOutputImage>
 {
@@ -22,9 +22,14 @@ public ImageToImageFilter<TInputImage, TOutputImage>
 
     using InputImageType = typename Superclass::InputImageType;
     using OutputImageType = typename Superclass::OutputImageType;
+    using MaskImageType = TMaskImage;
+
     using InputPixelType = typename InputImageType::PixelType;
     using OutputPixelType = typename OutputImageType::PixelType;
+    using MaskPixelType = typename TMaskImage::PixelType;
+    
     using OutputImageRegionType = typename OutputImageType::RegionType;
+    
 
     /** Image dimension */
     static constexpr unsigned int ImageDimension = InputImageType ::ImageDimension;
@@ -43,6 +48,9 @@ public ImageToImageFilter<TInputImage, TOutputImage>
 
     itkSetMacro(BrightObject,bool);
     itkGetConstMacro(BrightObject,bool);
+
+    void SetMaskImage(typename TMaskImage::Pointer maskImg){m_maskImage = maskImg;}
+
 
     protected:
 
@@ -67,8 +75,8 @@ public ImageToImageFilter<TInputImage, TOutputImage>
 
     double m_Tau{0.75};
     bool m_BrightObject{true};
+    typename TMaskImage::Pointer m_maskImage;
     
-
 };
 
 }

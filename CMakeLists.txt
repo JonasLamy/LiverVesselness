@@ -161,3 +161,4 @@ target_include_directories(MakeIrcadBifurcationGT PUBLIC
   )
 target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
 set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+
