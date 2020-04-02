@@ -6,7 +6,7 @@
 
 namespace itk{
 
-template< typename TInputImage, typename TOutputImage>
+template< typename TInputImage, typename TOutputImage, typename TMaskImage>
 class ITK_TEMPLATE_EXPORT HessianToMeijeringMeasureImageFilter : 
 public ImageToImageFilter<TInputImage, TOutputImage>
 {
@@ -26,6 +26,8 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     using OutputPixelType = typename OutputImageType::PixelType;
     using OutputImageRegionType = typename OutputImageType::RegionType;
 
+    using MaskImageType = TMaskImage;
+
     /** Image dimension */
     static constexpr unsigned int ImageDimension = InputImageType ::ImageDimension;
 
@@ -44,6 +46,8 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     itkSetMacro(BrightObject,bool);
     itkGetConstMacro(BrightObject,bool);
 
+    void SetMaskImage(typename MaskImageType::Pointer maskImage){m_maskImage = maskImage;}
+
     protected:
 
     HessianToMeijeringMeasureImageFilter();
@@ -58,6 +62,9 @@ public ImageToImageFilter<TInputImage, TOutputImage>
 
     private:
 
+    void withMask();
+    void noMask();
+
     struct AbsLessEqualCompare{ 
         bool operator()(EigenValueType a,EigenValueType b)
         {
@@ -65,10 +72,9 @@ public ImageToImageFilter<TInputImage, TOutputImage>
         }
     };
 
-    double m_Alpha{-0.5};
-    bool m_BrightObject{true};
-    
-
+    double m_Alpha;
+    bool m_BrightObject;
+    typename MaskImageType::Pointer m_maskImage;
 };
 
 }

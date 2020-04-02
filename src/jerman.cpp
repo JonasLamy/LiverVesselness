@@ -32,7 +32,7 @@ int main( int argc, char* argv[] )
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
     ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
-    ("mask,a",po::value<std::string>()->default_value(""),"mask response by image");
+    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;

@@ -29,7 +29,8 @@ int main( int argc, char* argv[] )
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
+    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -64,22 +65,32 @@ int main( int argc, char* argv[] )
     float sigmaMax = vm["sigmaMax"].as<float>();
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     float alpha = vm["alpha"].as<float>();
+    std::string maskFile = vm["mask"].as<std::string>();
 
     constexpr unsigned int Dimension = 3;
     using PixelType = double;
     using ImageType = itk::Image< PixelType, Dimension >;
 
-    ImageType::Pointer image = vUtils::readImage<ImageType>(inputFile,isInputDicom);
+    using MaskImageType = itk::Image<uint8_t,Dimension>;
 
+    ImageType::Pointer image = vUtils::readImage<ImageType>(inputFile,isInputDicom);
+    MaskImageType::Pointer maskImage;
 
     using HessianPixelType = itk::SymmetricSecondRankTensor< double, Dimension >;
     using HessianImageType = itk::Image< HessianPixelType, Dimension >;
+    using MaskImageType = itk::Image<uint8_t, Dimension>;
     
     using OutputImageType = itk::Image< double, Dimension >;
 
-    using MeijeringFilterType = itk::HessianToMeijeringMeasureImageFilter<HessianImageType, OutputImageType>;
+    using MeijeringFilterType = itk::HessianToMeijeringMeasureImageFilter<HessianImageType, OutputImageType,MaskImageType>;
     auto meijeringFilter = MeijeringFilterType::New();
     meijeringFilter->SetAlpha(alpha);
+    
+    if( !maskFile.empty() )
+    {
+      maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
+      meijeringFilter->SetMaskImage(maskImage);
+    }
 
     using MultiScaleEnhancementFilterType = itk::MultiScaleHessianBasedMeasureImageFilter< ImageType, HessianImageType, OutputImageType >;
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();

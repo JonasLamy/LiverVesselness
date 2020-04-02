@@ -56,7 +56,6 @@ int main(int argc,char** argv)
     std::string inputFileName(argv[1]);
     std::string maskFileName(argv[2]);
     std::string gtFileName(argv[3]);
-    int boxSize = std::atoi(argv[4]);
 
     bool skeleton = false;
     if(argc >= 5)
