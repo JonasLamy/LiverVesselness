@@ -5,6 +5,8 @@
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
 #include "itkScalarImageKmeansImageFilter.h"
 #include "itkSigmoidImageFilter.h"
+#include "itkImageDuplicator.h"
+#include "itkImageRegionIterator.h"
 
 #include "itkStatisticsImageFilter.h"
 
@@ -31,7 +33,8 @@ int main( int argc, char* argv[] )
     ("tau,t", po::value<float>()->default_value(0.75), "Jerman's tau" )
     ("nbSeeds,s",po::value<int>()->default_value(5),"number of kmean seeds")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
+    ("mask,a",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -67,21 +70,62 @@ int main( int argc, char* argv[] )
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     float tau = vm["tau"].as<float>();
     unsigned int nbClasses = vm["nbSeeds"].as<int>();
+     std::string maskFile = vm["mask"].as<std::string>();
 
     constexpr unsigned int Dimension = 3;
     using PixelType = double;
     using ImageType = itk::Image< PixelType, Dimension >;
+    
+    using MaskPixelType = uint8_t;
+    using MaskImageType = itk::Image<MaskPixelType, Dimension>;
 
     auto img = vUtils::readImage<ImageType>(inputFile,isInputDicom);
-    // Filtering image
+    MaskImageType::Pointer maskImage;
 
+    // if mask  is provided, use K-mean in mask boundary, else use it on the whole image
     typedef itk::ScalarImageKmeansImageFilter<ImageType> KmeanFilterType;
     auto kMeansFilter = KmeanFilterType::New();
-    kMeansFilter->SetInput( img );
+    auto duplicator = itk::ImageDuplicator<ImageType>::New();
+    ImageType::Pointer maskedImage;
+    auto stats = itk::StatisticsImageFilter<ImageType>::New();
+
+
+    if( !maskFile.empty() )
+    {
+      maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
+      // creating the mask manually, our masks are not homogeneous for some.
+
+      duplicator->SetInputImage(img);
+      duplicator->Update();
+      maskedImage = duplicator->GetOutput();
+      itk::ImageRegionIterator<ImageType> itMasked(maskedImage,maskedImage->GetLargestPossibleRegion());
+      itk::ImageRegionIterator<MaskImageType> itMask(maskImage,maskedImage->GetLargestPossibleRegion());
+      itMask.GoToBegin();
+      itMasked.GoToBegin();
+
+      while(!itMasked.IsAtEnd())
+      {
+        if( itMask.Get() == 0)
+        {
+          itMasked.Set(0);
+        }
+        ++itMasked;
+        ++itMask;
+      }
+    
+      kMeansFilter->SetInput( maskedImage );
+      stats->SetInput( maskedImage );
+    }
+    else
+    {
+      kMeansFilter->SetInput( img );
+      stats->SetInput( img );
+    }
+    
     kMeansFilter->SetUseNonContiguousLabels(true);
 
-    auto stats = itk::StatisticsImageFilter<ImageType>::New();
-    stats->SetInput( img );
+    
+    
     stats->Update();
     
     double min = stats->GetMinimum(); // 0/4
@@ -130,9 +174,14 @@ int main( int argc, char* argv[] )
     
     using OutputImageType = itk::Image< double, Dimension >;
 
-    using RuiZhangFilterType = itk::HessianToRuiZhangMeasureImageFilter<HessianImageType, OutputImageType>;
+    using RuiZhangFilterType = itk::HessianToRuiZhangMeasureImageFilter<HessianImageType, OutputImageType,MaskImageType>;
     auto ruiZhangFilter = RuiZhangFilterType::New();
     ruiZhangFilter->SetTau(tau);
+
+    if( !maskFile.empty() )
+    {
+      ruiZhangFilter->SetMaskImage(maskImage);
+    }
 
     using MultiScaleEnhancementFilterType = itk::MultiScaleHessianBasedMeasureImageFilter< ImageType, HessianImageType, OutputImageType >;
     MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();

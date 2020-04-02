@@ -173,12 +173,10 @@ namespace itk
     {
         if( m_maskImage)
         {
-            std::cout<<"using mask"<<std::endl;
             withMask(regionForThread);
         }
         else
         {
-            std::cout<<"no Mask"<<std::endl;
             noMask(regionForThread);
         }
     }

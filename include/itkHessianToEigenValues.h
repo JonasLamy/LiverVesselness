@@ -8,7 +8,8 @@
 
 namespace itk{
     template <typename TInputImage,
-    typename TOutputImage = Image<FixedArray< double, 3>,3>, typename TMaskImage = Image<uint8_t,3> >
+    typename TOutputImage = Image<FixedArray< double, 3>,3>, 
+    typename TMaskImage = Image<uint8_t,3> >
     class ITK_TEMPLATE_EXPORT HessianToEigenValuesImageFilter:public ImageToImageFilter<TInputImage,TOutputImage>
     {
         public:

@@ -2,13 +2,13 @@
 #define itkHessianToRuiZhangMeasureImageFilter_h
 
 #include <cmath>
-#include "itkHessianToEigenValues.h"
+#include "itkHessianToMeasureImageFilter.h"
 
 namespace itk{
 
-template< typename TInputImage, typename TOutputImage>
+template< typename TInputImage, typename TOutputImage, typename TMaskImage>
 class ITK_TEMPLATE_EXPORT HessianToRuiZhangMeasureImageFilter : 
-public ImageToImageFilter<TInputImage, TOutputImage>
+public HessianToMeasureImageFilter<TInputImage, TOutputImage, TMaskImage>
 {
     public:
 
@@ -16,7 +16,7 @@ public ImageToImageFilter<TInputImage, TOutputImage>
 
     /** standard aliases */
     using Self = HessianToRuiZhangMeasureImageFilter;
-    using Superclass = ImageToImageFilter< TInputImage, TOutputImage >;
+    using Superclass = HessianToMeasureImageFilter< TInputImage, TOutputImage >;
     using Pointer = SmartPointer< Self >;
     using ConstPointer = SmartPointer< const Self >;
 
@@ -25,6 +25,7 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     using InputPixelType = typename InputImageType::PixelType;
     using OutputPixelType = typename OutputImageType::PixelType;
     using OutputImageRegionType = typename OutputImageType::RegionType;
+    using MaskImageType = TMaskImage;
 
     /** Image dimension */
     static constexpr unsigned int ImageDimension = InputImageType ::ImageDimension;
@@ -36,7 +37,7 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     itkNewMacro(Self);
 
     /** Runtime information support. */
-    itkTypeMacro(HessianToRuiZhangMeasureImageFilter, ImageToImageFilter);
+    itkTypeMacro(HessianToRuiZhangMeasureImageFilter, HessianToMeasureImageFilter);
     
     itkSetMacro(Tau,double);
     itkGetConstMacro(Tau,double);
@@ -51,12 +52,14 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     
     void PrintSelf(std::ostream & os, Indent indent) const override;
 
-    void VerifyPreconditions() ITKv5_CONST override;
-    void GenerateData() override;
-    void DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread) override;
-    void BeforeThreadedGenerateData() override;
+    virtual void GenerateData() override;
+    virtual void DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread) override;
+    virtual void BeforeThreadedGenerateData() override;
 
     private:
+
+    virtual void noMask() override;
+    virtual void withMask() override;
 
     struct AbsLessEqualCompare{ 
         bool operator()(EigenValueType a,EigenValueType b)

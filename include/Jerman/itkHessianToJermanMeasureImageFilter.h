@@ -2,13 +2,13 @@
 #define itkHessianToJermanMeasureImageFilter_h
 
 #include <cmath>
-#include <itkHessianToEigenValues.h>
+#include "itkHessianToMeasureImageFilter.h"
 
 namespace itk{
 
 template< typename TInputImage, typename TOutputImage, typename TMaskImage = itk::Image<uint8_t,3> >
 class ITK_TEMPLATE_EXPORT HessianToJermanMeasureImageFilter : 
-public ImageToImageFilter<TInputImage, TOutputImage>
+public HessianToMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>
 {
     public:
 
@@ -16,7 +16,7 @@ public ImageToImageFilter<TInputImage, TOutputImage>
 
     /** standard aliases */
     using Self = HessianToJermanMeasureImageFilter;
-    using Superclass = ImageToImageFilter< TInputImage, TOutputImage >;
+    using Superclass = HessianToMeasureImageFilter<TInputImage, TOutputImage,TMaskImage>;
     using Pointer = SmartPointer< Self >;
     using ConstPointer = SmartPointer< const Self >;
 
@@ -32,7 +32,7 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     
 
     /** Image dimension */
-    static constexpr unsigned int ImageDimension = InputImageType ::ImageDimension;
+    static constexpr unsigned int ImageDimension = InputImageType::ImageDimension;
 
     using EigenValueType = double;
     using EigenValueArrayType = itk::FixedArray< EigenValueType, Self::ImageDimension >;
@@ -41,16 +41,13 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     itkNewMacro(Self);
 
     /** Runtime information support. */
-    itkTypeMacro(HessianToJermanMeasureImageFilter, ImageToImageFilter);
+    itkTypeMacro(HessianToJermanMeasureImageFilter, HessianToMeasureImageFilter);
     
     itkSetMacro(Tau,double);
     itkGetConstMacro(Tau,double);
 
     itkSetMacro(BrightObject,bool);
     itkGetConstMacro(BrightObject,bool);
-
-    void SetMaskImage(typename TMaskImage::Pointer maskImg){m_maskImage = maskImg;}
-
 
     protected:
 
@@ -59,12 +56,14 @@ public ImageToImageFilter<TInputImage, TOutputImage>
     
     void PrintSelf(std::ostream & os, Indent indent) const override;
 
-    void VerifyPreconditions() ITKv5_CONST override;
-    void GenerateData() override;
-    void DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread) override;
-    void BeforeThreadedGenerateData() override;
+    virtual void GenerateData() override;
+    virtual void DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread) override;
+    virtual void BeforeThreadedGenerateData() override;
 
     private:
+
+    virtual void noMask() override;
+    virtual void withMask() override;
 
     struct AbsLessEqualCompare{ 
         bool operator()(EigenValueType a,EigenValueType b)
@@ -75,7 +74,6 @@ public ImageToImageFilter<TInputImage, TOutputImage>
 
     double m_Tau{0.75};
     bool m_BrightObject{true};
-    typename TMaskImage::Pointer m_maskImage;
     
 };
 
