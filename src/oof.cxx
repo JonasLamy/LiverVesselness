@@ -10,6 +10,7 @@ Based on work of Turetken & Fethallah Benmansour
 #include "itkTimeProbe.h"
 #include "itkDiscreteGaussianImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
+#include "itkMaskImageFilter.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -35,7 +36,8 @@ int main(int argc, char** argv)
     ("sigmaMax,M", po::value<double>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
     ("sigma,s",po::value<double>(),"sigma for smoothing")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
+    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -68,19 +70,22 @@ int main(int argc, char** argv)
     double sigmaMax = vm["sigmaMax"].as<double>();
     int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
     double fixedSigma = vm["sigma"].as<double>();
-    
+    std::string maskFile = vm["mask"].as<std::string>();
+
     //********************************************************
     //                    Reading inputs
     //********************************************************
 
 
-    const unsigned int maxDimension = 3;
+    const unsigned int Dimension = 3;
 
     typedef double PixelType;
-    typedef itk::Image<PixelType,maxDimension> InputImageType;
+    typedef itk::Image<PixelType,Dimension> InputImageType;
+    typedef itk::Image<uint8_t, Dimension> MaskImageType;
 
     InputImageType::Pointer inputImage = vUtils::readImage<InputImageType>(inputFile,isInputDicom);
-
+    
+    
     //********************************************************
     //                   Filter
     //********************************************************
@@ -128,8 +133,27 @@ int main(int argc, char** argv)
         std::cerr << e << std::endl;
     }
 
+  
     auto rescaleFilter = itk::RescaleIntensityImageFilter<InputImageType>::New();
-    rescaleFilter->SetInput(OOFfilter->GetOutput());
+    
+    MaskImageType::Pointer maskImage;
+    if( !maskFile.empty() )
+    {
+      maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
+    
+      auto maskFilter = itk::MaskImageFilter<InputImageType,MaskImageType>::New();
+      maskFilter->SetInput( OOFfilter->GetOutput() );
+      maskFilter->SetMaskImage(maskImage);
+      maskFilter->SetMaskingValue(0);
+      maskFilter->SetOutsideValue(0);
+
+      maskFilter->Update();
+      rescaleFilter->SetInput( maskFilter->GetOutput() );
+    }
+    else{
+      rescaleFilter->SetInput(OOFfilter->GetOutput());
+    }
+  
     rescaleFilter->SetOutputMinimum(0);
     rescaleFilter->SetOutputMaximum(1);
     

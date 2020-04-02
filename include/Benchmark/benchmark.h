@@ -37,11 +37,13 @@ public:
     void SetremoveResultsVolume(bool removeResultsVolume){ m_removeResultsVolume = removeResultsVolume;}
     void SetOutputDirectory(const std::string &outputDir){m_outputDir = outputDir; }
     void SetPatientDirectory(const std::string &patient){m_patient = patient;}
-
+    void SetMaskName(const std::string &maskFileName){m_maskFileName;}
     void run();
     
 private:
     std::string m_inputFileName;
+    std::string m_maskFileName;
+
     std::string m_outputDir;
     std::string m_patient;
 
