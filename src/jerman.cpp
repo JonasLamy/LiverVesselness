@@ -2,7 +2,9 @@
 #include "itkImageFileWriter.h"
 
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
+
 #include "itkHessianToJermanMeasureImageFilter.h"
+//#include "itkHessianToMeasureImageFilter.h"
 
 #include "itkStatisticsImageFilter.h"
 
@@ -81,7 +83,7 @@ int main( int argc, char* argv[] )
     
     using OutputImageType = itk::Image< double, Dimension >;
 
-    using JermanFilterType = itk::HessianToJermanMeasureImageFilter<HessianImageType, OutputImageType>;
+    using JermanFilterType = itk::HessianToJermanMeasureImageFilter<HessianImageType, OutputImageType, MaskImageType>;
     auto jermanFilter = JermanFilterType::New();
     jermanFilter->SetTau(tau);
 
