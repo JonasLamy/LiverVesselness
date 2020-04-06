@@ -61,7 +61,8 @@ int main(int argc, char** argv)
     ("input,i",po::value<std::string>(),"Input image ")
     ("parametersFile,p",po::value<std::string>()->default_value("parameters.json"),"ParameterFile : input json file")
     ("computeMetricsOnly,c",po::bool_switch(&computeMetricsOnly),"if true, assume that algo outputs are already calculated")
-    ("removeResultsVolumes,r",po::bool_switch(&removeResultsVolumes),"if true, assume that algo outputs are already calculated");
+    ("removeResultsVolumes,r",po::bool_switch(&removeResultsVolumes),"if true, assume that algo outputs are already calculated")
+    ("useMask,k",po::value<int>()->default_value(-1),"choose to compute filters responses with masks [0:whole liver,1:dilated vessels, 2:bifurcations]");
   bool parsingOK = true;
   po::variables_map vm;
 
@@ -85,6 +86,7 @@ int main(int argc, char** argv)
 
   std::string inputFileName = vm["input"].as<std::string>();
   std::string parameterFileName = vm["parametersFile"].as<std::string>();
+  int useMask = vm["useMask"].as<int>();
 
   // -----------------
   // Reading JSON file
@@ -247,10 +249,27 @@ int main(int argc, char** argv)
 #else
       mkdir( (benchDir+benchName+"/"+patientName+"/best").c_str(),S_IRWXG | S_IRWXU | S_IROTH | S_IXOTH);
 #endif
-      
-    // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
-    // Mask is only useful for statistics during segmentation assessment, 
-    // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
+
+
+  // dealing with potential masking
+  std::string maskOrganName;
+  switch(useMask)
+  {
+    case 0:
+      maskOrganName = maskName;
+      break;
+    case 1:
+      maskOrganName = maskDilatedVesselsName;
+      break;
+    case 2:
+      maskOrganName = maskBifurcationsName;
+      break;
+    default:
+      maskOrganName = "";
+  }
+  // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
+  // Mask is only useful for statistics during segmentation assessment, 
+  // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
       
       if( vUtils::isDir( gtName ) ) // boolean choice for now, 0 is nifti & 1 is DICOM 
 	{
@@ -275,6 +294,8 @@ int main(int argc, char** argv)
       b.SetDicomInput();
       b.SetComputeMetricsOnly(computeMetricsOnly);
       b.SetremoveResultsVolume(removeResultsVolumes);
+      b.SetMaskName(maskOrganName);
+      
       b.run();
 	}
       else
@@ -299,6 +320,8 @@ int main(int argc, char** argv)
       b.SetNiftiInput();
       b.SetComputeMetricsOnly(computeMetricsOnly);
       b.SetremoveResultsVolume(removeResultsVolumes);
+      b.SetMaskName(maskOrganName);
+
       b.run();
     }
     

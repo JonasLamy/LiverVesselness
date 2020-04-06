@@ -59,37 +59,73 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
 
     const Json::Value algo = m_rootNode[algoName];
 
-    const std::string outputName = algo["Output"].asString();
-    const Json::Value arguments = algo["Arguments"];
-
-    std::stringstream sStream;
-    sStream << "./" << algoName << " "
-            << "--input"
-            << " " << m_inputFileName << " "
-            << "--output " << m_outputDir+ "/" + outputName << " ";
-
-    for (auto &arg : arguments)
+    if (algo.isArray()) // the algorithm contains several sets of parameters
     {
-      std::string m = arg.getMemberNames()[0]; // only one name in the array
-      sStream << m << " " << arg[m].asString() << " ";
-    }
+      for (auto &p : algo)
+      {
+        const std::string outputName = p["Output"].asString();
+        const Json::Value arguments = p["Arguments"];
 
-    if( !m_maskFileName.empty() )
-    {
-      sStream << "--mask " << m_maskFileName << " ";
-    }
+        std::stringstream sStream;
+        sStream << "./" << algoName << " "
+                << "--input"
+                << " " << m_inputFileName << " "
+                << "--output " << m_outputDir+ "/" + outputName << " ";
 
-    launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
-    
-    if(m_removeResultsVolume)
-    {
-      remove( (m_outputDir+ "/" + outputName).c_str());
+        for (auto &arg : arguments)
+        {
+          std::string m = arg.getMemberNames()[0]; // only one name in the array
+          sStream << "--" << m << " " << arg[m].asString() << " ";
+        }
+
+        if( !m_maskFileName.empty() )
+        {
+          sStream << "--mask " << m_maskFileName << " ";
+        }
+
+        launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
+
+        if(m_removeResultsVolume)
+        {
+          remove( (m_outputDir+ "/" + outputName).c_str() );
+        }
+
+       m_nbAlgorithms++;
+      }
     }
-    
-    m_nbAlgorithms++;
+    else // the algorithm contains only one set of parameters
+    {
+      const std::string outputName = algo["Output"].asString();
+      const Json::Value arguments = algo["Arguments"];
+
+      std::stringstream sStream;
+      sStream << "./" << algoName << " "
+              << "--input"
+              << " " << m_inputFileName << " "
+              << "--output " << m_outputDir+ "/" + outputName << " ";
+
+      for (auto &arg : arguments)
+      {
+        std::string m = arg.getMemberNames()[0]; // only one name in the array
+        sStream << m << " " << arg[m].asString() << " ";
+      }
+
+      if( !m_maskFileName.empty() )
+      {
+        sStream << "--mask " << m_maskFileName << " ";
+      }
+
+      launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
+      
+      if(m_removeResultsVolume)
+      {
+        remove( (m_outputDir+ "/" + outputName).c_str());
+      }
+      
+      m_nbAlgorithms++;
+    }
   }
 }
-
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName)

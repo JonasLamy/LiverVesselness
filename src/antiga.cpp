@@ -29,7 +29,8 @@ int main( int argc, char* argv[] )
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
+    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
+    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image ( Warning !!!! Dummy option for now");
 
     bool parsingOK = true;
     po::variables_map vm;
@@ -64,6 +65,7 @@ int main( int argc, char* argv[] )
     float alpha = vm["alpha"].as<float>();
     float beta = vm["beta"].as<float>();
     float gamma = vm["gamma"].as<float>();
+    std::string maskFile = vm["mask"].as<std::string>();
 
     constexpr unsigned int Dimension = 3;
     using PixelType = float;
