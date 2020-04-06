@@ -245,7 +245,11 @@ class AnalyseResults2:
                 raise Exception("error file empty:" + self.csvFileList[i])
             d,id,infos,curvesData = result[0]
             BenchmarkName = self.csvFileList[i].replace("_","\_")
-            curvesName = re.search( r'[a-z,A-Z]+ScalesSearch',self.csvFileList[i]).group(0).split("Scales")[0]
+
+            try:
+                    curvesName = re.search( r'[a-z,A-Z]+ScalesSearch',self.csvFileList[i]).group(0).split("Scales")[0]
+            except:
+                curvesName = self.csvFileList[i]
             
             Name = infos["Name"].replace("_","\_")
             Threshold = infos["Threshold"]
@@ -406,7 +410,7 @@ print("\\hypersetup{colorlinks=true,linktoc=all,linkcolor=blue}")
 print("\\begin{document}")
 print("\\tableofcontents")
 print("\\begin{landscape}")
-listLength = 5
+listLength = 7
 
 print("\\section{Whole Liver metrics}")
 analyseMask(WholeFileList,listLength)
