@@ -41,6 +41,7 @@ int main( int argc, char* argv[] )
     {
       parsingOK = false;
       std::cout<<"Error checking program option"<<ex.what()<< std::endl;
+    
     }
 
     po::notify(vm);
