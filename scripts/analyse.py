@@ -152,12 +152,12 @@ class AnalyseResults2:
             fig.suptitle('Mean metrics : ' + rankingMethod)
 
             templateHeader = "{0:50} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} \\\\"
-            template = "{0:50} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} \\\\"
+            template = "{0:50} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} \\\\"
 
             print("\\begin{center}")
             print("\\begin{tabular}{l l l l l l}")
             print("\\hline")
-            print( templateHeader.format("BenchmarkName","Parameters","Threshold","MCC","Dice","ROCDist") )
+            print( templateHeader.format("BenchmarkName","Parameters","Threshold","MCC","Dice","ROCDist","TP","TN","FP","FN") )
             #print("\\hline")
 
             BenchmarkName = self.csvFileList[i].replace("_","\_")
@@ -167,7 +167,11 @@ class AnalyseResults2:
                 
                 MCC =  "{0:5.4f} $\pm$ {1:2.5f}".format( infos["MCC"],infos["stdDevMCC"] )
                 Dice = "{0:5.4f} $\pm$ {1:2.5f}".format( infos["Dice"],infos["stdDevDice"] )
-                ROC =  "{:5.4f}".format( infos["ROCDist"] ) 
+                ROC =  "{:5.4f}".format( infos["ROCDist"] )
+                TP = infos["TP"]
+                TN = infos["TN"]
+                FP = infos["FP"]
+                FN = infos["FN"]
 
 
                 #########################
@@ -204,7 +208,7 @@ class AnalyseResults2:
                 ax2.set_xlim(1,0)
                 ax2.title.set_text=("Dice")
 
-                print(template.format(BenchmarkName,Name,Threshold,MCC,Dice,ROC))
+                print(template.format(BenchmarkName,Name,Threshold,MCC,Dice,ROC,TP,TN,FP,FN))
             print("\\end{tabular}")
             print("\\end{center}")
 
@@ -223,8 +227,8 @@ class AnalyseResults2:
             plt.close()
 
     def computeTopMeanMetrics(self,rankingMethod):
-        templateHeader = "{0:50} & {1:20}  & {2:10} & {3:20} & {4:10} & {5:10} \\\\"
-        template = "{0:50} & {1:20} & {2:10} & {3:20} & {4:10} & {5:10} \\\\"
+        templateHeader = "{0:50} & {1:20}  & {2:10} & {3:20} & {4:10} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} \\\\"
+        template = "{0:50} & {1:20} & {2:10} & {3:20} & {4:10} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} \\\\"
 
         fig = plt.figure(dpi=100 )
         fig.set_size_inches(w=10,h=6)
@@ -232,9 +236,9 @@ class AnalyseResults2:
         fig.suptitle('Top Mean metrics : ' + rankingMethod)
 
         print("\\begin{center}")
-        print("\\begin{tabular}{l l l l l l}")
+        print("\\begin{tabular}{l l l l l l l l l l}")
         print("\\hline")
-        print( templateHeader.format("BenchmarkName","Parameters","Threshold","MCC","Dice","ROCDist") )
+        print( templateHeader.format("BenchmarkName","Parameters","Threshold","MCC","Dice","ROCDist","TP","FP","TN","FN") )
         #print("\\hline")
 
         for i in range(0,len(self.csvData) ):
@@ -256,8 +260,12 @@ class AnalyseResults2:
             MCC =  "{0:5.4f} $\pm$ {1:2.5f}".format( infos["MCC"],infos["stdDevMCC"] )
             Dice = "{0:5.4f} $\pm$ {1:2.5f}".format( infos["Dice"],infos["stdDevDice"] )
             ROC =  "{:5.4f}".format( infos["ROCDist"] ) 
+            TP = infos["TP"]
+            TN = infos["TN"]
+            FP = infos["FP"]
+            FN = infos["FN"]
 
-            print(template.format(BenchmarkName,Name,Threshold,MCC,Dice,ROC))
+            print(template.format(BenchmarkName,Name,Threshold,MCC,Dice,ROC,TP,FP,TN,FN))
 
 
             #########################
@@ -315,9 +323,11 @@ class AnalyseResults2:
         
 
     def computeBestMetricsPerVolume(self,rankingMethod):
-        templateHeader = "{0:50} & {1:20} & {2:20} & {3:10} & {4:10} & {5:10} & {6:10} \\\\"
-        template = "{0:50} & {1:20} & {2:20} & {3:10} & {4:10} & {5:10} & {6:10} \\\\"
+        templateHeader = "{0:50} & {1:20} & {2:20} & {3:10} & {4:10} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} & {10:10} \\\\"
+        template = "{0:50} & {1:20} & {2:20} & {3:10} & {4:10} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} & {10:10} \\\\"
 
+        
+        
         for i in range(0,len(self.csvData) ):
             
             result = self.BestMetricsPerVolume(i,rankingMethod)
@@ -326,9 +336,9 @@ class AnalyseResults2:
                 raise Exception("error file empty:" + self.csvFileList[i])
 
             print("\\begin{center}")
-            print("\\begin{tabular}{l l l l l l l}")
+            print("\\begin{tabular}{l l l l l l l l l l l}")
             print("\\hline")
-            print( templateHeader.format("BenchmarkName","Volume","Name","Threshold","MCC","Dice","ROCDist") )
+            print( templateHeader.format("BenchmarkName","Volume","Name","Threshold","MCC","Dice","ROCDist","TP","FP","TN","FN") )
 
             BenchmarkName = self.csvFileList[i].replace("_","\_")
             for infos in result:
@@ -338,8 +348,11 @@ class AnalyseResults2:
                 MCC =  "{0:5.4f}".format( infos["MCC"] )
                 Dice = "{:5.4f}".format( infos["Dice"] )
                 ROC =  "{:5.4f} ".format( infos["ROCDist"] ) 
-
-                print(template.format(BenchmarkName,Volume,Name,Threshold,MCC,Dice,ROC))
+                TP = infos["TP"]
+                TN = infos["TN"]
+                FP = infos["FP"]
+                FN = infos["FN"]
+                print(template.format(BenchmarkName,Volume,Name,Threshold,MCC,Dice,ROC,TP,FP,TN,FN))
             print("\n") 
             print("\\end{tabular}")
             print("\\end{center}")

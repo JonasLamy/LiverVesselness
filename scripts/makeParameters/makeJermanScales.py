@@ -50,6 +50,10 @@ for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
     for j in drange(minBoundaryEnd,maxBoundaryEnd,stepBoundaryEnd) : 
         if(j <= i):
             continue
+
+        if((j-i) < 0.8):
+            continue
+        
         print("\t{",end="") 
         scaleSpaceSingleScale(i,j,step)
         if( i==(maxBoundaryStart-stepBoundaryStart)  and j == maxBoundaryEnd ):

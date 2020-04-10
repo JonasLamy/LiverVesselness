@@ -13,6 +13,10 @@
 #include "itkImageSeriesReader.h"
 #include "itkImageSeriesWriter.h"
 
+#include "itkIdentityTransform.h"
+#include "itkBSplineInterpolateImageFunction.h"
+#include "itkResampleImageFilter.h"
+
 #include <vector>
 #include <sys/stat.h>
 #include <stdint.h>
@@ -80,6 +84,58 @@ namespace vUtils{
         reader->SetFileName(fileName);
         reader->Update();
         return reader->GetOutput();
+    }
+
+    template<typename TImageType>
+    typename TImageType::Pointer makeIso(typename TImageType::Pointer inputImage,bool isMask, bool identitySpacing )
+    {
+        typename TImageType::SizeType size = inputImage->GetLargestPossibleRegion().GetSize();
+        typename TImageType::SpacingType spacing = inputImage->GetSpacing();
+
+        typename TImageType::SpacingType newSpacing;
+        double minSpacing = std::min( spacing[0],std::min(spacing[1],spacing[2]) );
+
+        if(identitySpacing)
+        {
+            newSpacing[0] = 1;
+            newSpacing[1] = 1;
+            newSpacing[2] = 1;
+        }
+        else
+        {
+            newSpacing[0] = 0.56;//minSpacing;
+            newSpacing[1] = 0.56;//minSpacing;
+            newSpacing[2] = 0.56;//minSpacing;
+        }
+
+        std::cout<<"new spacing:"<<newSpacing<<std::endl;
+        typename TImageType::SizeType newSize;
+        newSize[0] = long(size[0] * spacing[0]) / newSpacing[0] + 1;
+        newSize[1] = long(size[1] * spacing[1]) / newSpacing[1] + 1;
+        newSize[2] = long(size[2] * spacing[2]) / newSpacing[2] + 1;
+
+        auto idTransform = itk::IdentityTransform<double,3>::New();
+        auto interpolator = itk::BSplineInterpolateImageFunction<TImageType>::New();
+
+        if( isMask)
+        {
+            interpolator->SetSplineOrder(0);
+        }
+        else
+        {
+            interpolator->SetSplineOrder(3);
+        }
+        
+        auto resampler = itk::ResampleImageFilter<TImageType,TImageType>::New();
+        resampler->SetInput(inputImage);
+        resampler->SetTransform(idTransform);
+        resampler->SetInterpolator(interpolator);
+        resampler->SetSize(newSize);
+        resampler->SetOutputSpacing(newSpacing);
+        resampler->SetOutputOrigin(inputImage->GetOrigin());
+        resampler->Update();
+
+        return resampler->GetOutput();
     }
 }
 

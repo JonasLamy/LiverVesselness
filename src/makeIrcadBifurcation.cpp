@@ -14,7 +14,8 @@
 #include "itkSpatialObjectToImageFilter.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkMaximumImageFilter.h"
-//#include "QuickView.h"
+
+#include "utils.h"
 
 
 
@@ -56,8 +57,11 @@ int main(int argc,char** argv)
     std::string inputFileName(argv[1]);
     std::string maskFileName(argv[2]);
     std::string gtFileName(argv[3]);
+    
+    bool isDicom = false;
+    
 
-    bool skeleton = false;
+    bool skeleton = true;
     if(argc >= 5)
         skeleton = true;
 
@@ -67,11 +71,9 @@ int main(int argc,char** argv)
     auto reader = itk::ImageFileReader<ImageType>::New();
     reader->SetFileName(inputFileName);
     reader->Update();
-    auto img = reader->GetOutput();
 
-    auto maskReader = itk::ImageFileReader<ImageType>::New();
-    maskReader->SetFileName(maskFileName);
-    maskReader->Update();
+    auto img = vUtils::readImage<ImageType>(inputFileName,isDicom);
+    auto mask = vUtils::readImage<ImageType>(maskFileName,isDicom);
 
     std::cout<<"0"<<std::endl;
 
@@ -87,13 +89,22 @@ int main(int argc,char** argv)
     thinningFilter->SetInput(rescaleFilter->GetOutput());
     thinningFilter->Update();
 
+    
+
+    auto maskFilter = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
+    maskFilter->SetInput( thinningFilter->GetOutput() );
+    maskFilter->SetMaskImage( mask );
+    maskFilter->SetOutsideValue(0);
+    maskFilter->SetMaskingValue(0);
+    maskFilter->Update();
+
     using WriterType = itk::ImageFileWriter<ImageType>;
     if(skeleton)
     {
         WriterType::Pointer thinningWriter = WriterType::New();
 
         thinningWriter->SetFileName("skeleton.nii");
-        thinningWriter->SetInput(thinningFilter->GetOutput());
+        thinningWriter->SetInput(maskFilter->GetOutput());
         try
         {
             thinningWriter->Update();
@@ -104,12 +115,6 @@ int main(int argc,char** argv)
             return EXIT_FAILURE;
         }
     }
-
-    auto maskFilter = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
-    maskFilter->SetInput( thinningFilter->GetOutput() );
-    maskFilter->SetMaskImage( maskReader->GetOutput() );
-    maskFilter->SetOutsideValue(0);
-    maskFilter->Update();
 
     std::cout<<"2"<<std::endl;
 
@@ -155,7 +160,7 @@ int main(int argc,char** argv)
     inverseFilter->SetInsideValue(0);
     inverseFilter->SetOutsideValue(255);
 
-    inverseFilter->SetInput( maskReader->GetOutput() );
+    inverseFilter->SetInput( mask );
     
     auto distanceTransform = itk::SignedMaurerDistanceMapImageFilter<ImageType,FloatImageType>::New();
     distanceTransform->SquaredDistanceOff();
@@ -172,10 +177,12 @@ int main(int argc,char** argv)
 
     // creating image
     auto resultImage = ImageType::New();
-    resultImage->SetRegions( imgBifurcationNode->GetLargestPossibleRegion() );
+    resultImage->SetRegions( img->GetLargestPossibleRegion() );
+    
+    resultImage->SetSpacing(img->GetSpacing() );
     resultImage->Allocate();
     resultImage->FillBuffer(0);
-
+    std::cout<<"result image spacing \n"<<resultImage->GetSpacing() <<std::endl;
     // creating ellipses
 
     using EllipseType = itk::EllipseSpatialObject<3>;
@@ -195,6 +202,8 @@ int main(int argc,char** argv)
         auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
         ellipseToImageFilter->SetSize( imgBifurcationNode->GetLargestPossibleRegion().GetSize() );
         ellipseToImageFilter->SetSpacing( imgBifurcationNode->GetSpacing() );
+        //ellipseToImageFilter->SetOrigin( imgBifurcationNode->GetOrigin() );
+        std::cout<<"ellipse filter spacing \n"<<imgBifurcationNode->GetSpacing() <<std::endl;
 
         auto ellipse = EllipseType::New();
         EllipseType::ArrayType radiusArray;
@@ -236,8 +245,8 @@ int main(int argc,char** argv)
         ++it;
     }
 
-    resultImage->SetOrigin( imgBifurcationNode->GetOrigin() );
-    resultImage->SetSpacing( imgBifurcationNode->GetSpacing() );
+    resultImage->SetOrigin( img->GetOrigin() );
+
 
     std::cout<<"5"<<std::endl;
     using OutputWriterType = itk::ImageFileWriter<ImageType>;

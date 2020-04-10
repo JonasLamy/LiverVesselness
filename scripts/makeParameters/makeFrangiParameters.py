@@ -38,8 +38,6 @@ sigmaMin = decimal.Decimal(sys.argv[4])
 sigmaMax = decimal.Decimal(sys.argv[5])
 nbSigmaSteps = decimal.Decimal(sys.argv[6])
 
-
-
 decimal.getcontext().prec = 3
 
 name = "Antiga"
@@ -53,7 +51,8 @@ for i in drange(start,end,step) :
     for j in drange(start,end,step) : 
         if(j == 0):            
             continue
-        print("\t{",end="") 
+
+        print("\t{",end="")
         varyingPart(i,j,sigmaMin,sigmaMax,nbSigmaSteps)
         if( i == end and j==end):
             print("\t\t]\n\t}")
