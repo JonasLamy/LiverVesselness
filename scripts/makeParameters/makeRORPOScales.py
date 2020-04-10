@@ -19,6 +19,9 @@ def isOK(i,j,step,minImageSize):
         if(int(i * j**k) >= minImageSize):
             #print("skipping",i,j,step,"because:"+str(int(i * j**k))+" for step= "+str(k))
             return False
+    if(i*j**step < 40):
+        return False
+        
     return True
         
 def scaleSpaceSingleScale(minBoundary,factor,step):
@@ -29,6 +32,7 @@ def scaleSpaceSingleScale(minBoundary,factor,step):
             {"factor":\""""+str(factor)+"""\"},
             {"nbScales":\""""+str(step)+"""\"},
             {"core":"4"},
+            {"dilationSize":"0"},
             {"verbose":""}"""
     print(st)
 

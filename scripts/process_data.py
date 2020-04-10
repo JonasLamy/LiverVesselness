@@ -38,10 +38,18 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     commandLine = "./MakeIso " + patientPath + " " + liverPath + " " + venousPath + " " + portalPath + " "
     commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath + " " + dilatedVesselsMask + " " + maskedLiverOutPath  + " " + IdentitySpacing
 
-    #print(commandLine)
-    #os.system(commandLine)
+    print(commandLine)
+    os.system(commandLine)
 
     commandLine = "./MakeIrcadBifurcationGT " + vesselsOutPath + " " + liverOutPath  + " " + bifurcationsOutPath
     
-    print(commandLine)
-    os.system(commandLine)
+    #print(commandLine)
+    #os.system(commandLine)
+
+    bifurcationInPath = patientDirectory+"/bifurcationsMaskIso.nii"
+    liverInPath = patientDirectory+ "/liverMaskIso.nii"
+    bifurcationsOutPath = "/DATA/ircad_iso/"+patientDirectory.split("/")[3]+"/bifurcationsMaskIso.nii"
+    commandLine = "./isoFromUnit " + bifurcationInPath + " " + liverInPath + " " + bifurcationsOutPath
+
+    #print(commandLine)
+    #os.system(commandLine)
