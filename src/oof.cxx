@@ -97,11 +97,10 @@ int main(int argc, char** argv)
 
     // creating radii from parameters
 
-    double step = (sigmaMax - sigmaMin) / (double)(nbSigmaSteps-2);
+    double step = (sigmaMax - sigmaMin) / (double)(nbSigmaSteps-2+1);
     
     std::vector<double> radii;
-    radii.push_back( sigmaMin );
-    double i=sigmaMin+step;
+    double i=sigmaMin;
     while(i<sigmaMax)
     {
       radii.push_back(i);

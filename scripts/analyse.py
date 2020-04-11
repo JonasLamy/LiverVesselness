@@ -151,11 +151,11 @@ class AnalyseResults2:
             axes = fig.subplots(1,3)
             fig.suptitle('Mean metrics : ' + rankingMethod)
 
-            templateHeader = "{0:50} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} \\\\"
-            template = "{0:50} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} \\\\"
+            templateHeader = "{0:30} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10}\\\\"
+            template = "{0:30} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} \\\\"
 
             print("\\begin{center}")
-            print("\\begin{tabular}{l l l l l l}")
+            print("\\begin{tabular}{l l l l l l l l l l}")
             print("\\hline")
             print( templateHeader.format("BenchmarkName","Parameters","Threshold","MCC","Dice","ROCDist","TP","TN","FP","FN") )
             #print("\\hline")

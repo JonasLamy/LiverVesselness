@@ -28,7 +28,7 @@ for dirName in listDir[1][ :int( len(listDir[1])/2 ) ]:
         # running through data directories
         listData = next(os.walk(listDir[0] + "/" +dirName))[1]
         for data in listData:
-            if( not(data in ["data12","data11","data10","data9","data8"]) ):
+            if( not(data in ["data7","data9","data11"]) ):
                 continue
             if data.startswith('data'):
 
@@ -46,7 +46,7 @@ for dirName in listDir[1][ :int( len(listDir[1])/2 ) ]:
 
                     if file.endswith('.mhd'):
                         
-                        print(filePath +"/"+ "vbi_rician_20.0.nii")
+                        print(filePath +"/"+ "vbi_rician_5.0.nii")
                         print("vascu_2013/maskWholeImage.nii") # only image at root directory
                         print(filePath +"/"+ "bifurcationGT.nii")
                         print(filePath +"/"+ "gtDilated.nii")

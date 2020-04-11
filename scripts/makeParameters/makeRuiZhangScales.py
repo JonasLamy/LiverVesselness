@@ -51,7 +51,7 @@ for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
         if(j <= i):
             continue
 
-        if((j-i) < 0.8):
+        if((j-i) < 1.6):
             continue
 
         print("\t{",end="") 
