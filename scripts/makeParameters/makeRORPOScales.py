@@ -9,20 +9,6 @@ def drange(x, y, jump):
         if(x < 0 or y < 0):
             return []
         x+= jump
-
-def isOK(i,j,step,minImageSize):
-
-    #print("path length:",i,"for step=0")
-
-    for k in range(1,int(step)):
-        #print("path length:",i*j**k,"for step="+str(k))
-        if(int(i * j**k) >= minImageSize):
-            #print("skipping",i,j,step,"because:"+str(int(i * j**k))+" for step= "+str(k))
-            return False
-    if(i*j**step < 40):
-        return False
-        
-    return True
         
 def scaleSpaceSingleScale(minBoundary,factor,step):
     st = """
@@ -36,13 +22,13 @@ def scaleSpaceSingleScale(minBoundary,factor,step):
             {"verbose":""}"""
     print(st)
 
-minBoundaryStart = decimal.Decimal(sys.argv[1])
-maxBoundaryStart = decimal.Decimal(sys.argv[2])
-stepBoundaryStart = decimal.Decimal(sys.argv[3])
+minBoundaryStart = int(sys.argv[1])
+maxBoundaryStart = int(sys.argv[2])
+stepBoundaryStart = int(sys.argv[3])
 
-minFactor = decimal.Decimal(sys.argv[4])
-maxFactor = decimal.Decimal(sys.argv[5])
-stepFactor = decimal.Decimal(sys.argv[6])
+minFactor = int( float(sys.argv[4]) * 10)
+maxFactor = int( float(sys.argv[5]) * 10)
+stepFactor = int( float(sys.argv[6]) * 10)
 
 stepMin = int(sys.argv[7])
 stepMax = int(sys.argv[8])
@@ -55,31 +41,25 @@ name = "RORPO_multiscale_usage"
 print("{")
 print("""    \""""+str(name)+"""\":
      [""")
+nbParam=0
 
-for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
-    if(i == 0):
-        continue
-    if(minFactor == maxFactor):
-        print("\t{",end="") 
-        scaleSpaceSingleScale(i,minFactor,step)
-        if( i==maxBoundaryStart):
-            print("\t\t]\n\t}")
-        else:
-            print("\t\t]\n\t},")
-    else:
-        
-        for j in drange(minFactor,maxFactor,stepFactor) :
-            for step in range(stepMin,stepMax+1):
-                # checking that the paths are not over
-                # the desired threshold
-                
-                if not isOK(i,j,step,minImageSize):
-                    break
-                #print("scales:",i,j,step+1,int(i * j**k))
-                
+print(minBoundaryStart,maxBoundaryStart,stepBoundaryStart)
+print(minFactor,maxFactor,stepFactor)
+print(stepMin,stepMax)
+for s in range(minBoundaryStart,maxBoundaryStart,stepBoundaryStart):
+    for f in range(minFactor,maxFactor,stepFactor):
+        for n in range(stepMin,stepMax):
+
+            vectScales=[]
+            for i in range(n):
+                vectScales +=[round(s*((f/10)**i))]
+            vectScales = np.array(vectScales)
+            if np.amax(vectScales) < 100 and np.amax(vectScales) > 40:
+                nbParam += 1
+            
                 print("\t{",end="") 
-                scaleSpaceSingleScale(i,j,step)
-                
+                scaleSpaceSingleScale(s,f/10,n)
+            
                 if( i==maxBoundaryStart  and j == maxFactor ):
                     print("\t\t]\n\t}")
                 else:

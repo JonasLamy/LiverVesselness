@@ -1,23 +1,23 @@
 dirName=$1
 # min scale pace bound
-minBoundStart=0
-minBoundEnd=3
-minBoundStep=0.2
+minBoundStart=0.4
+minBoundEnd=6
+minBoundStep=0.6
 # max scale space bound
-maxBoundStart=1
-maxBoundEnd=3
-maxBoundStep=0.2
+maxBoundStart=2
+maxBoundEnd=6
+maxBoundStep=0.6
 # nbScales by interval [minBound;maxBound]
 step=4
 
 minBoundStartRORPO=10
-minBoundEndRORPO=50
+minBoundEndRORPO=61
 minBoundStepRORPO=10
 factorStart=1.2
-factorEnd=2
+factorEnd=1.7
 factorStep=0.2
-stepRORPOMin=2
-stepRORPOMax=4
+stepRORPOMin=3
+stepRORPOMax=5
 
 python3 makeFrangiScales.py $minBoundStart $minBoundEnd $minBoundStep $maxBoundStart $maxBoundEnd $maxBoundStep $step > $dirName/FrangiScalesSearch.json
 python3 makeMeijeringScales.py $minBoundStart $minBoundEnd $minBoundStep $maxBoundStart $maxBoundEnd $maxBoundStep $step > $dirName/MeijeringScalesSearch.json
