@@ -1,5 +1,13 @@
 # LiverVesselness
-testRepository for vesselness trials
+Repository of work submitted to ICPR 2020:
+
+**Vesselness Filters: A Survey with Benchmarks Applied to Liver Imaging**
+
+The  implementations of the seven methods are available and results presented on the paper can be reproduced.
+
+Moreover the run of the methods can be done without any installation with this online demonstration:
+
+[http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
 Warning : a wide range of scales can cause a big memory consuption.
 All methods support Dicom inputs using the option --InPutIsDicom or -d
