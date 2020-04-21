@@ -1,9 +1,20 @@
 # LiverVesselness
 Repository for Vesselness benchmark
 
+## Dependancies
+
+ITK > 5.0 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
+recommanded options : Module_Thickness3D, ITK_USE_FFTWF, ITK_USE_FFTWD
+
+Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp)
+Boost > 1.46.0 : needs program_option and filesystem
+
+
+
+
 Warning : a wide range of scales can cause a big memory consuption.
 All methods support Dicom inputs using the option --InPutIsDicom or -d
-All methods support a masking option for
+All methods support a masking option for vesselness intensity rescale.
 
 ## Antiga (generalized Frangi's vesselness)
 ```
