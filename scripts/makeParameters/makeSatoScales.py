@@ -35,6 +35,7 @@ maxBoundaryEnd = decimal.Decimal(sys.argv[5])
 stepBoundaryEnd = decimal.Decimal(sys.argv[6])
 
 step = decimal.Decimal(sys.argv[7])
+scaleSpaceMinSize = float(sys.argv[8])
 
 
 decimal.getcontext().prec = 3
@@ -52,7 +53,7 @@ for i in drange(minBoundaryStart,maxBoundaryStart,stepBoundaryStart) :
         if(j <= i):
             continue
 
-        if((j-i) < 1.6):
+        if((j-i) < scaleSpaceMinSize):
             continue
 
         print("\t{",end="") 
