@@ -38,6 +38,49 @@ class AnalyseResults2:
             dist = np.sqrt( np.square(FalsePositiveRate) + np.square(1 - TruePositiveRate) )
         
             csvFile['ROCDist'] = dist
+
+    def filterToColor(self,name):
+        if "Frangi" in name:
+            return "tab:blue"
+        if "Sato" in name:
+            return "tab:orange"
+        if "Meijering" in name:
+            return "tab:green"
+        if "Zhang" in name:
+            return "tab:red"
+        if "RORPO" in name:
+            return "tab:purple"
+        if "OOF" in name:
+            return "tab:brown"
+        if "Jerman" in name:
+            return "tab:gray"
+        
+        return name
+
+    def shortFilter(self,name):
+        if "Frangi" in name:
+            return "Frangi"
+        if "Sato" in name:
+            return "Sato"
+        if "Meijering" in name:
+            return "Meijering"
+        if "RuiZhang" in name:
+            return "Zhang"
+        if "RORPO" in name:
+            return "RORPO"
+        if "OOF" in name:
+            return "OOF"
+        if "Jerman" in name:
+            return "Jerman"
+        return name
+    
+
+    def shortMask(self,name):
+        if "dilated" in name:
+            return "dilated_Vessels"
+        if "bifurcations" in name:
+            return "bifurcations"
+        return "whole_volume"
         
     def setTopListLength(self,length):
         self.topLength = length
@@ -86,10 +129,13 @@ class AnalyseResults2:
 
         for name,dataGroup in grp:
             dataFiltered = dataGroup.groupby(["Threshold"],as_index=False).mean()
-
+                    
             TPR = dataFiltered['sensitivity']
             FPR = 1 - dataFiltered['specificity']
 
+            #dist = np.sqrt( np.square(FPR) + np.square(1 - TPR) )
+            #dataFiltered.insert(0,"ROCDist",dist)
+            
             curvesData = CurvesData(FPR,TPR,dataFiltered['MCC'].iloc[::-1],dataFiltered['Dice'].iloc[::-1])
 
             dataFiltered.insert(0,"Name",name)
@@ -98,9 +144,24 @@ class AnalyseResults2:
 
             dataFiltered.insert(0,"stdDevMCC",stdDev["MCC"])
             dataFiltered.insert(0,"stdDevDice",stdDev["Dice"])
-
+            dataFiltered.insert(0,"stdDevROCDist",stdDev["ROCDist"])
+            #dataFiltered.insert(0,"stdDevROCDist",dist)
+            
             indexROC = np.argmin( np.array( dataFiltered["ROCDist"]) )
+            #indexROC = np.argmin( dist )
             minRocDist = np.min(dataFiltered["ROCDist"])
+
+            """
+            print(name)
+            print("indexROC:",indexROC,"minRocDist",minRocDist)
+            for i in range(dataFiltered["ROCDist"].size):
+                print(curvesData.FPR.iloc[i],curvesData.TPR.iloc[i], dataFiltered["ROCDist"].iloc[i] )
+            print("-----------------")
+            """
+            
+            #print(curvesData.TPR.iloc[indexROC],curvesData.FPR.iloc[indexROC],minRocDist)
+            #dataFiltered.insert(0,"xROC",curvesData.FPR.iloc[indexROC])
+            #dataFiltered.insert(1,"yROC",curvesData.TPR.iloc[indexROC])
             
             if( rankingMethod == "ROCDist"): # ROC is min distance from the top left corner of the graph (0,1)
                 # using heap instead of queue for top
@@ -147,32 +208,33 @@ class AnalyseResults2:
             result = self.avgMetric(i,rankingMethod)
 
             fig = plt.figure(dpi=100 )
+
             fig.set_size_inches(w=10,h=6)
             axes = fig.subplots(1,3)
             fig.suptitle('Mean metrics : ' + rankingMethod)
-
+            
             templateHeader = "{0:30} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10}\\\\"
             template = "{0:30} & {1:20} & {2:10} & {3:20} & {4:20} & {5:10} & {6:10} & {7:10} & {8:10} & {9:10} \\\\"
 
             print("\\begin{center}")
             print("\\begin{tabular}{l l l l l l l l l l}")
             print("\\hline")
-            print( templateHeader.format("BenchmarkName","Parameters","Threshold","MCC","Dice","ROCDist","TP","TN","FP","FN") )
+            print( templateHeader.format("Filter","Parameters","Threshold","MCC","Dice","ROCDist","TP","TN","FP","FN") )
             #print("\\hline")
 
-            BenchmarkName = self.csvFileList[i].replace("_","\_")
+            FilterName = self.shortFilter( self.csvFileList[i] )
+            MaskName = self.shortMask( self.csvFileList[i] )
             for d,j,infos,curvesData in result:
-                Name = infos["Name"].replace("_","\_")
+                Name = self.shortFilter( infos["Name"].replace("_","\_") )
                 Threshold = infos["Threshold"]
                 
-                MCC =  "{0:5.4f} $\pm$ {1:2.5f}".format( infos["MCC"],infos["stdDevMCC"] )
-                Dice = "{0:5.4f} $\pm$ {1:2.5f}".format( infos["Dice"],infos["stdDevDice"] )
-                ROC =  "{:5.4f}".format( infos["ROCDist"] )
+                MCC =  "{0:5.3f} $\pm$ {1:2.3f}".format( infos["MCC"],infos["stdDevMCC"] )
+                Dice = "{0:5.3f} $\pm$ {1:2.3f}".format( infos["Dice"],infos["stdDevDice"] )
+                ROC =  "{0:5.4f}$\pm$ {1:2.3f}".format( infos["ROCDist"],infos["stdDevROCDist"] )
                 TP = infos["TP"]
                 TN = infos["TN"]
                 FP = infos["FP"]
                 FN = infos["FN"]
-
 
                 #########################
                 #   printing the results
@@ -186,7 +248,7 @@ class AnalyseResults2:
                 #ax2.set_position([0.66, 0, 0.33, 1])
 
                 # ROC plot
-                ax0.plot(curvesData.FPR,curvesData.TPR,marker="x",label=f"${infos['Name']}$")
+                ax0.plot(curvesData.FPR,curvesData.TPR,marker="x",label=Name)
                 ax0.set_xlabel('False Positive Rate')
                 ax0.set_ylabel('True Postive Rate')
                 ax0.set_ylim(0,1)
@@ -208,22 +270,22 @@ class AnalyseResults2:
                 ax2.set_xlim(1,0)
                 ax2.title.set_text=("Dice")
 
-                print(template.format(BenchmarkName,Name,Threshold,MCC,Dice,ROC,TP,TN,FP,FN))
+                print(template.format(FilterName,Name,Threshold,MCC,Dice,ROC,TP,TN,FP,FN))
             print("\\end{tabular}")
             print("\\end{center}")
 
             dirName = "images/"
-            imgName = self.csvFileList[i].split('.')[0] + "_first_"+rankingMethod + ".pdf"
+            imgName = MaskName +"_"+FilterName +"_mean_"+rankingMethod + ".pdf"
         
             print("\\begin{figure}[ht]")
             print("\\includegraphics[width=\linewidth,]{"+dirName+imgName+"}")
-            print("\\caption{" + BenchmarkName.split('.')[0] + " "+rankingMethod + "}")
+            print("\\caption{" + MaskName.replace("_"," ") + " " + FilterName  + " "+rankingMethod + "}")
             print("\\end{figure}")
             print("\n")
             print("\\FloatBarrier")
 
             fig.legend(loc='lower center',ncol=4)        
-            plt.savefig(dirName+imgName,bbox_inches="tight")
+            fig.savefig(dirName+imgName,bbox_inches="tight")
             plt.close()
 
     def computeTopMeanMetrics(self,rankingMethod):
@@ -235,10 +297,15 @@ class AnalyseResults2:
         axes = fig.subplots(1,3)
         fig.suptitle('Top Mean metrics : ' + rankingMethod)
 
+        fig2 = plt.figure(dpi=100 )
+        fig2.set_size_inches(w=10,h=6)
+        ax02 = fig2.add_subplot()
+        #fig2.suptitle('Top Mean metrics : ' + rankingMethod)
+        
         print("\\begin{center}")
         print("\\begin{tabular}{l l l l l l l l l l}")
         print("\\hline")
-        print( templateHeader.format("BenchmarkName","Parameters","Threshold","MCC","Dice","ROCDist","TP","FP","TN","FN") )
+        print( templateHeader.format("Filter","Parameters","Threshold","MCC","Dice","ROCDist","TP","TN","FP","FN") )
         #print("\\hline")
 
         for i in range(0,len(self.csvData) ):
@@ -248,26 +315,29 @@ class AnalyseResults2:
             if(len(result) == 0):
                 raise Exception("error file empty:" + self.csvFileList[i])
             d,id,infos,curvesData = result[0]
-            BenchmarkName = self.csvFileList[i].replace("_","\_")
 
-            try:
-                    curvesName = re.search( r'[a-z,A-Z]+ScalesSearch',self.csvFileList[i]).group(0).split("Scales")[0]
-            except:
-                curvesName = self.csvFileList[i]
+            FilterName = self.shortFilter( self.csvFileList[i] )
+            MaskName = self.shortMask( self.csvFileList[i] )
+
+            curvesName = FilterName            
             
-            Name = infos["Name"].replace("_","\_")
+            VolumeName = self.shortFilter( infos["Name"].replace("_","\_") )
             Threshold = infos["Threshold"]
-            MCC =  "{0:5.4f} $\pm$ {1:2.5f}".format( infos["MCC"],infos["stdDevMCC"] )
-            Dice = "{0:5.4f} $\pm$ {1:2.5f}".format( infos["Dice"],infos["stdDevDice"] )
-            ROC =  "{:5.4f}".format( infos["ROCDist"] ) 
+            MCC =  "{0:5.3f} $\pm$ {1:2.3f}".format( infos["MCC"],infos["stdDevMCC"] )
+            Dice = "{0:5.3f} $\pm$ {1:2.3f}".format( infos["Dice"],infos["stdDevDice"] )
+            ROC =  "{0:5.4f} $\pm$ {1:2.3f}".format( infos["ROCDist"],infos["stdDevROCDist"] )
             TP = infos["TP"]
             TN = infos["TN"]
             FP = infos["FP"]
             FN = infos["FN"]
+            #xroc = infos["xROC"]
+            #yroc = infos["yROC"]
+            
+            
+            print(template.format(FilterName,VolumeName,Threshold,MCC,Dice,ROC,TP,TN,FP,FN))
 
-            print(template.format(BenchmarkName,Name,Threshold,MCC,Dice,ROC,TP,FP,TN,FN))
 
-
+            colorFromName = self.filterToColor(curvesName)
             #########################
             #   printing the results
             #########################
@@ -279,16 +349,28 @@ class AnalyseResults2:
             ax2 = axes[2] # Dice
             #ax2.set_position([0.66, 0, 0.33, 1])
 
+            
+            plt.figure(1)
             # ROC plot
-            ax0.plot(curvesData.FPR,curvesData.TPR,marker="x",label=f"${curvesName}$")
+            ax0.plot(curvesData.FPR,curvesData.TPR,color=colorFromName,marker="x",label=curvesName)
             ax0.set_xlabel('False Positive Rate')
-            ax0.set_ylabel('True Postive Rate')
+            ax0.set_ylabel('True Positive Rate')
             ax0.set_ylim(0,1)
             ax0.set_xlim(0,1)
             ax0.title.set_text=("ROC curve")
 
+            plt.figure(2)
+            ax02.plot(curvesData.FPR,curvesData.TPR,label=curvesName,color=colorFromName,linewidth=2)
+            #ax02.plot([0,yroc],[1,xroc],color="r")
+            ax02.set_xlabel('False Positive Rate')
+            ax02.set_ylabel('True Postive Rate')
+            ax02.set_ylim(0,1)
+            #ax02.set_xlim(0,1)
+            ax02.title.set_text=("ROC curve")
+            
+            plt.figure(1)
             # MCC plot
-            ax1.plot(np.linspace(1,0,curvesData.MCC.size),curvesData.MCC.values,label="_nolegend_")
+            ax1.plot(np.linspace(1,0,curvesData.MCC.size),curvesData.MCC.values,color=colorFromName,label="_nolegend_")
             ax1.set_xlabel('threshold')
             ax1.set_ylabel('MCC')
             ax1.set_ylim(-1,1)
@@ -296,7 +378,7 @@ class AnalyseResults2:
             ax1.title.set_text=("MCC")
 
             # Dice plot
-            ax2.plot(np.linspace(1,0,curvesData.Dice.size),curvesData.Dice.values,label="_nolegend_")
+            ax2.plot(np.linspace(1,0,curvesData.Dice.size),curvesData.Dice.values,color=colorFromName,label="_nolegend_")
             ax2.set_xlabel('threshold')
             ax2.set_ylabel('dice')
             ax2.set_ylim(0,1)
@@ -308,17 +390,24 @@ class AnalyseResults2:
         print("\n")
 
         dirName = "images/"
-        imgName = self.csvFileList[i].split('.')[0] + "_"+rankingMethod + ".pdf"
-    
+        imgName = MaskName + "_top_"+rankingMethod + ".pdf"
+        #self.shortMask(self.csvFileList[i]) + "_top_"+rankingMethod + ".pdf"
+
+        
+        
         print("\\begin{figure}[ht]")
         print("\\includegraphics[width=\linewidth,]{"+dirName+imgName+"}")
-        print("\\caption{" + BenchmarkName.split('.')[0] + " "+rankingMethod + "}")
+        print("\\caption{"  + MaskName.replace("_"," ") + " "+rankingMethod + "}")
         print("\\end{figure}")
         print("\n")
         print("\\FloatBarrier")
 
         fig.legend(loc='lower center',ncol=4)        
-        plt.savefig(dirName+imgName,bbox_inches="tight")
+        fig.savefig(dirName+imgName,bbox_inches="tight")
+
+        fig2.legend(loc='lower right')
+        fig2.savefig( MaskName + "_top_"+rankingMethod + "_ROCCurve" + ".pdf" )
+        
         plt.close()
         
 
@@ -340,9 +429,11 @@ class AnalyseResults2:
             print("\\hline")
             print( templateHeader.format("BenchmarkName","Volume","Name","Threshold","MCC","Dice","ROCDist","TP","FP","TN","FN") )
 
-            BenchmarkName = self.csvFileList[i].replace("_","\_")
+            #BenchmarkName = self.csvFileList[i].replace("_","\_")
+            FilterName = self.shortFilter( self.csvFileList[i] )
+            MaskName = self.shortMask( self.csvFileList[i] )
             for infos in result:
-                Name = infos["Name"].replace("_","\_")
+                Name = self.shortFilter(infos["Name"])
                 Threshold = infos["Threshold"]
                 Volume = infos["Volume"]
                 MCC =  "{0:5.4f}".format( infos["MCC"] )
@@ -352,7 +443,7 @@ class AnalyseResults2:
                 TN = infos["TN"]
                 FP = infos["FP"]
                 FN = infos["FN"]
-                print(template.format(BenchmarkName,Volume,Name,Threshold,MCC,Dice,ROC,TP,FP,TN,FN))
+                print(template.format(MaskName.replace("_","\_")+" "+FilterName,Volume,Name,Threshold,MCC,Dice,ROC,TP,FP,TN,FN))
             print("\n") 
             print("\\end{tabular}")
             print("\\end{center}")
@@ -411,7 +502,8 @@ matplotlib.rcParams.update({
     "pgf.texsystem":"pdflatex",
     'font.family':'serif',
     'text.usetex':True,
-    'pgf.rcfonts':False
+    'pgf.rcfonts':False,
+    'font.size':16
 })
 
 print("\\documentclass{article}")
@@ -439,9 +531,7 @@ analyseMask_annexe(WholeFileList,listLength)
 print("\\section{Vessels neighbourhood metrics}")
 analyseMask_annexe(DilatedVesselsFileList,listLength)
 print("\\section{Bifurcations metrics}")
-analyseMask_annexe(BifurcationFileList,listLength)
+#analyseMask_annexe(BifurcationFileList,listLength)
 
 print("\\end{landscape}")
 print("\\end{document}")
-
-

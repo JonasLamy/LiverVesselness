@@ -19,7 +19,7 @@ listDir = next(os.walk(inputDir))
 
 generator = vascuSynth.Generator()
 
-for dirName in listDir[1][ :int( len(listDir[1])/2 ) ]:
+for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
     if dirName.startswith('Group'):
         # creating group dirs in destination folder
         if not os.path.exists( outputDir + "/" + dirName):
@@ -46,7 +46,7 @@ for dirName in listDir[1][ :int( len(listDir[1])/2 ) ]:
 
                     if file.endswith('.mhd'):
                         
-                        print(filePath +"/"+ "vbi_rician_5.0.nii")
+                        print(filePath +"/"+ "vbi_rician_20.0.nii")
                         print("vascu_2013/maskWholeImage.nii") # only image at root directory
                         print(filePath +"/"+ "bifurcationGT.nii")
                         print(filePath +"/"+ "gtDilated.nii")
