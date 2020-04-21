@@ -1,5 +1,14 @@
 # LiverVesselness
-Repository for Vesselness benchmark
+
+Repository of work submitted to ICPR 2020:
+
+**Vesselness Filters: A Survey with Benchmarks Applied to Liver Imaging**
+
+The  implementations of the seven methods are available and results presented on the paper can be reproduced.
+
+Moreover the run of the methods can be done without any installation with this online demonstration:
+
+[http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
 ## Dependancies
 
@@ -8,7 +17,6 @@ recommanded options : Module_Thickness3D, ITK_USE_FFTWF, ITK_USE_FFTWD
 
 Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp)
 Boost > 1.46.0 : needs program_option and filesystem
-
 
 
 
@@ -124,4 +132,3 @@ Example:
 The benchmark detects if input images (input,gt,mask) are DICOMs by checking if GT path leads to a directory or not.
 It is possible to compute metrics without keeping output volumes (for memory management) using the option -r.
 It is possible to rescale responses according to a mask using the option --useMask # ( Organ mask:0  Dilated vessels mask:1 Bifurcation mask:2).
-
