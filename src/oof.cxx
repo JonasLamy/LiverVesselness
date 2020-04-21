@@ -53,14 +53,7 @@ int main(int argc, char** argv)
     po::notify(vm);
     if( !parsingOK || vm.count("help") || argc<=1 )
     {
-      std::cout<<"\n Usage : ./OOF --input=<inputImg> --output=<inputImg> --sigmaMin=<sMin> --sigmaMax=<sMax> --nbSigmaSteps=<nbSteps> --sigma=<S> \n\n"
-                << " inputImg : input image (nifti)\n"
-                << " outputImg : output image (nifti)\n"
-                << " sigmaMin : min scale space value \n"
-                << " sigmaMax : max scale space value \n"
-		<< " nbSigmaSteps : number of scales\n"
-	        << " sigma : fixed sigma smoothing \n\n"
-                <<"example : ./OOF --input liver.nii --output result.nii --sigmaMin 1 --sigmaMax 5 --nbSigmaSteps 5 \n" << std::endl;
+      std::cout<< general_opt << std::endl;
       return 0;
     }
 
