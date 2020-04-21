@@ -79,7 +79,7 @@ set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DI
 
 # RORPO ----------------------------
 
-#add_subdirectory(RORPO)
+add_subdirectory(RORPO)
 
 # benchmark ------------------------
 
@@ -98,77 +98,67 @@ set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 
 # process ircad -------------------
 
-add_executable(CropImages src/crop_ircad_data.cpp)
-target_include_directories(CropImages PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(CropImages ${ITK_LIBRARIES})
-set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#add_executable(CropImages src/crop_ircad_data.cpp)
+#target_include_directories(CropImages PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(CropImages ${ITK_LIBRARIES})
+#set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 # utilities --------------------------------
 
-add_executable(ChangeLabelDicom src/changeLabelDicom.cpp)
-target_include_directories(ChangeLabelDicom PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
-set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+#add_executable(ChangeLabelDicom src/changeLabelDicom.cpp)
+#target_include_directories(ChangeLabelDicom PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
+#set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
-add_executable(MakeIso src/makeIso.cpp)
-target_include_directories(MakeIso PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeIso ${ITK_LIBRARIES})
-set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#add_executable(MakeIso src/makeIso.cpp)
+#target_include_directories(MakeIso PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeIso ${ITK_LIBRARIES})
+#set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
-add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
-target_include_directories(MakeVascuSynthGT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
-set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
-
-# TODO remove this - no longer needed
-add_executable(testScaleSpace src/testScaleSpace.cpp)
-target_include_directories(testScaleSpace PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(testScaleSpace ${ITK_LIBRARIES} Boost::filesystem)
-set_target_properties(testScaleSpace PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+#add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
+#target_include_directories(MakeVascuSynthGT PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
+#set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 # Bifurcations VascuSynth
 
-add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
-target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
-set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
+#target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
+#set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 # Bifurcation IRCAD 
 
-add_executable(MakeIrcadBifurcationGT src/makeIrcadBifurcation.cpp)
-target_include_directories(MakeIrcadBifurcationGT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
-set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#add_executable(MakeIrcadBifurcationGT src/makeIrcadBifurcation.cpp)
+#target_include_directories(MakeIrcadBifurcationGT PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
+#set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 # isoFromUnit local script
 
-add_executable(isoFromUnit src/isoFromUnit.cpp)
-target_include_directories(isoFromUnit PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(isoFromUnit ${ITK_LIBRARIES})
-set_target_properties(isoFromUnit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#add_executable(isoFromUnit src/isoFromUnit.cpp)
+#target_include_directories(isoFromUnit PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(isoFromUnit ${ITK_LIBRARIES})
+#set_target_properties(isoFromUnit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 

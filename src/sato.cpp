@@ -46,13 +46,7 @@ int main( int argc, char* argv[] )
     po::notify(vm);
     if( !parsingOK || vm.count("help") || argc<=1 )
     {
-      std::cout<<"\n Usage : vesselGenerator [backGroundIntensity] [gradMin] [gradMax] [gNoiseMean] [gNoiseStDev] \n\n"
-                << " backgroundIntensity : intensity of the backGround (0-255)\n"
-                << " gradMin - gradMax : greyscale gradient values (0-255)\n"
-                << " gNoiseMean : gaussian additive white noise mean \n"
-                << " gNoiseStDev : gaussian additive white noise standard deviation \n"
-		            << " ouputName : output img without extension, the program will generate both nifti and image output\n\n"
-                <<"example : ./vesselGenerator 128 0 255 128 50 \n" << std::endl;
+      std::cout<< general_opt << std::endl;
     
       return 0;
     }

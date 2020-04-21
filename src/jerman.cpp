@@ -48,16 +48,7 @@ int main( int argc, char* argv[] )
     po::notify(vm);
     if( !parsingOK || vm.count("help") || argc<=1 )
     {
-      std::cout<<"\n Usage : ./JermanVesselness --input=<inputname> --output=<outputName> \
-                --tau=<tau> --sigmaMin=<sigmaMin> --sigmaMax=<sigmaMax> --nbSigmaSteps=<nbSigmaSteps> \n\n"
-                << " inputName : Name of the input image\n"
-                << " outputName : Name of the output image\n"
-                << " tau : scale space normalization coefficient (between [0,1]) \n"
-                << " sigmaMin : scale space minimum size \n"
-		            << " sigmaMax : scale space maximum size \n"
-                << " nbSigmaSteps : scale space length \n\n"
-                <<"example : ./JermanVesselness --input liver.nii --output result.nii --tau 0.75 --sigmaMin 0.3 --sigmaMax 5 --nbSigmaSteps 8 \n" << std::endl;
-    
+      std::cout<< general_opt <<std::endl;
       return 0;
     }
 

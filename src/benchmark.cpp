@@ -77,9 +77,7 @@ int main(int argc, char** argv)
   po::notify(vm);
   if( !parsingOK || vm.count("help") || argc<=1 )
     {
-      std::cout<<"\n Usage : benchmark [input file] [optionnal parameterFile] \n\n"
-	       <<" input : input file listing patient name, image,mask and ground truth\n"
-	       <<" parametersFile : input Json parameter file. If none provided, default is parameters.json\n"<<std::endl;
+      std::cout<< general_opt <<std::endl;
     
       return 0;
     }
