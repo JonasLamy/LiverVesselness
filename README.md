@@ -8,7 +8,7 @@ The  implementations of the seven methods are available and results presented on
 
 Moreover the run of the methods can be done without any installation with this online demonstration:
 
-[http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
+[https://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](https://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
 ## Dependancies
 
