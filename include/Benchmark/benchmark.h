@@ -38,6 +38,7 @@ public:
     void SetOutputDirectory(const std::string &outputDir){m_outputDir = outputDir; }
     void SetPatientDirectory(const std::string &patient){m_patient = patient;}
     void SetMaskName(const std::string &maskFileName){m_maskFileName = maskFileName;}
+    void SetNbThresholds(int nbThresholds){m_nbThresholds=nbThresholds;}
     void run();
     
 private:
@@ -47,6 +48,7 @@ private:
     std::string m_outputDir;
     std::string m_patient;
 
+    int m_nbThresholds;
     static int m_nbAlgorithms;
     bool m_inputIsDicom;
     bool m_computeMetricsOnly;

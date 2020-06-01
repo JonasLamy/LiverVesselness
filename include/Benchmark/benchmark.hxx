@@ -169,9 +169,9 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
 
   // trying out new way of tresholding for complete ROC curve...
   int step = 1;
-  int maxBound = 100;
-  float maxBoundf = 100.0f;
-  for(int i=maxBound; i>0; i-=step)
+  int maxBound = m_nbThresholds;
+  float maxBoundf = m_nbThresholds;
+  for(int i=maxBound; i>=0; i-=step)
   {
     // thresholding for all values ( keeping upper value and adding more incertainty as lower probabilities are accepted )
     auto tFilter = ThresholdFilterType::New();
