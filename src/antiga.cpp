@@ -3,6 +3,7 @@
 #include "itkHessianToObjectnessMeasureImageFilter.h"
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
+#include "itkMaskImageFilter.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -90,20 +91,36 @@ int main( int argc, char* argv[] )
     multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );
     multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );
 
-    // end Antiga vesselness operator
-  /*
-    using OutputImageType = itk::Image< unsigned char, Dimension >;
-    using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, OutputImageType >;
-    RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
-    rescaleFilter->SetInput( multiScaleEnhancementFilter->GetOutput() );
-*/
+    // For antiga, no global parameters (like jerman's lambda_max)
+    // we still have to mask the answer though
+
     using imageWriterType = itk::Image<PixelType,Dimension>;
     typedef  itk::ImageFileWriter< imageWriterType  > WriterType;
     WriterType::Pointer writer = WriterType::New();
-    writer->SetInput( multiScaleEnhancementFilter->GetOutput() );
     writer->SetFileName( std::string(outputFile) );
+
+    typedef itk::Image<uint8_t, Dimension> MaskImageType;
+    MaskImageType::Pointer maskImage;
+    if( !maskFile.empty() )
+    {
+      maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
+    
+      auto maskFilter = itk::MaskImageFilter<ImageType,MaskImageType>::New();
+      maskFilter->SetInput( multiScaleEnhancementFilter->GetOutput() );
+      maskFilter->SetMaskImage(maskImage);
+      maskFilter->SetMaskingValue(0);
+      maskFilter->SetOutsideValue(0);
+
+      maskFilter->Update();
+    
+      writer->SetInput( maskFilter->GetOutput() );
+    }
+    else
+    {
+      writer->SetInput( multiScaleEnhancementFilter->GetOutput() );
+    }
+
     writer->Update();
-
-
+    
     return EXIT_SUCCESS;
 }
