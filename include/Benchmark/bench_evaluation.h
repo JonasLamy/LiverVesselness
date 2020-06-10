@@ -30,10 +30,6 @@ class Eval{
   double hausdorffDistance();
   long double matthewsCorrelation();
 
-
-  static void roc(VoxelsMap &vMap); // not used or implemented here
-    
-  void print();
  private:
   void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask, const std::string &id);
   
@@ -59,7 +55,7 @@ std::ostream& operator <<(std::ostream& out,Eval<TImageType,TGroundTruthImageTyp
 		<< eval.accuracy() << ","
 		<< eval.dice() << ","
 		<< eval.matthewsCorrelation() << "," 
-    << eval.hausdorffDistance() << std::endl;
+    << eval.hausdorffDistance() <<std::endl;
 
     return out;
 }

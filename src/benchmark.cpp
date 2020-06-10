@@ -28,6 +28,19 @@
   #include <sys/types.h>
 #endif
 
+int createDirectory(std::string path)
+{
+  int error = mkdir(path.c_str(), S_IRWXG | S_IRWXU | S_IROTH | S_IXOTH);
+  if (error)
+  {
+    if (errno != EEXIST)
+    {
+      std::cout << "directory creation error: " << errno << " " << path.c_str() << std::endl;
+      throw 1;
+    }
+  }
+  std::cout << "created directory :"<<path<< std::endl;
+}
 
 std::ofstream initCSVFile(std::string csvFileName)
 {
@@ -35,7 +48,7 @@ std::ofstream initCSVFile(std::string csvFileName)
   csvFileStream.open(csvFileName, std::ios::out | std::ios::trunc); // if the file already exists, we discard content
   if( csvFileStream.is_open() )
   {
-    csvFileStream <<"SerieName,Name,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,Hausdorff"<<std::endl;
+    csvFileStream <<"SerieName,VolumeName,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,Hausdorff"<<std::endl;
   } 
   else{ 
     std::cout<<"error couldn't open csv file..."<<std::endl; // *TODO remove cout and do proper exceptions messages
@@ -119,36 +132,18 @@ int main(int argc, char** argv)
   std::string benchDir = benchPath + "/" + benchName;
 
 #ifdef __WIN32__
-  std::cout<<"Windows not supported"<<std::endl;
+  std::cout << "Windows not supported" << std::endl;
   throw;
   //mkdir("bench");
 #else
-  int error = mkdir(benchPath.c_str(),S_IRWXG | S_IRWXU | S_IROTH | S_IXOTH);
-  if(error)
-    {
-      if(errno != EEXIST)
-      {
-	std::cout<<"root directory error: "<<errno<<" "<<benchPath.c_str()<<std::endl; 
-        return 1;
-      }
-    }
-  std::cout<<"created base directory..."<<std::endl;
-  
-  error = mkdir( benchDir.c_str(),S_IRWXG | S_IRWXU | S_IROTH | S_IXOTH);
-  if(error)
-    {
-      if(errno != EEXIST)
-	{
-	std::cout<<"benchmark name directory error: "<<errno<<" "<<benchDir.c_str()<<std::endl; 
-        return 1;
-      }
-    }
-  std::cout<<"created benchmark directory..."<<std::endl;
+  createDirectory(benchPath);
+  createDirectory(benchDir);
+  createDirectory( benchDir+"/csv" );
 #endif
-  
-  std::string csvFileMask = benchDir + "/" + benchName +".csv";
-  std::string csvFileMaskBifurcation = benchDir + "/" + benchName +"_bifurcations.csv";
-  std::string csvFileMaskDilatedVessels = benchDir + "/" + benchName +"_dilatedVessels.csv";
+
+  std::string csvFileMask = benchDir + "/csv/" + benchName +".csv";
+  std::string csvFileMaskBifurcation = benchDir + "/csv/" + benchName +"_bifurcations.csv";
+  std::string csvFileMaskDilatedVessels = benchDir + "/csv/" + benchName +"_dilatedVessels.csv";
   
   std::cout<< "---------------------" << std::endl;
   std::cout<< "csv files" << std::endl;
@@ -225,18 +220,7 @@ int main(int argc, char** argv)
       std::cout<<"Non Unix directory creation not supported 1"<<std::endl;
       throw;
 #else
-      error = mkdir( (benchDir+"/"+patientName).c_str(),S_IRWXG | S_IRWXU | S_IROTH | S_IXOTH);
-      if( error)
-	{
-	  if(errno != EEXIST)
-	    {
-	      std::cout<<"couldn't create patient directory "<<errno<<" "<< (benchDir+benchName+"/"+patientName).c_str() << std::endl; 
-	      std::cout<<errno<<std::endl;
-	    }
-      }
-      else{
-	std::cout<<"creating directory "<< (benchDir+"/"+patientName).c_str()<<std::endl;
-      }
+      createDirectory( benchDir+"/"+patientName );
 #endif
       
 /*
