@@ -191,7 +191,7 @@ int main(int argc, char** argv)
   std::string maskDilatedVesselsName; // name of the dilated vessels mask
   std::string gtName;
 
-
+  // Images types
   using ImageType = itk::Image<double,3>;
   using GroundTruthImageType = itk::Image<int,3>;
   using MaskImageType = itk::Image<int,3>;

@@ -124,20 +124,22 @@ inputName = sys.argv[1]
 saveRocCurves = bool(sys.argv[2])
 
 # adding imageDirectory
-inputImageDir = inputName.split("csv/",1)[0] +"csv/roc_curves"
+benchName = inputName.split('csv/')[1].split('.csv')[0]
+inputImageDir = inputName.split("csv/",1)[0] +"csv/roc_curves_" + benchName 
 print(inputImageDir)
 if not os.path.exists(inputImageDir):
     os.makedirs(inputImageDir)
 
-inputCSV = inputName + ".csv"
-inputBest_MCC = inputName + "_Best_MCC.pkl"
-inputBest_Dice = inputName + "_Best_Dice.pkl"
-inputBest_RocDist = inputName + "_Best_RocDist.pkl"
+inputCSV = inputName
+inputBest_MCC = inputName.split(".csv")[0] + "_Best_MCC.csv"
+inputBest_Dice = inputName.split(".csv")[0] + "_Best_Dice.csv"
+inputBest_RocDist = inputName.split(".csv")[0] + "_Best_RocDist.csv"
+
 
 csv_df = pd.read_csv(inputCSV)
-best_mcc_df = pd.read_pickle(inputBest_MCC)
-best_dice_df = pd.read_pickle(inputBest_Dice)
-best_roc_dist_df = pd.read_pickle(inputBest_RocDist)
+best_mcc_df = pd.read_csv(inputBest_MCC)
+best_dice_df = pd.read_csv(inputBest_Dice)
+best_roc_dist_df = pd.read_csv(inputBest_RocDist)
 
 print('----------- MCC ------------')
 print(best_mcc_df)
