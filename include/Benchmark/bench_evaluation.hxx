@@ -163,35 +163,3 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::dice()
 		return 0;
 	return 2 * m_truePositive / (double)(m_falsePositive + m_falseNegative + 2 * m_truePositive);
 }
-
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType,TGroundTruthImageType,TMaskImageType>::roc(VoxelsMap &vMap)
-{
-	std::cout<<vMap["TP"].size()<<std::endl;
-	
-	for(int i=0;i<vMap["TP"].size();i++)
-	{
-		std::cout<< vMap["TP"][i] << "-" << vMap["FP"][i] <<std::endl;
-	}
-}
-
-
-
-
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::print()
-{
-	std::cout << "stats\n"
-			  << "TP (1,1) :" << m_truePositive << std::endl
-			  << "TN (0,0):" << m_trueNegative << std::endl
-			  << "FP (1,0):" << m_falsePositive << std::endl
-			  << "FN (0,1):" << m_falseNegative << std::endl
-			  << std::endl
-			  << "Sensitivity:" << sensitivity() << std::endl
-			  << "Specificity:" << specificity() << std::endl
-			  << "Precision:" << precision() << std::endl
-			  << "Accuracy:" << accuracy() << std::endl
-			  << "Matthews correlation:" << matthewsCorrelation() << std::endl
-			  << "Dice:" << dice() << std::endl
-			  << "Hausdorff:"<<hausdorffDistance() <<std::endl;
-}

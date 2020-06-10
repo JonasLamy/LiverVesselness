@@ -3,18 +3,28 @@
 
 #include "itkHessianToRuiZhangMeasureImageFilter.h"
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
-#include "itkScalarImageKmeansImageFilter.h"
 #include "itkSigmoidImageFilter.h"
 #include "itkImageDuplicator.h"
 #include "itkImageRegionIterator.h"
 
 #include "itkStatisticsImageFilter.h"
 
+#include "itkKdTree.h"
+#include "itkKdTreeBasedKmeansEstimator.h"
+#include "itkWeightedCentroidKdTreeGenerator.h"
+
+#include "itkMinimumDecisionRule.h"
+#include "itkEuclideanDistanceMetric.h"
+
+#include "itkImageToListSampleAdaptor.h"
+
+
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
 #include <string>
+#include "itkTimeProbe.h"
 
 #include "utils.h"
 
@@ -74,18 +84,24 @@ int main( int argc, char* argv[] )
     auto img = vUtils::readImage<ImageType>(inputFile,isInputDicom);
     MaskImageType::Pointer maskImage;
 
-    // if mask  is provided, use K-mean in mask boundary, else use it on the whole image
-    typedef itk::ScalarImageKmeansImageFilter<ImageType> KmeanFilterType;
-    auto kMeansFilter = KmeanFilterType::New();
     auto duplicator = itk::ImageDuplicator<ImageType>::New();
     ImageType::Pointer maskedImage;
     auto stats = itk::StatisticsImageFilter<ImageType>::New();
 
 
+    typedef itk::Statistics::ImageToListSampleAdaptor< ImageType >   AdaptorType;
+    AdaptorType::Pointer adaptor = AdaptorType::New();
+    // Create the K-d tree structure
+    typedef itk::Statistics::WeightedCentroidKdTreeGenerator< AdaptorType > TreeGeneratorType;
+    TreeGeneratorType::Pointer treeGenerator = TreeGeneratorType::New();
+    typedef TreeGeneratorType::KdTreeType TreeType;
+    typedef itk::Statistics::KdTreeBasedKmeansEstimator<TreeType> EstimatorType;
+    EstimatorType::Pointer estimator = EstimatorType::New();
+
     if( !maskFile.empty() )
     {
       maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
-      // creating the mask manually, our masks are not homogeneous for some.
+      // creating the mask manually.
 
       duplicator->SetInputImage(img);
       duplicator->Update();
@@ -105,45 +121,58 @@ int main( int argc, char* argv[] )
         ++itMask;
       }
     
-      kMeansFilter->SetInput( maskedImage );
+      adaptor->SetImage( maskedImage );
       stats->SetInput( maskedImage );
     }
     else
     {
-      kMeansFilter->SetInput( img );
+      adaptor->SetImage( img );
       stats->SetInput( img );
     }
     
-    kMeansFilter->SetUseNonContiguousLabels(true);
-
-    
-    
     stats->Update();
+    adaptor->Update();
     
     double min = stats->GetMinimum(); // 0/4
     double max = stats->GetMaximum(); // 4/4
     
+    EstimatorType::ParametersType initialMeans(nbClasses);
+    
+    
+    
     std::cout<<"min seed: "<<min<<std::endl;
 
-    kMeansFilter->AddClassWithInitialMean(min);
+    initialMeans[0] = min;
     double step = (max - min) / nbClasses;
     for(int i=1; i<nbClasses-1;i++)
     {
-        kMeansFilter->AddClassWithInitialMean(step * i + min);
+        initialMeans[i] = step * i + min;
         std::cout<<"seed: "<<step*i+min<<std::endl;
     }
-    kMeansFilter->AddClassWithInitialMean(max);
+    initialMeans[nbClasses-1] = max;
 
     std::cout<<"max seed: "<<max<<std::endl;
+    itk::TimeProbe clock;
 
-    kMeansFilter->Update();
+    clock.Start();
+    treeGenerator->SetSample( adaptor );
+    treeGenerator->SetBucketSize( 16 );
+    treeGenerator->Update();
+    estimator->SetParameters( initialMeans );
+    estimator->SetKdTree( treeGenerator->GetOutput() );
+    estimator->SetMaximumIteration( 200 );
+    estimator->SetCentroidPositionChangesThreshold(0.0);
+    estimator->StartOptimization();
+    clock.Stop();
+    
+    std::cout<<"clock:"<<clock.GetTotal(); 
+  EstimatorType::ParametersType estimatedMeans = estimator->GetParameters();
 
-    KmeanFilterType::ParametersType estimatedMeans = kMeansFilter->GetFinalMeans();
-    for( unsigned int i=0;i<nbClasses;i++)
-    {
-        std::cout<<"cluster["<<i<<"]"<<std::endl;
-        std::cout<<"estimated mean : "<<estimatedMeans[i]<<std::endl;
-    }
+  for ( unsigned int i = 0 ; i < nbClasses ; ++i )
+  {
+    std::cout << "cluster[" << i << "] " << std::endl;
+    std::cout << "    estimated mean : " << estimatedMeans[i] << std::endl;
+  }
 
     double alpha = (estimatedMeans[nbClasses-1] - estimatedMeans[nbClasses-2])/2.0;
     double beta  = (estimatedMeans[nbClasses-1] + estimatedMeans[nbClasses-1])/2.0;

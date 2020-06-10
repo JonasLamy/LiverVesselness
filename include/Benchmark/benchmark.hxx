@@ -53,6 +53,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
   std::cout<<"------------------"<<std::endl;
 
   Json::Value::Members algoNames = m_rootNode.getMemberNames();
+  
   for (auto &algoName : algoNames)
   {
     std::cout << "Algorithm n°" << m_nbAlgorithms << " " << algoName << std::endl;
@@ -161,7 +162,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       return;
     }
 
-
+  
 
   // Computing roc curve for the image segmentation
   double bestThreshold = 0;
