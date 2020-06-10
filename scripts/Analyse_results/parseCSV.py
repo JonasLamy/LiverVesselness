@@ -36,8 +36,8 @@ for serieName,data in grp:
 df_rocDist = pd.DataFrame(dataList,columns=["SerieName","VolumeName","minROCDist","TPR","FPR"]).sort_values(by=["SerieName","minROCDist"],ascending=True)
 print(df_rocDist)
 
-SaveName = dataName + "_Best_RocDist.pkl"
-df_rocDist.to_pickle(SaveName)
+saveName = dataName + "_Best_RocDist.csv"
+df_rocDist.to_csv(saveName,index=False)
 
 
 ###################
@@ -62,9 +62,9 @@ for rankingMethod in ["MCC","Dice"]:
     temp_df = pd.DataFrame(dataList).sort_values(by=["SerieName",rankingMethod],ascending=False)
     print(temp_df)
     
-    saveName = dataName+"_Best_" + rankingMethod + ".pkl"
+    saveName = dataName+"_Best_" + rankingMethod + ".csv"
     print(saveName)
-    temp_df.to_pickle(saveName)
+    temp_df.to_csv(saveName,index=False)
 
     print("------------")
 
