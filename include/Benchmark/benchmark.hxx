@@ -108,7 +108,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
       for (auto &arg : arguments)
       {
         std::string m = arg.getMemberNames()[0]; // only one name in the array
-        sStream << m << " " << arg[m].asString() << " ";
+        sStream << "--" << m << " " << arg[m].asString() << " ";
       }
 
       if( !m_maskFileName.empty() )

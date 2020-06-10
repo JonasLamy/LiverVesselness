@@ -164,8 +164,8 @@ int main( int argc, char* argv[] )
     estimator->SetCentroidPositionChangesThreshold(0.0);
     estimator->StartOptimization();
     clock.Stop();
-    
-    std::cout<<"clock:"<<clock.GetTotal(); 
+
+    std::cout<<"clock:"<<clock.GetTotal()<<std::endl; 
   EstimatorType::ParametersType estimatedMeans = estimator->GetParameters();
 
   for ( unsigned int i = 0 ; i < nbClasses ; ++i )
