@@ -5,7 +5,7 @@ project(Vesselness)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
  
-find_package(ITK 5.0 REQUIRED)
+find_package(ITK 5.1 REQUIRED)
 include(${ITK_USE_FILE})
 find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options filesystem)
 
