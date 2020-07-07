@@ -13,6 +13,8 @@ Moreover the run of the methods can be done without any installation with this o
 ## Dependancies
 - Benchmark (C/C++)
 
+CMake > 3.10.2 (https://cmake.org/)
+
 ITK > 5.0 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
 recommanded options : Module_Thickness3D, ITK_USE_FFTWF, ITK_USE_FFTWD
 
@@ -64,7 +66,7 @@ The settings file options are the following :
 - path : path where you want the benchmark folder to be created ( see Benchmark Hierarchy for more details )
 - inputVolumesList : path to the .txt file listing the data used
 - algorithmSets : path to the json file enumerating benchmarked algorithms and their parameters
-- maskType : The type of mask used; it can be "Organ","DilatedVessels","Bifurcations or "" (for No masks). * 
+- maskType : The type of mask used; available options are : "Organ","DilatedVessels","Bifurcations or "" (for No masks). The filter response will be computed in this mask. * 
 - nbThresholds : Metrics are computed between the thresholded output of the filters and the groundtruth. This parameter controls the number of thresholds we want to make. This parameter also controls the amount of points when computing the ROC curve of a filter output.
 - removeResultsVolumes : true/false if set to true, the output volumes are discarded after metrics are computed. This option is useful on big benchmark or computers with low disk space. 
 
@@ -103,19 +105,23 @@ path/newBenchmark
 	|	|_ ouputVesselness2.nii
 	|	|_outputVesselness3.nii
 	|_ data2
-	|_ ouputVesselness1.nii
+	|   |_ ouputVesselness1.nii
 	|	|_ ouputVesselness2.nii
 	|	|_outputVesselness3.nii
 ```
+with "outputVesselness*.nii" the output of a parameter set defined in section "Methods parameters".
 
 ### Input Volumes list
-For a given data, for instance liver CTs, The input volume list requires an input volume, several masks and a groundtruth. The supported types are listed in the table below:
+For a given data, for instance liver CTs, The input volume list requires an input volume, several masks and a groundtruth. The supported input volume types are listed in the table below:
 
 | Volume      | Other (.mhd,.nii,etc.) | Dicom |
 |-------------|------------------------|-------|
 | input volume| double                 | int_16|
 | masks       | uint_8                 | uint_8|
 | ground truth| uint_8                 | uint_8|
+
+Other types will require to tweak the code...Especially input template type.
+
 
 The input volume list is a .txt file listing all necessary volumes for the benchmark in the following order :
 
@@ -202,6 +208,9 @@ Currently the command line is created using the boost options format. The Antiga
 ```
 
 Note that a parameter file can be composed of one or several vesselness with one or several instances of parameters.
+
+for instance, when testing one instance of each vesselness "frangi.nii", "Jerman.nii", "Sato.nii", naming scheme is suitable. When benchmarking parameters, a naming scheme with the value of the parameters is more practical. For example, "0.1-0.5.nii","0.5-0.5.nii" for testing the influence of the pair of parameters alpha and beta for frangi's vesselness. 
+
 ### Adding a custom vesselness
 
 As stated before, the benchmark is designed to use stand alone vesselness functions.
@@ -227,10 +236,11 @@ python3 parseCSV.py pathToCSV/myResultCSVFile.csv
 - analysing results (means per parameter sets)
 
 This script computes the mean and standard deviation of the best MCC, DICE and ROC dist for each parameters sets and summarize it in a csv file.
-The script needs the csv file from the benchmark as unique input as it will determine the others from it's name.
+The script needs the csv file corresponding to the "organ" mask from the benchmark as unique input as it will determine the others ("dialtedVessels" and "bifurcations") from it's name.
 Moreover, you can choose to save the ROC curves for visualization.
 
 ```
+python3 parseCSV.py <path to csv> <plot ROC>
 python3 parseCSV.py pathToCSV/myResultCSVFile.csv 1 
 
 output example :
@@ -239,6 +249,5 @@ antiga1.nii  ,0.347 ,0.021   ,0.356 ,0.021    ,0.609    ,0.145
 antiga2.nii  ,0.418 ,0.030   ,0.435 ,0.024    ,0.345    ,0.161
 antiga3.nii  ,0.340 ,0.028   ,0.352 ,0.024    ,0.338    ,0.106
 meijering.nii,0.000 ,0.000   ,0.064 ,0.025    ,1.000    ,0.000
-
 
 ```
