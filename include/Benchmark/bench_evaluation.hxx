@@ -5,7 +5,13 @@
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id, const char* evalName)
-	: m_truePositive(0), m_trueNegative(0), m_falsePositive(0), m_falseNegative(0), m_epsilon(0.000001f),m_evalName(evalName)
+	: m_truePositive(0), 
+	m_trueNegative(0), 
+	m_falsePositive(0), 
+	m_falseNegative(0), 
+	m_foreground(0),
+	m_background(0),
+	m_epsilon(0.000001f),m_evalName(evalName)
 {
 	countMatchesBinary(img, gt, mask, id);
 }
@@ -33,6 +39,17 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	//auto writer = itk::ImageFileWriter<TImageType>::New();
 	while (!itImg.IsAtEnd())
 	{
+		// sparcity
+		if( itImg.Get() == 0 )
+		{
+			m_background ++;
+		}
+		else
+		{
+			m_foreground ++;
+ 		}
+
+		// confusion matrix
 		if (itMask.Get() > 0)
 		{
 			if (itImg.Get() > 0)
@@ -75,10 +92,10 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	//if( m_truePositive == 0 and m_falsePositive == 0)
 	//{
 		// space is a rectangular cuboid, so space diagonal should be the max distance
-		int a = gt->GetLargestPossibleRegion().GetSize()[0];
-		int b = gt->GetLargestPossibleRegion().GetSize()[1];
-		int c = gt->GetLargestPossibleRegion().GetSize()[2];
-		m_hausdorff_distance = std::sqrt(a*a + b*b + c*c);
+		//int a = gt->GetLargestPossibleRegion().GetSize()[0];
+		//int b = gt->GetLargestPossibleRegion().GetSize()[1];
+		//int c = gt->GetLargestPossibleRegion().GetSize()[2];
+		//m_hausdorff_distance = std::sqrt(a*a + b*b + c*c);
 	//	std::cout<<a<<" "<<b<<" "<<c<<" "<<m_hausdorff_distance<<std::endl;
 	//}	
 	//else
@@ -162,4 +179,10 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::dice()
 	if( (m_falsePositive + m_falseNegative + 2 * m_truePositive) == 0 )
 		return 0;
 	return 2 * m_truePositive / (double)(m_falsePositive + m_falseNegative + 2 * m_truePositive);
+}
+
+template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+double Eval<TImageType, TGroundTruthImageType, TMaskImageType>::sparsity()
+{ 
+	return m_background / (double)(m_foreground + m_background);
 }

@@ -20,7 +20,8 @@ class Eval{
   long TN(){return m_trueNegative;}
   long FP(){return m_falsePositive;}
   long FN(){return m_falseNegative;}
-
+  long foreground(){return m_foreground;}
+  long background(){return m_background;}
 
   double sensitivity();
   double specificity();
@@ -29,6 +30,7 @@ class Eval{
   double dice();
   double hausdorffDistance();
   long double matthewsCorrelation();
+  double sparsity();
 
  private:
   void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask, const std::string &id);
@@ -39,6 +41,8 @@ class Eval{
   long m_falseNegative;
   float m_epsilon;
   double m_hausdorff_distance;
+  long m_background;
+  long m_foreground;
   std::string m_evalName;
 };
 
@@ -54,8 +58,9 @@ std::ostream& operator <<(std::ostream& out,Eval<TImageType,TGroundTruthImageTyp
 		<< eval.precision() << ","
 		<< eval.accuracy() << ","
 		<< eval.dice() << ","
-		<< eval.matthewsCorrelation() << "," 
-    << eval.hausdorffDistance() <<std::endl;
+		<< eval.matthewsCorrelation() << ","
+    << std::endl;
+    //<< eval.sparsity() <<std::endl;
 
     return out;
 }
