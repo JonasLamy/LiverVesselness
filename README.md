@@ -32,6 +32,8 @@ Livervesselness should be build with cmake and generate:
 
 ## Vesselness filters
 
+All vesselness filters are available as standalone programs. Look for each filter's help for usage.
+
 ### Antiga
 ```
 ./Antiga --input OneInputFromVolumeList --ouput antiga.nii --sigmaMin 2.4 --sigmaMax 2.6 --nbSigmaSteps 4 --alpha 0.7 --beta 0.1 --gamma 5
