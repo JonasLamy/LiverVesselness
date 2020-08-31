@@ -14,12 +14,19 @@ using MetricsMap = std::map<std::string,std::vector<double> >;
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 class Eval{
  public:
-  Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id, const char* evalName = "eval");
+  Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
+  Eval(long tp,long tn, long fp, long fn);
 
   long TP(){return m_truePositive;}
   long TN(){return m_trueNegative;}
   long FP(){return m_falsePositive;}
   long FN(){return m_falseNegative;}
+  // testing purpose
+  void setTP(long tp){m_truePositive = tp;}
+  void setTN(long tn){m_trueNegative = tn;}
+  void setFP(long fp){m_falsePositive = fp;}
+  void setFN(long fn){m_falseNegative = fn;}
+
   long foreground(){return m_foreground;}
   long background(){return m_background;}
 
@@ -33,7 +40,7 @@ class Eval{
   double sparsity();
 
  private:
-  void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask, const std::string &id);
+  void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
   
   long m_truePositive;
   long m_trueNegative;
@@ -43,7 +50,6 @@ class Eval{
   double m_hausdorff_distance;
   long m_background;
   long m_foreground;
-  std::string m_evalName;
 };
 
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>

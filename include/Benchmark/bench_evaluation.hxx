@@ -4,20 +4,36 @@
 //#include "itkViewImage.h"
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id, const char* evalName)
+Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, 
+															const typename TGroundTruthImageType::Pointer gt, 
+															const typename TMaskImageType::Pointer mask)
 	: m_truePositive(0), 
 	m_trueNegative(0), 
 	m_falsePositive(0), 
 	m_falseNegative(0), 
 	m_foreground(0),
 	m_background(0),
-	m_epsilon(0.000001f),m_evalName(evalName)
+	m_epsilon(0.000001f)
 {
-	countMatchesBinary(img, gt, mask, id);
+	countMatchesBinary(img, gt, mask);
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask, const std::string &id)
+Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(long tp, long tn, long fp, long fn)
+	: m_truePositive(tp), 
+	m_trueNegative(tn), 
+	m_falsePositive(fp), 
+	m_falseNegative(fn), 
+	m_foreground(0),
+	m_background(0),
+	m_epsilon(0.000001f)
+{
+}
+
+template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation,
+																				const typename TGroundTruthImageType::Pointer gt,
+																				const typename TMaskImageType::Pointer mask)
 {
 
 	typename itk::ImageRegionConstIterator<TImageType> itImg(segmentation, segmentation->GetLargestPossibleRegion());
@@ -164,6 +180,16 @@ long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorr
 	a *= (m_truePositive + m_falseNegative);
 	a *= (m_trueNegative + m_falsePositive);
 	a *= (m_trueNegative + m_falseNegative);
+
+	if(m_truePositive == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return 1;
+	if(m_trueNegative == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return 1;
+
+	if(m_falseNegative == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return -1;
+	if(m_falsePositive == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return -1;
 
 	if( std::abs(a) < m_epsilon)
 		return 0;
