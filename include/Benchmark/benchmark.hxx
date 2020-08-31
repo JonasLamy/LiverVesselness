@@ -129,7 +129,10 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
-void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName)
+void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,
+                                                                              const std::string &commandLine,
+                                                                              const std::string &outputDir,
+                                                                              const std::string &outputName)
 {
   typedef itk::BinaryThresholdImageFilter<TImageType,TGroundTruthImageType> ThresholdFilterType;
 
@@ -185,9 +188,9 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     tFilter->Update();
     auto segmentationImage = tFilter->GetOutput();
     
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_maskLiver,std::to_string(i/maxBoundf));
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalBifurcations(segmentationImage,m_gt,m_maskBifurcation,std::to_string(i/maxBoundf),"bifurcations");
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalDilatedVessels(segmentationImage,m_gt,m_maskVesselsDilated,std::to_string(i/maxBoundf),"vessels");
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_maskLiver);
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalBifurcations(segmentationImage,m_gt,m_maskBifurcation);
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalDilatedVessels(segmentationImage,m_gt,m_maskVesselsDilated);
 
     if( i%10 == 0)
     {
