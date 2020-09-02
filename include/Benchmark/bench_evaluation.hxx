@@ -30,6 +30,21 @@ Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(long tp, long tn, l
 {
 }
 
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+void Eval<TImageType, TGroundTruthImageType, TMaskImageType>::countMatches(std::list<typename TImageType::PixelType> & list,
+																		   float threshold)
+{
+	
+	typename std::list<typename TImageType::PixelType>::iterator it = list.begin();
+	
+	// list should be from masked region of interest
+	while( it != list.end() )
+	{
+		it++;
+	}
+
+}
+
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation,
 																				const typename TGroundTruthImageType::Pointer gt,
@@ -55,16 +70,6 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	//auto writer = itk::ImageFileWriter<TImageType>::New();
 	while (!itImg.IsAtEnd())
 	{
-		// sparcity
-		if( itImg.Get() == 0 )
-		{
-			m_background ++;
-		}
-		else
-		{
-			m_foreground ++;
- 		}
-
 		// confusion matrix
 		if (itMask.Get() > 0)
 		{
@@ -210,5 +215,6 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::dice()
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType, TMaskImageType>::sparsity()
 { 
-	return m_background / (double)(m_foreground + m_background);
+	// background / (background+foreground)
+	return (m_trueNegative+m_falseNegative) / (double)( (m_trueNegative+m_falseNegative) + (m_truePositive+m_falsePositive) );
 }
