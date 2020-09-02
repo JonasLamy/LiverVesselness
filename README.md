@@ -233,6 +233,9 @@ Any extra vesselness filter can be included by following these two steps:
 The minimal call of a new filter should be : ./YourVesselness --input inputVolume.nii --output outputVolume.nii
 
 ### Analyse scripts
+
+Update : In the paper the global best mean MCC is computed over all segmentation thresholds. The scripts are now computing the mean of the best MCC of each volumes.
+
 The scripts provided are used to find the mean of the best MCC, Dice and ROC dist as well as computing the ROC curves once the metrics are computed. 
 
 - **parsing csv**
