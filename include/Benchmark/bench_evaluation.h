@@ -7,15 +7,19 @@
 #include "itkHausdorffDistanceImageFilter.h"
 #include <iostream>
 
-// map to store values
-using VoxelsMap = std::map<std::string,std::vector<long> >;
-using MetricsMap = std::map<std::string,std::vector<double> >;
+
+struct ConfusionMatrix{
+  long TP;
+  long TN;
+  long FP;
+  long FN;
+};
 
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 class Eval{
  public:
   Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
-  Eval(long tp,long tn, long fp, long fn);
+  Eval(long tp=0,long tn=0, long fp=0, long fn=0);
 
   long TP(){return m_truePositive;}
   long TN(){return m_trueNegative;}
@@ -39,9 +43,12 @@ class Eval{
   long double matthewsCorrelation();
   double sparsity();
 
+  void countMatches(std::list<typename TImageType::PixelType> &listV, float threshold);
+
  private:
   void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
   
+
   long m_truePositive;
   long m_trueNegative;
   long m_falsePositive;

@@ -13,7 +13,7 @@
 
 #include "itkImageFileReader.h"
 #include "itkBinaryThresholdImageFilter.h"
-
+#include "itkImageRegionConstIteratorWithIndex.h"
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 class Benchmark
@@ -65,7 +65,20 @@ private:
     typename TMaskImageType::Pointer m_maskBifurcation;
 
     void launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName);
-    //void addResultsToFile(int algoID,int threshold, const Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType>& eval);
+    // test function for speedy confusion matrix computation
+    void launchScriptFast(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName);
+    
+    void computeMetrics(const std::string & outputName,TImageType* outputImage,
+                        TGroundTruthImageType* gt,
+                        TMaskImageType* mask, 
+                        std::ofstream * stream);
+    void computeConfusionValues(typename std::list<typename TImageType::PixelType> & foregroundValues,
+                                typename std::list<typename TImageType::IndexType> & foregroundIndexes,
+                                float threshold,
+                                long & TP_f,
+                                long & TN_f, 
+                                long & FP_f, 
+                                long & FN_f);
 };
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
