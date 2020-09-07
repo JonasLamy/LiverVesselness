@@ -34,7 +34,7 @@ Livervesselness should be build with cmake and generate:
 
 All vesselness filters are available as standalone programs. Look for each filter's help for usage.
 
-### Antiga
+### Antiga (Frangi)
 ```
 ./Antiga --input OneInputFromVolumeList --ouput antiga.nii --sigmaMin 2.4 --sigmaMax 2.6 --nbSigmaSteps 4 --alpha 0.7 --beta 0.1 --gamma 5
 ```
@@ -82,7 +82,8 @@ The settings file options are the following :
 - **path** : path where the benchmark folder is created ( see [Benchmark Hierarchy](#benchmark-hierarchy) for more details )
 - **inputVolumesList** : path to the .txt file listing the data used (see [Input Volumes list](#input-volumes-list) for more details)
 - **algorithmSets** : path to the json file listing which vesselness filter to compute and their associated parameters
-- **maskType** : The type of mask used; it can be "Organ","DilatedVessels","Bifurcations or "" (for No masks). The filter response will be computed in this mask. * 
+- **maskList** : The list of masks used in the benchmark. The order of the list must match the order of the input volume list. At least one mask is required. If you are interested in metrics on the full image, you can create a dummy mask for the whole image.
+- **enhancementMask** : The name of the mask used as a region of interest for the enhancement filters. This parameter can be set with an empty string if no enhancement mask is used.*
 - **nbThresholds** : Number of thresholds to compute the different metrics. Each metric compare a binary volume to the ground truth, the binary volume is obtained by thresholding the vesselness result. As the results are normalized between 0 and 1, nbThreshold = 5 would yield 5 thresholds: 0, 0.25, 0.5, 0.75, 1. This parameter also controls the amount of points of the ROC curves
 - **removeResultsVolumes** : true/false. If true, the output volumes are discarded after the metrics computation. This option is useful to save disk space. 
 
@@ -94,7 +95,8 @@ Example of settings file:
 	"path":"/home/path/WhereIWant/My/BenchmarkToBe",
 	"inputVolumesList":"fileLists/ircad_10_and_11.txt",
 	"algorithmSets":"paramSets/minimal.json",
-	"maskType":"",
+	"maskList":["Organ","Vessels","Bifurcations],
+	"enhancementMask":"Organ",
 	"nbThresholds":200,
 	"removeResultsVolumes":false
     }
@@ -123,14 +125,14 @@ path/newBenchmark
 	|	|_outputVesselness3.nii
 ```
 where:
-- newBenchmark.csv contain the metrics computed on the full volume
-- newBenchmark_dilatedVessels.csv contains the metrics computed only in the dilated vessel mask 
-- newBenchmark_bifurcations.csv contains the metrics computed only in the mask of the bifurcations
+- newBenchmark_Organ.csv contain the metrics computed on the full volume
+- newBenchmark_Vessels.csv contains the metrics computed only in the dilated vessel mask 
+- newBenchmark_Bifurcations.csv contains the metrics computed only in the mask of the bifurcations
 - data1, data2 are the name of the two input volumes in the inputVolumesList file
 - ouputVesselness1.nii, ouputVesselness2.nii, ouputVesselness3.nii are the vesseless filter results of each method specified in the methods parameters file.
 
 ### Input Volumes list
-For a given data, for instance liver CTs, the input volume list requires an input volume, several masks and a groundtruth. The supported types are listed in the table below:
+For a given data, for instance liver CTs, the input volume list requires an input volume, several masks and a groundtruth. The supported Image types are listed in the table below:
 
 | Volume      | Other (.mhd,.nii,etc.) | Dicom |
 |-------------|------------------------|-------|
@@ -138,17 +140,17 @@ For a given data, for instance liver CTs, the input volume list requires an inpu
 | masks       | uint_8                 | uint_8|
 | ground truth| uint_8                 | uint_8|
 
-Other types will require to tweak the code...Especially input template type.
-
+Other types will require to tweak the C++ templates in the code...
 
 The input volume list is a .txt file listing all necessary volumes for the benchmark in the following order :
 
 - A unique ID/Name
 - The path to the raw data
+- The path to the vessels groundtruth
 - The path to the organ mask
 - The path to the bifurcations mask
 - The path to the dilated vessels mask
-- The path to the vessels groundtruth 
+ 
 
 Note that the unique ID is used to create a folder containing all its vesselness results. This corresponds to data1 and data2 in the previous section.
 
@@ -156,18 +158,24 @@ Example :
 ```
 3Dircadb1.10 // ID of the first sequence 
 /DATA/ircad_iso_111/3Dircadb1.10/patientIso.nii // input data
+/DATA/ircad_iso_111/3Dircadb1.10/vesselsIso.nii // groundtruth
 /DATA/ircad_iso_111/3Dircadb1.10/liverMaskIso.nii // 1rst mask 
 /DATA/ircad_iso_111/3Dircadb1.10/bifurcationsMaskIso.nii // 2nd mask 
 /DATA/ircad_iso_111/3Dircadb1.10/dilatedVesselsMaskIso.nii // 3rd mask
-/DATA/ircad_iso_111/3Dircadb1.10/vesselsIso.nii // groundtruth
+
 3Dircadb1.11 // ID of the second sequence
 /DATA/ircad_iso_111/3Dircadb1.11/patientIso.nii // input data
+/DATA/ircad_iso_111/3Dircadb1.11/vesselsIso.nii // groundtruth
 /DATA/ircad_iso_111/3Dircadb1.11/liverMaskIso.nii // 1rst mask 
 /DATA/ircad_iso_111/3Dircadb1.11/bifurcationsMaskIso.nii // 2nd mask 
 /DATA/ircad_iso_111/3Dircadb1.11/dilatedVesselsMaskIso.nii // 3rd mask 
-/DATA/ircad_iso_111/3Dircadb1.11/vesselsIso.nii // groundtruth 
 ...
 ```
+
+Notes: 
+The number and order of masks in this file must match the number of masks declared in  the settings file.
+Be careful not to add an extra end of line caracter at the end of the input volume list file.
+
 ### methods Parameters
 
 The parameter file lists the parameters used for each vesselness filter.
@@ -247,7 +255,7 @@ python3 parseCSV.py pathToCSV/myResultCSVFile.csv
 - **analysing results** (means per parameter sets)
 
 This script computes the mean and standard deviation of the best MCC, DICE and ROC dist for each parameters sets and summarize it in a csv file.
-The script needs the csv file corresponding to the "organ" mask from the benchmark as unique input as it will determine the others ("dialtedVessels" and "bifurcations") from it's name.
+
 Moreover, you can choose to save the ROC curves for visualization.
 
 ```
