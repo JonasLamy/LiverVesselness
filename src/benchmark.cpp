@@ -113,7 +113,8 @@ int main(int argc, char** argv)
   std::string benchPath = benchParameters["path"].asString();
   std::string inputVolumesListPath = benchParameters["inputVolumesList"].asString();
   std::string algorithmSetsPath = benchParameters["algorithmSets"].asString();
-  std::string benchMaskType = benchParameters["maskType"].asString();
+  const Json::Value benchMaskList = benchParameters["maskList"];
+  std::string enhancementMask = benchParameters["enhancementMask"].asString();
   bool removeResultsVolumes = benchParameters["removeResultsVolumes"].asBool();
   bool computeMetricsOnly = false; // feature comming soon
   int nbThresholds = benchParameters["nbThresholds"].asInt();
@@ -124,7 +125,7 @@ int main(int argc, char** argv)
             <<"Algorithms set list : "<<algorithmSetsPath << std::endl
             <<"NbThresholds : "<<nbThresholds << std::endl
             <<"Remove volumes :"<< removeResultsVolumes << std::endl
-            <<"Mask type :"<< benchMaskType << std::endl;
+            <<"Mask type :"<< benchMaskList << std::endl;
 
 
 
@@ -141,20 +142,27 @@ int main(int argc, char** argv)
   createDirectory( benchDir+"/csv" );
 #endif
 
-  std::string csvFileMask = benchDir + "/csv/" + benchName +".csv";
-  std::string csvFileMaskBifurcation = benchDir + "/csv/" + benchName +"_bifurcations.csv";
-  std::string csvFileMaskDilatedVessels = benchDir + "/csv/" + benchName +"_dilatedVessels.csv";
-  
   std::cout<< "---------------------" << std::endl;
   std::cout<< "csv files" << std::endl;
 
-  std::cout<<"Opening main csv file :"<<csvFileMask<<std::endl;
-  // opening resultFileStream
-  std::ofstream csvFileStreamMask = initCSVFile(csvFileMask);
-  std::cout<<"Opening Bifurcation csv file :"<<csvFileMaskBifurcation<<std::endl;
-  std::ofstream csvFileStreamMaskBifurcations = initCSVFile(csvFileMaskBifurcation);
-  std::cout<<"Opening dilated vessels csv file :"<<csvFileMaskDilatedVessels<<std::endl;  
-  std::ofstream csvFileStreamMaskDilatedVessels = initCSVFile(csvFileMaskDilatedVessels);
+  std::vector<std::string> csvFileMaskList;
+  std::vector<std::ofstream> csvFileMaskStreamList;
+  int enhancementMaskIndex = -1;
+  int nbMasks = 0;
+  for(auto &mask : benchMaskList)
+  {
+    if(enhancementMask == mask.asString() )
+    {
+      enhancementMaskIndex = nbMasks;
+    }
+
+    csvFileMaskList.push_back(benchDir + "/csv/" + benchName + "_" + mask.asString() +".csv");
+    csvFileMaskStreamList.push_back( initCSVFile(csvFileMaskList[nbMasks]) );
+    std::cout<<"Opening csv file for mask : "<<mask.asString()<<std::endl;
+    nbMasks++;
+  }
+
+  std::cout<<"enhancement mask: "<<enhancementMask<<std::endl;
 
   // -----------------
   // Reading algorithms parameters sets
@@ -201,20 +209,35 @@ int main(int argc, char** argv)
   using DicomMaskImageType = itk::Image<uint8_t,3>;
   
   while(std::getline(f,patientName))
-    {
+  {
+      // image path
       std::getline(f,imgName);
-      std::getline(f,maskName);
-      std::getline(f,maskBifurcationsName);
-      std::getline(f,maskDilatedVesselsName);
+      // Gt image
       std::getline(f,gtName);
+      // masks path
+      std::vector<std::string> maskPathList;
+      std::string maskPath;
+      for(int i=0; i<nbMasks;i++)
+      {
+        std::getline(f,maskPath);
+        maskPathList.push_back(maskPath);
+      }
+
+      std::string enhancementMaskPath = "";
+      if(enhancementMaskIndex >= 0)
+      {
+        enhancementMaskPath = maskPathList[enhancementMaskIndex];
+      }
       
       std::cout<<patientName<<std::endl;
       std::cout<<imgName<<std::endl;
-      std::cout<<maskName<<std::endl;
-      std::cout<<maskBifurcationsName<<std::endl;
-      std::cout<<maskDilatedVesselsName<<std::endl;
       std::cout<<gtName<<std::endl;
-      
+
+      for(int i=0; i<nbMasks;i++)
+      {
+        std::cout<<maskPathList[i]<<std::endl;
+      }
+
       //creating root directory
 #ifdef __WIN32__
       std::cout<<"Non Unix directory creation not supported 1"<<std::endl;
@@ -222,103 +245,75 @@ int main(int argc, char** argv)
 #else
       createDirectory( benchDir+"/"+patientName );
 #endif
-      
-/*
-    // creating subdir for patient - best  * TODO work in progess *
-#ifdef __WIN32__
-      std::cout<<"Non Unix directory creation not supported 2"<<std::endl;
-      throw;
-#else
-      mkdir( (benchDir+"/"+patientName+"/best").c_str(),S_IRWXG | S_IRWXU | S_IROTH | S_IXOTH);
-#endif
-*/
-
-  // dealing with potential masking
-  std::string maskOrganName("");
-  if(benchMaskType == "Organ")
-  {
-    maskOrganName = maskName;
-  }
-  if( benchMaskType == "DilatedVessels")
-  {
-    maskOrganName = maskDilatedVesselsName;
-  }
-  if( benchMaskType == "Bifurcations")
-  {
-    maskOrganName = maskBifurcationsName;  
-  }
-
-  std::cout<< "Mask : "<< maskOrganName << std::endl;
-  
-
-  // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
-  // Mask is only useful for statistics during segmentation assessment, 
-  // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
-      
-      if( vUtils::isDir( gtName ) ) // boolean choice for now, 0 is nifti & 1 is DICOM 
-	{
-	  
-	  std::cout<<"Using dicom groundTruth data...."<<std::endl;
-	  DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(gtName,false);
-	  DicomMaskImageType::Pointer maskImage = vUtils::readImage<DicomMaskImageType>(maskName,false);
-	  DicomMaskImageType::Pointer maskBifurcationImage = vUtils::readImage<DicomMaskImageType>(maskBifurcationsName,false);
-	  DicomMaskImageType::Pointer maskDilatedVesselsImage = vUtils::readImage<DicomMaskImageType>(maskDilatedVesselsName,false);
-	  
-      Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,
-									       imgName,
-									       groundTruth,
-									       csvFileStreamMask,
-									       maskImage,
-									       csvFileStreamMaskDilatedVessels,
-									       maskDilatedVesselsImage,
-									       csvFileStreamMaskBifurcations,
-									       maskBifurcationImage);
-      b.SetOutputDirectory(benchDir+"/"+patientName);
-      b.SetPatientDirectory(benchName+"/"+patientName);
-      b.SetDicomInput();
-      b.SetComputeMetricsOnly(computeMetricsOnly);
-      b.SetremoveResultsVolume(removeResultsVolumes);
-      b.SetMaskName(maskOrganName);
-      b.SetNbThresholds(nbThresholds);
-      
-      b.run();
-	}
-      else
-    {
-      std::cout<<"Using NIFTI groundtruth data...."<<std::endl;
-      GroundTruthImageType::Pointer groundTruth = vUtils::readImage<GroundTruthImageType>(gtName,false);
-      MaskImageType::Pointer maskImage = vUtils::readImage<MaskImageType>(maskName,false);
-      MaskImageType::Pointer maskBifurcationImage = vUtils::readImage<MaskImageType>(maskBifurcationsName,false);
-      MaskImageType::Pointer maskDilatedVesselsImage = vUtils::readImage<MaskImageType>(maskDilatedVesselsName,false);
-      
-      Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,
-                                                                imgName,
-                                                                groundTruth,
-                                                                csvFileStreamMask,
-                                                                maskImage,
-                                                                csvFileStreamMaskDilatedVessels,
-                                                                maskDilatedVesselsImage,
-                                                                csvFileStreamMaskBifurcations,
-                                                                maskBifurcationImage);
-      b.SetOutputDirectory(benchDir+"/"+patientName);
-      b.SetPatientDirectory(benchName+"/"+patientName);
-      b.SetNiftiInput();
-      b.SetComputeMetricsOnly(computeMetricsOnly);
-      b.SetremoveResultsVolume(removeResultsVolumes);
-      b.SetMaskName(maskOrganName);
-      b.SetNbThresholds(nbThresholds);
-      b.run();
-    }
     
-    if( !f.is_open())
+    // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
+    // Mask is only useful for statistics during segmentation assessment, 
+    // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
+        
+    if( vUtils::isDir( gtName ) ) // boolean choice for now, 0 is nifti & 1 is DICOM 
     {
-      std::cout<<"we are doomed"<<std::endl;
+      
+      std::cout<<"Using dicom groundTruth data...."<<std::endl;
+      DicomGroundTruthImageType::Pointer groundTruth = vUtils::readImage<DicomGroundTruthImageType>(gtName,false);
+
+      std::vector<DicomMaskImageType::Pointer> dicomMaskImageList;
+      for(int i=0; i<nbMasks;i++)
+      {
+        dicomMaskImageList.push_back( vUtils::readImage<DicomMaskImageType>(maskPathList[i],true) );
+      }
+      
+        Benchmark<DicomImageType,DicomGroundTruthImageType,DicomMaskImageType> b(root,
+                                                                                imgName,
+                                                                                groundTruth,
+                                                                                dicomMaskImageList,
+                                                                                csvFileMaskStreamList);
+        b.SetOutputDirectory(benchDir+"/"+patientName);
+        b.SetPatientDirectory(benchName+"/"+patientName);
+        b.SetDicomInput();
+        b.SetComputeMetricsOnly(computeMetricsOnly);
+        b.SetRemoveResultsVolume(removeResultsVolumes);
+        b.SetEnhancementMaskName(enhancementMaskPath);
+        b.SetNbThresholds(nbThresholds);
+        
+        b.run();
     }
+        else
+      {
+        std::cout<<"Using NIFTI groundtruth data...."<<std::endl;
+        GroundTruthImageType::Pointer groundTruth = vUtils::readImage<GroundTruthImageType>(gtName,false);
+
+        std::vector<MaskImageType::Pointer> maskImageList;
+        for(int i=0; i<nbMasks;i++)
+        {
+          std::cout<<maskPathList[i]<<std::endl;
+          maskImageList.push_back( vUtils::readImage<MaskImageType>(maskPathList[i],false) );
+        }
+        
+        Benchmark<ImageType,GroundTruthImageType,MaskImageType> b(root,
+                                                                  imgName,
+                                                                  groundTruth,
+                                                                  maskImageList,
+                                                                  csvFileMaskStreamList);
+        b.SetOutputDirectory(benchDir+"/"+patientName);
+        b.SetPatientDirectory(benchName+"/"+patientName);
+        b.SetNiftiInput();
+        b.SetComputeMetricsOnly(computeMetricsOnly);
+        b.SetRemoveResultsVolume(removeResultsVolumes);
+        b.SetEnhancementMaskName(enhancementMaskPath);
+        b.SetNbThresholds(nbThresholds);
+        b.run();
+      }
+      
+      if( !f.is_open())
+      {
+        std::cout<<"we are doomed"<<std::endl;
+      }
   }
   
   f.close();
-  csvFileStreamMask.close();
-  csvFileStreamMaskDilatedVessels.close();
-  csvFileStreamMaskBifurcations.close();
-  
+
+  for(int i=0;i<nbMasks;i++)
+  {
+    csvFileMaskStreamList[i].close();
+  } 
 }
