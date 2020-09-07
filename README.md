@@ -218,8 +218,6 @@ Here is an example :
 }
 ```
 
-Note that a parameter file can be used to compute one or several vesselness filters.
-
 Note that a parameter file can be composed of one or several vesselness with one or several instances of parameters.
 
 for instance, when testing one instance of each vesselness "frangi.nii", "Jerman.nii", "Sato.nii", naming scheme is suitable. When benchmarking parameters, a naming scheme with the value of the parameters is more practical. For example, "0.1-0.5.nii","0.5-0.5.nii" for testing the influence of the pair of parameters alpha and beta for frangi's vesselness. 
