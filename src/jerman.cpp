@@ -16,6 +16,41 @@
 
 int main( int argc, char* argv[] )
 {
+  // parse command line using CLI ----------------------------------------------
+  CLI::App app;
+  app.description("Apply the Meijering algorithm");
+  std::string inputFile ;
+  std::string outputFile;
+  double sigmaMin;
+  double sigmaMax;
+  float tau {0.75};
+  int nbClasses {5};
+  bool isInputDicom = false;
+  
+  int nbSigmaSteps;
+  double fixedSigma;
+  std::string maskFile;
+  app.add_option("-i,--input,1", inputFile, "inputName : input img")
+  ->required()
+  ->check(CLI::ExistingFile);
+  
+  app.add_option("--output,-o",outputFile, "ouputName : output img");
+  app.add_option("--sigmaMin,-m", sigmaMin, "scale space sigma min");
+  app.add_option("--sigmaMax,-M", sigmaMax, "scale space sigma max");
+  app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
+  app.add_option("--tau,-t", tau, "Jerman tau parameter" ,true);
+  
+  app.add_option("--sigma,-s",fixedSigma,"number of kmean seeds");
+  app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
+  app.add_option("--mask,-k",maskFile,"mask response by image")
+  ->check(CLI::ExistingFile);
+  
+  app.get_formatter()->column_width(40);
+  CLI11_PARSE(app, argc, argv);
+  // END parse command line using CLI ----------------------------------------------
+  
+  
+  constexpr unsigned int Dimension = 3;
   using PixelType = double;
   using ImageType = itk::Image< PixelType, Dimension >;
   
