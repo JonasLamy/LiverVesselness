@@ -17,7 +17,6 @@ int main( int argc, char* argv[] )
   
   // parse command line using CLI ----------------------------------------------
   CLI::App app;
-  CLI::App app;
   app.description("Apply the Sato algorithm");
   std::string inputFile ;
   std::string outputFile;
