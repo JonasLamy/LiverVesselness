@@ -29,7 +29,7 @@ int main( int argc, char* argv[] )
   
   // parse command line using CLI ----------------------------------------------
   CLI::App app;
-  app.description("Apply the Sato algorithm");
+  app.description("Apply the ruiZhang algorithm");
   std::string inputFile ;
   std::string outputFile;
   double sigmaMin;
@@ -57,7 +57,6 @@ int main( int argc, char* argv[] )
   app.add_option("--mask,-k",maskFile,"mask response by image")
   ->check(CLI::ExistingFile);
   
-  bool parsingOK = true;
   
   
   constexpr unsigned int Dimension = 3;
