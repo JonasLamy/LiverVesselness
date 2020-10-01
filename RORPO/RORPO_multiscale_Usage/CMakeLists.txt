@@ -2,6 +2,9 @@
 
 project (RORPO_multiscale_usage)
 cmake_minimum_required(VERSION 3.2)
+set(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk)
+
+include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
 # FIND OPENMP
 find_package(OpenMP REQUIRED)
@@ -17,8 +20,7 @@ find_package(ITK REQUIRED)
 include(${ITK_USE_FILE})
 
 add_executable( ${PROJECT_NAME} main.cpp )
-
 # LINK REQUIRED LIBS
-target_link_libraries( ${PROJECT_NAME} RORPO docopt ${ITK_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} RORPO ${ITK_LIBRARIES} OpenMP::OpenMP_CXX )
 set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/ )
