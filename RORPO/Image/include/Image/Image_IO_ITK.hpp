@@ -57,11 +57,14 @@ struct Image3DMetadata
 
 Image3DMetadata Read_Itk_Metadata(const std::string& image_path)
 {
-	itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO( image_path.c_str(), itk::ImageIOFactory::ReadMode);
+	itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO( image_path.c_str(),  itk::CommonEnums::IOFileMode::ReadMode);
 	imageIO->SetFileName(image_path);
 	imageIO->ReadImageInformation();
-
-	return { imageIO->GetComponentType(), imageIO->GetComponentTypeAsString(imageIO->GetComponentType()), imageIO->GetNumberOfDimensions() };
+  Image3DMetadata type;
+  type.pixelType = (uint)(imageIO->GetComponentType());
+  type.pixelTypeString = imageIO->GetComponentTypeAsString(imageIO->GetComponentType());
+  type.nbDimensions = imageIO->GetNumberOfDimensions();
+  return type;
 }
 
 template<typename PixelType>
