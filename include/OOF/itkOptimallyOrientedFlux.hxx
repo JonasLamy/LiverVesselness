@@ -1,3 +1,4 @@
+
 template<typename TInputImage, typename TOutputImage>
 itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::OptimallyOrientedFlux()
 :m_sigma(1.0),m_normalizationType(1),m_responseType(1)
@@ -16,6 +17,11 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::PrintSelf(std::ostrea
 {
 
 }
+template <typename TInputImage, typename TOutputImage>
+void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::SetRadii(const std::vector<double> &v){
+  m_Radii = v;
+}
+
 
 template <typename TInputImage, typename TOutputImage>
 itk::Image<double,3>::Pointer itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::ifftShiftedCoordMatrixX(typename TInputImage::SizeType dimension,typename TInputImage::SpacingType spacing, typename TInputImage::PointType origin)

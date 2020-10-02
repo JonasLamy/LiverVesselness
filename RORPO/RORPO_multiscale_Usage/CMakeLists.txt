@@ -2,7 +2,9 @@
 
 project (RORPO_multiscale_usage)
 cmake_minimum_required(VERSION 3.2)
-set(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk)
+if(APPLE)
+     set(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk)
+endif()
 
 include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
