@@ -25,5 +25,5 @@ include_directories(
             docopt)
 
 add_subdirectory(libRORPO)
-add_subdirectory(docopt)
+
 add_subdirectory(RORPO_multiscale_Usage)
