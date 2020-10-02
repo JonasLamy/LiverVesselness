@@ -4,7 +4,18 @@ project(Vesselness)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
- 
+
+if(APPLE)
+    set(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk)
+endif()
+
+
+
+# CLI11
+include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
+
+
+
 find_package(ITK 5.1 REQUIRED)
 include(${ITK_USE_FILE})
 find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options filesystem)
@@ -15,14 +26,14 @@ set(CMAKE_BUILD_TYPE Release)
 
 # TEST
 
-add_executable(Test src/test.cpp)
-target_include_directories(Test PUBLIC
-"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(Test ${ITK_LIBRARIES} )
-set_target_properties(Test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+#add_executable(Test src/test.cpp)
+#target_include_directories(Test PUBLIC
+#"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(Test ${ITK_LIBRARIES} )
+#set_target_properties(Test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 #Antiga ------------------------
 
 add_executable(Antiga src/antiga.cpp)
@@ -103,7 +114,7 @@ target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
   "$<INSTALL_INTERFACE:include/Benchmark>"
   )
-target_link_libraries(Benchmark ${ITK_LIBRARIES} Boost::program_options jsoncpp_lib)
+target_link_libraries(Benchmark ${ITK_LIBRARIES}   Boost::program_options jsoncpp_lib)
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # process ircad -------------------
