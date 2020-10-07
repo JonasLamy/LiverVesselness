@@ -18,7 +18,8 @@ include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
 find_package(ITK 5.1 REQUIRED)
 include(${ITK_USE_FILE})
-find_package(Boost 1.46.0 REQUIRED COMPONENTS program_options filesystem)
+
+
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -41,7 +42,7 @@ target_include_directories(Antiga PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
   )
-target_link_libraries(Antiga ${ITK_LIBRARIES} Boost::program_options )
+target_link_libraries(Antiga ${ITK_LIBRARIES}  )
 set_target_properties(Antiga PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # Jerman -----------------------
@@ -52,7 +53,7 @@ target_include_directories(Jerman PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Jerman>"
   "$<INSTALL_INTERFACE:include/Jerman>"
   )
-target_link_libraries(Jerman ${ITK_LIBRARIES} Boost::program_options)
+target_link_libraries(Jerman ${ITK_LIBRARIES})
 set_target_properties(Jerman PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # RhuiZhang -----------------------
@@ -63,7 +64,7 @@ target_include_directories(RuiZhang PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/RuiZhang>"
   "$<INSTALL_INTERFACE:include/RuiZhang>"
   )
-target_link_libraries(RuiZhang ${ITK_LIBRARIES} Boost::program_options)
+target_link_libraries(RuiZhang ${ITK_LIBRARIES})
 set_target_properties(RuiZhang PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 
@@ -75,7 +76,7 @@ target_include_directories(Meijering PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Meijering>"
   "$<INSTALL_INTERFACE:include/Meijering>"
   )
-target_link_libraries(Meijering ${ITK_LIBRARIES} Boost::program_options)
+target_link_libraries(Meijering ${ITK_LIBRARIES} )
 set_target_properties(Meijering PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # Sato -----------------------------
@@ -84,7 +85,7 @@ add_executable(Sato src/sato.cpp)
 target_include_directories(Sato PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   )
-target_link_libraries(Sato ${ITK_LIBRARIES} Boost::program_options)
+target_link_libraries(Sato ${ITK_LIBRARIES} )
 set_target_properties(Sato PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # OOF ------------------------------
@@ -95,7 +96,7 @@ target_include_directories(OOF PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/OOF>"
   "$<INSTALL_INTERFACE:include/OOF>"
   )
-target_link_libraries(OOF ${ITK_LIBRARIES} Boost::program_options)
+target_link_libraries(OOF ${ITK_LIBRARIES} )
 set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # RORPO ----------------------------
@@ -114,7 +115,7 @@ target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
   "$<INSTALL_INTERFACE:include/Benchmark>"
   )
-target_link_libraries(Benchmark ${ITK_LIBRARIES}   Boost::program_options jsoncpp_lib)
+target_link_libraries(Benchmark ${ITK_LIBRARIES}    jsoncpp_lib)
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # process ircad -------------------
