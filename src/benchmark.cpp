@@ -13,9 +13,8 @@
 #include "itkImageFileReader.h"
 #include "itkBinaryThresholdImageFilter.h"
 
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
+#include "CLI11.hpp"
+
 
 // system depedant Unix include to create folders....
 #ifdef __WIN32__ // assume windows
@@ -63,32 +62,20 @@ int main(int argc, char** argv)
   // ------------------
   // Reading arguments 
   // ------------------
-  namespace po = boost::program_options;
-  po::options_description general_opt("Allowed options are ");
-  general_opt.add_options()
-    ("help,h", "display this message")
-    ("settingsFile,s",po::value<std::string>(),"settings Json File path");
-  bool parsingOK = true;
-  po::variables_map vm;
-
-  try{
-    po::store(po::parse_command_line(argc,argv,general_opt),vm);
-  }catch(const std::exception& ex)
-    {
-      parsingOK = false;
-      std::cout<<"Error checking program option"<<ex.what()<< std::endl;
-    }
+  // parse command line using CLI ----------------------------------------------
+  CLI::App app;
   
-  po::notify(vm);
-  if( !parsingOK || vm.count("help") || argc<=1 )
-    {
-      std::cout<< general_opt <<std::endl;
+  std::string configFileName;
+  app.description("Apply benchmark from json file.");
+  app.add_option("--settingsFile,-s", configFileName, "settings Json File path")
+  ->required()
+  ->check(CLI::ExistingFile);
+  
+  app.get_formatter()->column_width(40);
+  CLI11_PARSE(app, argc, argv);
+  // END parse command line using CLI ----------------------------------------------
+
     
-      return 0;
-    }
-
-  std::string configFileName = vm["settingsFile"].as<std::string>();
-
   // -----------------
   // Reading config JSON file
   // -----------------
@@ -104,11 +91,9 @@ int main(int argc, char** argv)
   Json::Value root;
   configFile >> root;
   configFile.close();
-  std::cout<<"done\n"<<std::endl
-           <<"---------------------"<<std::endl;
-
-  // display first two categories
+  std::cout<<"done\n"<<std::endl;
   const Json::Value benchParameters = root["Settings"];
+  // display first two categories
   std::string benchName = benchParameters["name"].asString();
   std::string benchPath = benchParameters["path"].asString();
   std::string inputVolumesListPath = benchParameters["inputVolumesList"].asString();
@@ -119,6 +104,11 @@ int main(int argc, char** argv)
   bool computeMetricsOnly = false; // feature comming soon
   int nbThresholds = benchParameters["nbThresholds"].asInt();
 
+  
+  
+  
+  
+ 
   std::cout<< "Benchmark Name : "<<benchName << std::endl
             <<"Benchmark Path : "<<benchPath << std::endl
             <<"Input volumes list : "<<inputVolumesListPath << std::endl
