@@ -259,6 +259,8 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
     }
   }
 
+  // special case, last threshold
+
   TN_f=0;
   //FP_f=0;
   FN_f=0;  

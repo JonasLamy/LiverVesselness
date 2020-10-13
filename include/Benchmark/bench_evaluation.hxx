@@ -30,21 +30,6 @@ Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(long tp, long tn, l
 {
 }
 
-template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType, TGroundTruthImageType, TMaskImageType>::countMatches(std::list<typename TImageType::PixelType> & list,
-																		   float threshold)
-{
-	
-	typename std::list<typename TImageType::PixelType>::iterator it = list.begin();
-	
-	// list should be from masked region of interest
-	while( it != list.end() )
-	{
-		it++;
-	}
-
-}
-
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation,
 																				const typename TGroundTruthImageType::Pointer gt,

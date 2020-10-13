@@ -217,8 +217,8 @@ namespace itk
 			InternalComplexType value(0.0, 0.0);
 			if(normU >= eps)
 			{
-				double phase								= 2.0 * vnl_math::pi * radius * normU;
-				double piNormUSigma					= (vnl_math::pi * normU * sigma0);
+				double phase = 2.0 * vnl_math::pi * radius * normU;
+				double piNormUSigma	= (vnl_math::pi * normU * sigma0);
 				InternalComplexType derivativesTerm(0.0, 0.0);
 				// second order derivatives.
 				derivativesTerm = InternalComplexType(-exp( -2.0* piNormUSigma * piNormUSigma )* Ui * Uj, 0.0);

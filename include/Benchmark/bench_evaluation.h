@@ -43,8 +43,6 @@ class Eval{
   long double matthewsCorrelation();
   double sparsity();
 
-  void countMatches(std::list<typename TImageType::PixelType> &listV, float threshold);
-
  private:
   void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
   
@@ -71,7 +69,7 @@ std::ostream& operator <<(std::ostream& out,Eval<TImageType,TGroundTruthImageTyp
 		<< eval.precision() << ","
 		<< eval.accuracy() << ","
 		<< eval.dice() << ","
-		<< eval.matthewsCorrelation() << ","
+		<< eval.matthewsCorrelation()
     << std::endl;
     //<< eval.sparsity() <<std::endl;
 
