@@ -31,7 +31,7 @@ class HessianScaleSearch:
         self.boundsSS = boundsSS
         self.methodName = methodName
         self.methodParameters = methodParameters
-
+        self.epsilon = 0.0001
         #debug purpose
         self.nbParameters = 0
 
@@ -58,12 +58,14 @@ class HessianScaleSearch:
         parametersSets = []
         
         minB = self.boundsSS.minBoundStart
-        while(minB <= self.boundsSS.minBoundEnd):
+        while(minB <= self.boundsSS.minBoundEnd + self.epsilon):
             maxB = self.boundsSS.maxBoundStart
-            while(maxB <= self.boundsSS.maxBoundEnd):
-                parameterSet = self.instance(minB,maxB,self.boundsSS.nbScales,self.methodName,self.methodParameters)
+            while(maxB <= self.boundsSS.maxBoundEnd + self.epsilon):
                 
-                parametersSets.append(parameterSet)
+                if(maxB-minB >= 1):
+                    parameterSet = self.instance(minB,maxB,self.boundsSS.nbScales,self.methodName,self.methodParameters)
+                    parametersSets.append(parameterSet)
+
                 maxB += self.boundsSS.maxBoundStep
             minB += self.boundsSS.minBoundStep
             
@@ -111,6 +113,7 @@ class RORPOScaleSearch:
             while(factor <= self.boundsSS.factorEnd):
                 nbScales = self.boundsSS.nbScalesStart
                 while(nbScales <= self.boundsSS.nbScalesEnd):
+
                     parameterSet = self.instance(minS,factor,nbScales,self.methodParameters)
                     parametersSets.append(parameterSet)
 

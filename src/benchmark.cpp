@@ -316,4 +316,5 @@ int main(int argc, char** argv)
   {
     csvFileMaskStreamList[i].close();
   } 
+  return 0;
 }

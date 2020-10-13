@@ -13,13 +13,13 @@ if not os.path.exists(dirPath):
     exit()
 
 bounds = BoundsSS()
-bounds.minBoundStart = 0.1
-bounds.minBoundEnd   = 1
-bounds.minBoundStep  = 0.1
+bounds.minBoundStart = 1.0
+bounds.minBoundEnd   = 2.0
+bounds.minBoundStep  = 0.4
 
-bounds.maxBoundStart = 1.1
-bounds.maxBoundEnd   = 2
-bounds.maxBoundStep  = 0.1
+bounds.maxBoundStart = 2.0
+bounds.maxBoundEnd   = 3.0
+bounds.maxBoundStep  = 0.4
 
 bounds.nbScales      = 3
 
@@ -51,7 +51,7 @@ print(OOFSS, file=open(dirPath+"OOFScaleSearchTest.json","w"))
 print("OOF scale search:",OOFSS.nbParameters)
 
 # Jerman SS
-jermanParams = JermanParameters(tau=0.75)
+jermanParams = JermanParameters(tau=0.6)
 jermanSS = HessianScaleSearch(bounds,"Jerman",jermanParams)
 print(jermanSS, file=open(dirPath+"JermanScaleSearchTest.json","w"))
 print("Jerman scale search:",jermanSS.nbParameters)

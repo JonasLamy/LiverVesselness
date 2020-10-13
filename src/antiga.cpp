@@ -26,12 +26,12 @@ int main( int argc, char* argv[] )
     ("output,o", po::value<std::string>(), "ouputName : output img" )
     ("alpha,a", po::value<float>()->default_value(0.5), "Frangi's alpha" )
     ("beta,b",po::value<float>()->default_value(0.5),"Frangi's beta" )
-    ("gamma,",po::value<float>()->default_value(5.0),"max vessel intensity")
+    ("gamma,g",po::value<float>()->default_value(5.0),"max vessel intensity")
     ("sigmaMin,m", po::value<float>(), "scale space sigma min")
     ("sigmaMax,M", po::value<float>(), "scale space sigma max")
     ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
     ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
-    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image ( Warning !!!! Dummy option for now");
+    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image");
 
     bool parsingOK = true;
     po::variables_map vm;

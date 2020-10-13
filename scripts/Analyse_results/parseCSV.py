@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
+from sklearn import metrics
+
 
 dataPath = sys.argv[1]
 #rankingMethod = sys.argv[2]
@@ -17,27 +19,24 @@ grp = data.groupby(["SerieName"])
 # RocDist #
 ###########
 dataList = []
+dataListROC = []
 for serieName,data in grp:
         # for each volume
         groupedData = data.groupby(["VolumeName"])
-        
-        
+                
         for name,dataFiltered in groupedData:
             # for each parameter set
             TruePositiveRate = dataFiltered['sensitivity'].values
             FalsePositiveRate = 1 - dataFiltered['specificity'].values
-            # finding closest roc curve from ideal discriminator
-            dist = np.sqrt( np.square(FalsePositiveRate) + np.square(1 - TruePositiveRate) )
-            
-            indexROC = np.argmin( dist)
-            minRocDist = np.min(dist)
-            dataList.append([serieName,name,minRocDist,TruePositiveRate[indexROC],FalsePositiveRate[indexROC]])
-            
-df_rocDist = pd.DataFrame(dataList,columns=["SerieName","VolumeName","minROCDist","TPR","FPR"]).sort_values(by=["SerieName","minROCDist"],ascending=True)
-print(df_rocDist)
+            # auc curve
+            auc = metrics.auc(FalsePositiveRate, TruePositiveRate)
+            dataListROC.append([serieName,name,TruePositiveRate,FalsePositiveRate])
 
-saveName = dataName + "_Best_RocDist.csv"
-df_rocDist.to_csv(saveName,index=False)
+df_rocAUC = pd.DataFrame(dataList,columns=["SerieName","VolumeName","AUC"]).sort_values(by=["SerieName","AUC"],ascending=True)
+print(df_rocAUC)
+
+saveName = dataName + "_Best_RocAUC.csv"
+df_rocAUC.to_csv(saveName,index=False)
 
 
 ###################
