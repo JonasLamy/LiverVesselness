@@ -12,59 +12,42 @@ Based on work of Turetken & Fethallah Benmansour
 #include "itkRescaleIntensityImageFilter.h"
 #include "itkMaskImageFilter.h"
 
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
+#include "CLI11.hpp"
+
 
 #include "utils.h"
 
 int main(int argc, char** argv)
 {
-    //********************************************************
-    //                   Reading arguments
-    //********************************************************
-    bool isInputDicom;
- 
-    namespace po = boost::program_options;
-    // parsing arguments
-    po::options_description general_opt("Allowed options are ");
-    general_opt.add_options()
-    ("help,h", "display this message")
-    ("input,i", po::value<std::string>(), "inputName : input img" )
-    ("output,o", po::value<std::string>(), "ouputName : output img" )
-    ("sigmaMin,m", po::value<double>(), "scale space sigma min")
-    ("sigmaMax,M", po::value<double>(), "scale space sigma max")
-    ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("sigma,s",po::value<double>(),"sigma for smoothing")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input")
-    ("mask,k",po::value<std::string>()->default_value(""),"mask response by image");
+  //********************************************************
+  //                   Reading arguments
+  //********************************************************
+  bool isInputDicom;
+  // parse command line using CLI ----------------------------------------------
+  CLI::App app;
+  app.description("Apply the OOF algorithm");
+  std::string inputFile ;
+  std::string outputFile;
+  double sigmaMin;
+  double sigmaMax;
+  int nbSigmaSteps;
+  double fixedSigma;
+  std::string maskFile;
+  
+  app.add_option("-i,--input,1", inputFile, "inputName : input img" )
+      ->required()
+      ->check(CLI::ExistingFile);
+  
+  app.add_option("--output,-o",outputFile, "ouputName : output img");
+  app.add_option("--sigmaMin,-m", sigmaMin, "scale space sigma min");
+  app.add_option("--sigmaMax,-M", sigmaMax, "scale space sigma max");
+  app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
+  app.add_option("--sigma,-s",fixedSigma,"sigma for smoothing");
+  app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
+  app.add_option("--mask,-k",maskFile,"mask response by image")
+  ->check(CLI::ExistingFile);
 
-    bool parsingOK = true;
-    po::variables_map vm;
-
-    try{
-      po::store(po::parse_command_line(argc,argv,general_opt),vm);
-    }catch(const std::exception& ex)
-    {
-      parsingOK = false;
-      std::cout<<"Error checking program option"<<ex.what()<< std::endl;
-    }
-
-    po::notify(vm);
-    if( !parsingOK || vm.count("help") || argc<=1 )
-    {
-      std::cout<< general_opt << std::endl;
-      return 0;
-    }
-
-    std::string inputFile = vm["input"].as<std::string>();
-    std::string outputFile = vm["output"].as<std::string>();
-    double sigmaMin = vm["sigmaMin"].as<double>();
-    double sigmaMax = vm["sigmaMax"].as<double>();
-    int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
-    double fixedSigma = vm["sigma"].as<double>();
-    std::string maskFile = vm["mask"].as<std::string>();
-
+  
     //********************************************************
     //                    Reading inputs
     //********************************************************

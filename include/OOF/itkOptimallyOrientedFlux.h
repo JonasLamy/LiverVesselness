@@ -32,10 +32,9 @@ namespace itk{
 
         itkNewMacro(Self);
         itkTypeMacro(OptimallyOrientedFlux,ImageToImageFilter);
-
-        itkSetMacro(Radii,std::vector<double>);
+//        itkSetMacro(Radii,std::vector<double>);
         itkGetMacro(Radii,std::vector<double>);
-
+        void SetRadii(const std::vector<double> &v);
         /* image related type alias */
         using ImageType = TInputImage;
         using RegionType = typename TInputImage::RegionType;
