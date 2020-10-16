@@ -6,7 +6,8 @@
 
 namespace itk{
     template <typename TInputImage,
-    typename TOutputImage = Image<FixedArray< double, 3>,3> > 
+    typename TOutputImage = Image<FixedArray< double, 3>,3>,
+    typename TMaskImage = Image<uint8_t,3 > > 
     class ITK_TEMPLATE_EXPORT ModifiedHessianToEigenValuesImageFilter:public ImageToImageFilter<TInputImage,TOutputImage>
     {
         public:
@@ -28,6 +29,8 @@ namespace itk{
         using SizeType = typename TInputImage::SizeType;
         using IndexType = typename TInputImage::IndexType;
         using PixelType = typename TInputImage::PixelType;
+
+        using MaskImageType = TMaskImage;
 
         static constexpr unsigned int ImageDimension = TInputImage::ImageDimension;
 
@@ -60,6 +63,8 @@ namespace itk{
         itkSetMacro(Alpha,double);
         itkGetConstMacro(Alpha,double);
 
+        void SetMaskImage(typename MaskImageType::Pointer maskImage){m_maskImage = maskImage;}
+
         protected:
         
         ModifiedHessianToEigenValuesImageFilter();
@@ -77,10 +82,14 @@ namespace itk{
 
         private:
 
+        void noMask(const RegionType & regionForThread);
+        void withMask(const RegionType & regionForThread);
+
         EigenValueType m_minEigenValue;
         double m_Alpha;
         std::mutex m_mutex;
         
+        typename MaskImageType::Pointer m_maskImage;
     };
 }
 

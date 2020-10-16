@@ -4,20 +4,32 @@
 
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
-Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json::Value root, 
-                                                std::string inputFileName,
-                                                std::ofstream &csvFileStream,
-                                                typename TGroundTruthImageType::Pointer gtImage, 
-                                                typename TMaskImageType::Pointer maskImage)
+Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::Benchmark(const Json::Value root,
+                                                                      std::string inputFileName,
+                                                                      typename TGroundTruthImageType::Pointer gtImage,
+                                                                      const std::vector<typename TMaskImageType::Pointer> & maskList,
+                                                                      std::vector<std::ofstream> & resultsMaskList)
 {
+
+    // filter options
     m_removeResultsVolume = false;
     m_computeMetricsOnly = false;
+    m_maskEnhancementFileName = "";
+    
+    // json root node
     m_rootNode = root;
+    
+    // benchmark images
     m_gt = gtImage;
-    m_mask = maskImage;
+    m_maskList = maskList;
     m_inputFileName = inputFileName;
 
-    m_resultFileStream = &csvFileStream;
+    // csv file streams
+    for(int i=0; i<resultsMaskList.size();i++)
+    {
+      m_resultsMaskList.push_back( &resultsMaskList[i]);
+    }
+     
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
@@ -37,6 +49,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
   std::cout<<"------------------"<<std::endl;
 
   Json::Value::Members algoNames = m_rootNode.getMemberNames();
+  
   for (auto &algoName : algoNames)
   {
     std::cout << "Algorithm n°" << m_nbAlgorithms << " " << algoName << std::endl;
@@ -61,7 +74,13 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
           std::string m = arg.getMemberNames()[0]; // only one name in the array
           sStream << "--" << m << " " << arg[m].asString() << " ";
         }
-        launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
+
+        if( !m_maskEnhancementFileName.empty() )
+        {
+          sStream << "--mask " << m_maskEnhancementFileName << " ";
+        }
+
+        launchScriptFast(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
 
         if(m_removeResultsVolume)
         {
@@ -85,9 +104,15 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
       for (auto &arg : arguments)
       {
         std::string m = arg.getMemberNames()[0]; // only one name in the array
-        sStream << m << " " << arg[m].asString() << " ";
+        sStream << "--" << m << " " << arg[m].asString() << " ";
       }
-      launchScript(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
+
+      if( !m_maskEnhancementFileName.empty() )
+      {
+        sStream << "--mask " << m_maskEnhancementFileName << " ";
+      }
+
+      launchScriptFast(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
       
       if(m_removeResultsVolume)
       {
@@ -99,9 +124,11 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
   }
 }
 
-
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
-void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName)
+void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFast(int algoID,
+                                                                              const std::string &commandLine,
+                                                                              const std::string &outputDir,
+                                                                              const std::string &outputName)
 {
   typedef itk::BinaryThresholdImageFilter<TImageType,TGroundTruthImageType> ThresholdFilterType;
 
@@ -124,7 +151,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     }
   }
 
-  
   std::cout<<"opening result"<<std::endl;
   auto outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
   
@@ -135,16 +161,211 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
       return;
     }
 
-  // Computing roc curve for the image segmentation
-  double bestThreshold = 0;
-  double minDist = 1000;
+  for(int i=0; i<m_maskList.size();i++)
+  {
+    computeMetrics(outputName,outputImage,m_gt,m_maskList[i],m_resultsMaskList[i]);
+  }
+
+  std::cout<<"done"<<std::endl;
+}
+
+template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
+void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(const std::string & outputName,
+                                                                                typename TImageType::Pointer outputImage,
+                                                                                typename TGroundTruthImageType::Pointer gt,
+                                                                                typename TMaskImageType::Pointer mask, 
+                                                                                std::ofstream * stream)
+{
+  // compute the 0 zeros, iterate over the region of interest
+  itk::ImageRegionConstIteratorWithIndex<TImageType> itFilter(outputImage,outputImage->GetLargestPossibleRegion());
+  itk::ImageRegionConstIteratorWithIndex<TMaskImageType> itMask(mask,mask->GetLargestPossibleRegion());
+
+  // positives values are stored
+  typename std::list<typename TImageType::PixelType> foregroundValues;
+  typename std::list<typename TImageType::IndexType> foregroundIndexes;
+  
+  typename std::list<typename TImageType::IndexType> backgroundIndexes;
+
+  itFilter.GoToBegin();
+  itMask.GoToBegin();
+  while( !itFilter.IsAtEnd() )
+  {
+    if(itMask.Get() > 0 )
+    {
+      if(itFilter.Value() > 0)
+      {
+        foregroundValues.push_back( itFilter.Value() );
+        foregroundIndexes.push_back( itFilter.GetIndex() );
+      }
+      else
+      {
+        backgroundIndexes.push_back( itFilter.GetIndex() );
+      }  
+    }
+    ++itMask;
+    ++itFilter;
+  }
+  
+  long TN_b=0;
+  long FN_b=0;
+
+  // for a given threshold, loop through the list
+  typename std::list<typename TImageType::IndexType>::iterator itBackgroundIndex = backgroundIndexes.begin();
+
+  while( itBackgroundIndex != backgroundIndexes.end() )
+  {
+
+    if(gt->GetPixel(*itBackgroundIndex) == 0)
+    {
+      TN_b++;
+    }
+    else
+    {
+      FN_b++;
+    }
+
+    itBackgroundIndex++;
+  }
+  // list not necessary anymore, we clear it
+  backgroundIndexes.clear();
+  
+  // looping over thresholds
+  int step = 1;
+  int maxBound = m_nbThresholds;
+  float maxBoundf = m_nbThresholds;
+
+  // at that point we have a list of potential thresholdable values and the number of voxels of value 0 in the ROI
+  long TP_f=0;
+  long TN_f=0;
+  long FP_f=0;
+  long FN_f=0;
+  for(int i=maxBound; i>0; i-=step)
+  {
+
+    TN_f=0;
+    //FP_f=0;
+    FN_f=0;  
+
+    computeConfusionValues(foregroundValues,foregroundIndexes,i/maxBoundf,TP_f,TN_f,FP_f,FN_f);
+
+    Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(TP_f, TN_f+TN_b, FP_f, FN_f+FN_b);
+    (*stream)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< eval;
+
+    if( i%10 == 0)
+    {
+      std::cout<<"threshold:"<<i/maxBoundf<<std::endl;
+      std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
+            << " false positive rate : " << 1.0f - eval.specificity() << "\n";
+    }
+  }
+
+  // special case, last threshold
+
+  TN_f=0;
+  //FP_f=0;
+  FN_f=0;  
+
+  computeConfusionValues(foregroundValues,foregroundIndexes,0,TP_f,TN_f,FP_f,FN_f);
+
+  Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(TP_f+FN_b, TN_f, FP_f+TN_b, FN_f);
+  (*stream)<<m_patient<<","<<outputName<<","<<0<<","<< eval;
+}
+
+template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
+void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeConfusionValues(typename std::list<typename TImageType::PixelType> & foregroundValues,
+                                                                                        typename std::list<typename TImageType::IndexType> & foregroundIndexes,
+                                                                                        float threshold,
+                                                                                        long & TP_f,
+                                                                                        long & TN_f, 
+                                                                                        long & FP_f, 
+                                                                                        long & FN_f)
+{
+    // for a given threshold, loop through the list
+    typename std::list<typename TImageType::PixelType>::iterator itResponse = foregroundValues.begin();
+    typename std::list<typename TImageType::IndexType>::iterator itIndex = foregroundIndexes.begin();
+    while( itResponse != foregroundValues.end() )
+    {
+      // check for threshold
+      if(*itResponse >= threshold)
+      {
+        // the values is thresholded to 1
+        if (m_gt->GetPixel(*itIndex) > 0)
+				{
+					TP_f++;
+				}
+				else
+				{
+					FP_f++;
+				}
+
+        itResponse = foregroundValues.erase(itResponse);
+        itIndex = foregroundIndexes.erase(itIndex);
+      }
+      else
+      {
+        if (m_gt->GetPixel(*itIndex) > 0)
+				{
+					FN_f++;
+				}
+				else
+				{
+					TN_f++;
+				}
+
+        // items are kept for further thresholds
+        itResponse++;
+        itIndex++;
+      }
+    }
+}
+
+
+/*
+template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
+void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(int algoID,
+                                                                              const std::string &commandLine,
+                                                                              const std::string &outputDir,
+                                                                              const std::string &outputName)
+{
+  typedef itk::BinaryThresholdImageFilter<TImageType,TGroundTruthImageType> ThresholdFilterType;
+
+  if( m_computeMetricsOnly )
+  {
+    std::cout<<"computing metrics only..."<<std::endl;
+  }
+  else
+  {
+    std::cout<<commandLine<<std::endl;
+    // starting external algorithm
+    if( m_inputIsDicom == true )
+    {
+      std::string commandLineDicom = commandLine + " --inputIsDicom";
+      int returnValue = system(commandLineDicom.c_str() );
+    }
+    else
+    {
+      int returnValue = system(commandLine.c_str());
+    }
+  }
+
+  std::cout<<"opening result"<<std::endl;
+  auto outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
+  
+  std::cout<<"comparing output to ground truth....\n";
+  if( outputImage->GetLargestPossibleRegion().GetSize() != m_gt->GetLargestPossibleRegion().GetSize() )
+    {
+      std::cout<<"output from program and groundTruth size does not match...No stats computed"<<std::endl;
+      return;
+    }
+
 
   // trying out new way of tresholding for complete ROC curve...
   int step = 1;
-  int maxBound = 100;
-  float maxBoundf = 100.0f;
-  for(int i=maxBound; i>0; i-=step)
+  int maxBound = m_nbThresholds;
+  float maxBoundf = m_nbThresholds;
+  for(int i=maxBound; i>=0; i-=step)
   {
+    
     // thresholding for all values ( keeping upper value and adding more incertainty as lower probabilities are accepted )
     auto tFilter = ThresholdFilterType::New();
     tFilter->SetInput( outputImage );
@@ -156,64 +377,24 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScript(in
     tFilter->Update();
     auto segmentationImage = tFilter->GetOutput();
     
-    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_mask,std::to_string(i/maxBoundf));
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_maskLiver);
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalBifurcations(segmentationImage,m_gt,m_maskBifurcation);
+    Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> evalDilatedVessels(segmentationImage,m_gt,m_maskVesselsDilated);
+
     if( i%10 == 0)
     {
       std::cout<<"threshold:"<<i/maxBoundf<<std::endl;
       std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
             << " false positive rate : " << 1.0f - eval.specificity() << "\n";
     }
-    // perfect qualifier (0,1), our segmentation (TPR,FPR)
-    float euclideanDistance =  (eval.sensitivity()*eval.sensitivity()) + ( 1.0f - eval.specificity() ) * ( 1.0f - eval.specificity() );
-    if( minDist >  euclideanDistance )
-    {
-      minDist = euclideanDistance;
-      bestThreshold = i/maxBoundf;
-    }
-    (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< eval;
 
-    // TODO uncomment for debug
-    /*
-    auto writer = itk::ImageFileWriter<TGroundTruthImageType>::New();
-    writer->SetFileName( std::string("toto/") + std::to_string(i) + std::string(".nii") );
-	  writer->SetInput(segmentationImage);
-	  writer->Update();
-    */
+
+    // writing results to file
+    (*m_resultMaskLiver)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< eval;
+    (*m_resultMaskBifurcation)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< evalBifurcations;
+    (*m_resultMaskVesselsDilated)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< evalDilatedVessels;
+    
   }   
-  
-  // computing the special case 0 because looping on float is annoying....
-  /*
-  auto tFilter = ThresholdFilterType::New();
-  tFilter->SetInput( outputImage );
-  tFilter->SetInsideValue( 1 );
-  tFilter->SetOutsideValue( 0 );
-
-  tFilter->SetLowerThreshold( 0 );
-  tFilter->SetUpperThreshold(1.01f);
-  tFilter->Update();
-  auto segmentationImage = tFilter->GetOutput();
-  */
-  // TODO uncomment for debug
-  /*
-  auto writer = itk::ImageFileWriter<TGroundTruthImageType>::New();
-  writer->SetFileName( std::string("0.nii") );
-	writer->SetInput(segmentationImage);
-	writer->Update();
-  */
-  /*
-  Eval<TGroundTruthImageType,TGroundTruthImageType,TMaskImageType> eval(segmentationImage,m_gt,m_mask,std::to_string(0));
-  std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
-          << " false positive rate : " << 1.0f - eval.specificity() << "\n";
-  
-  // perfect qualifier (0,1), our segmentation (TPR,FPR)
-  float euclideanDistance =  (eval.sensitivity()*eval.sensitivity()) + ( 1.0f - eval.specificity() ) * ( 1.0f - eval.specificity() );
-  if( minDist >  euclideanDistance )
-  {
-    minDist = euclideanDistance;
-    bestThreshold = 0;
-  }
-  (*m_resultFileStream)<<m_patient<<","<<outputName<<","<<0<<","<< eval;
-  */
-
   std::cout<<"done"<<std::endl;
 }
+*/

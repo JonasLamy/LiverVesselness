@@ -8,7 +8,8 @@
 
 namespace itk{
     template <typename TInputImage,
-    typename TOutputImage = Image<FixedArray< double, 3>,3> > 
+    typename TOutputImage = Image<FixedArray< double, 3>,3>, 
+    typename TMaskImage = Image<uint8_t,3> >
     class ITK_TEMPLATE_EXPORT HessianToEigenValuesImageFilter:public ImageToImageFilter<TInputImage,TOutputImage>
     {
         public:
@@ -62,6 +63,8 @@ namespace itk{
         using Superclass::MakeOutput;
         DataObjectPointer MakeOutput(DataObjectPointerArraySizeType idx)override;
 
+        void SetMaskImage(typename TMaskImage::Pointer imgMask){m_maskImage = imgMask;}
+
         #ifdef ITK_USE_CONCEPT_CHECKING
         // Begin concept checking
         itkConceptMacro( InputHasNumericTraitsCheck,
@@ -85,6 +88,10 @@ namespace itk{
 
         private:
 
+        void noMask(const RegionType & regionForThread);
+        void withMask(const RegionType & regionForThread);
+
+        typename TMaskImage::Pointer m_maskImage;
         EigenValueType m_maxEigenValue;
         EigenValueType m_minEigenValue;
         EigenValueType m_maxEigenValueNorm;

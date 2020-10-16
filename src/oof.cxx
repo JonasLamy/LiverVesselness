@@ -10,77 +10,58 @@ Based on work of Turetken & Fethallah Benmansour
 #include "itkTimeProbe.h"
 #include "itkDiscreteGaussianImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
+#include "itkMaskImageFilter.h"
 
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
+#include "CLI11.hpp"
+
 
 #include "utils.h"
 
 int main(int argc, char** argv)
 {
-    //********************************************************
-    //                   Reading arguments
-    //********************************************************
-    bool isInputDicom;
- 
-    namespace po = boost::program_options;
-    // parsing arguments
-    po::options_description general_opt("Allowed options are ");
-    general_opt.add_options()
-    ("help,h", "display this message")
-    ("input,i", po::value<std::string>(), "inputName : input img" )
-    ("output,o", po::value<std::string>(), "ouputName : output img" )
-    ("sigmaMin,m", po::value<double>(), "scale space sigma min")
-    ("sigmaMax,M", po::value<double>(), "scale space sigma max")
-    ("nbSigmaSteps,n",po::value<int>(),"nb steps sigma")
-    ("sigma,s",po::value<double>(),"sigma for smoothing")
-    ("inputIsDicom,d",po::bool_switch(&isInputDicom),"specify dicom input");
+  //********************************************************
+  //                   Reading arguments
+  //********************************************************
+  bool isInputDicom;
+  // parse command line using CLI ----------------------------------------------
+  CLI::App app;
+  app.description("Apply the OOF algorithm");
+  std::string inputFile ;
+  std::string outputFile;
+  double sigmaMin;
+  double sigmaMax;
+  int nbSigmaSteps;
+  double fixedSigma;
+  std::string maskFile;
+  
+  app.add_option("-i,--input,1", inputFile, "inputName : input img" )
+      ->required()
+      ->check(CLI::ExistingFile);
+  
+  app.add_option("--output,-o",outputFile, "ouputName : output img");
+  app.add_option("--sigmaMin,-m", sigmaMin, "scale space sigma min");
+  app.add_option("--sigmaMax,-M", sigmaMax, "scale space sigma max");
+  app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
+  app.add_option("--sigma,-s",fixedSigma,"sigma for smoothing");
+  app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
+  app.add_option("--mask,-k",maskFile,"mask response by image")
+  ->check(CLI::ExistingFile);
 
-    bool parsingOK = true;
-    po::variables_map vm;
-
-    try{
-      po::store(po::parse_command_line(argc,argv,general_opt),vm);
-    }catch(const std::exception& ex)
-    {
-      parsingOK = false;
-      std::cout<<"Error checking program option"<<ex.what()<< std::endl;
-    }
-
-    po::notify(vm);
-    if( !parsingOK || vm.count("help") || argc<=1 )
-    {
-      std::cout<<"\n Usage : ./OOF --input=<inputImg> --output=<inputImg> --sigmaMin=<sMin> --sigmaMax=<sMax> --nbSigmaSteps=<nbSteps> --sigma=<S> \n\n"
-                << " inputImg : input image (nifti)\n"
-                << " outputImg : output image (nifti)\n"
-                << " sigmaMin : min scale space value \n"
-                << " sigmaMax : max scale space value \n"
-		<< " nbSigmaSteps : number of scales\n"
-	        << " sigma : fixed sigma smoothing \n\n"
-                <<"example : ./OOF --input liver.nii --output result.nii --sigmaMin 1 --sigmaMax 5 --nbSigmaSteps 5 \n" << std::endl;
-      return 0;
-    }
-
-    std::string inputFile = vm["input"].as<std::string>();
-    std::string outputFile = vm["output"].as<std::string>();
-    double sigmaMin = vm["sigmaMin"].as<double>();
-    double sigmaMax = vm["sigmaMax"].as<double>();
-    int nbSigmaSteps = vm["nbSigmaSteps"].as<int>();
-    double fixedSigma = vm["sigma"].as<double>();
-    
+  
     //********************************************************
     //                    Reading inputs
     //********************************************************
 
 
-    const unsigned int maxDimension = 3;
+    const unsigned int Dimension = 3;
 
     typedef double PixelType;
-    typedef itk::Image<PixelType,maxDimension> InputImageType;
+    typedef itk::Image<PixelType,Dimension> InputImageType;
+    typedef itk::Image<uint8_t, Dimension> MaskImageType;
 
     InputImageType::Pointer inputImage = vUtils::readImage<InputImageType>(inputFile,isInputDicom);
-
+    
+    
     //********************************************************
     //                   Filter
     //********************************************************
@@ -92,11 +73,10 @@ int main(int argc, char** argv)
 
     // creating radii from parameters
 
-    double step = (sigmaMax - sigmaMin) / (double)(nbSigmaSteps-2);
+    double step = (sigmaMax - sigmaMin) / (double)(nbSigmaSteps-2+1);
     
     std::vector<double> radii;
-    radii.push_back( sigmaMin );
-    double i=sigmaMin+step;
+    double i=sigmaMin;
     while(i<sigmaMax)
     {
       radii.push_back(i);
@@ -128,8 +108,27 @@ int main(int argc, char** argv)
         std::cerr << e << std::endl;
     }
 
+  
     auto rescaleFilter = itk::RescaleIntensityImageFilter<InputImageType>::New();
-    rescaleFilter->SetInput(OOFfilter->GetOutput());
+    
+    MaskImageType::Pointer maskImage;
+    if( !maskFile.empty() )
+    {
+      maskImage = vUtils::readImage<MaskImageType>(maskFile,isInputDicom);
+    
+      auto maskFilter = itk::MaskImageFilter<InputImageType,MaskImageType>::New();
+      maskFilter->SetInput( OOFfilter->GetOutput() );
+      maskFilter->SetMaskImage(maskImage);
+      maskFilter->SetMaskingValue(0);
+      maskFilter->SetOutsideValue(0);
+
+      maskFilter->Update();
+      rescaleFilter->SetInput( maskFilter->GetOutput() );
+    }
+    else{
+      rescaleFilter->SetInput(OOFfilter->GetOutput());
+    }
+  
     rescaleFilter->SetOutputMinimum(0);
     rescaleFilter->SetOutputMaximum(1);
     

@@ -5,9 +5,9 @@
 
 namespace itk
 {
-    template<typename TInputImage,typename TOutputImage>
-    ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::ModifiedHessianToEigenValuesImageFilter()
-    :m_minEigenValue(NumericTraits<EigenValueType>::max()),m_Alpha(-0.5)
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::ModifiedHessianToEigenValuesImageFilter()
+    :m_minEigenValue(NumericTraits<EigenValueType>::max()),m_Alpha(-0.5),m_maskImage(nullptr)
     {
         /*
       // first output is a copy of the image, DataObject created by superlass
@@ -39,9 +39,9 @@ namespace itk
 
     
 
-    template<typename TInputImage,typename TOutputImage>
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
     DataObject::Pointer
-    ModifiedHessianToEigenValuesImageFilter< TInputImage, TOutputImage >
+    ModifiedHessianToEigenValuesImageFilter< TInputImage, TOutputImage, TMaskImage >
     ::MakeOutput(DataObjectPointerArraySizeType output)
     {
     switch ( output )
@@ -60,22 +60,22 @@ namespace itk
         }
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    typename ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::RealObjectType* 
-    ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GetMinEigenValueOutput()
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    typename ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::RealObjectType* 
+    ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::GetMinEigenValueOutput()
     {
         return static_cast<RealObjectType *>( this->ProcessObject::GetOutput(1) );
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    const typename ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::RealObjectType* 
-    ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GetMinEigenValueOutput() const
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    const typename ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::RealObjectType* 
+    ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::GetMinEigenValueOutput() const
     {
         return static_cast<const RealObjectType *>( this->ProcessObject::GetOutput(1) );
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::GenerateInputRequestedRegion()
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::GenerateInputRequestedRegion()
     {
         Superclass::GenerateInputRequestedRegion();
         if( this->GetInput() )
@@ -85,15 +85,15 @@ namespace itk
         }
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::EnlargeOutputRequestedRegion(DataObject * data)
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::EnlargeOutputRequestedRegion(DataObject * data)
     {
         Superclass::EnlargeOutputRequestedRegion(data);
         data->SetRequestedRegionToLargestPossibleRegion();
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::AllocateOutputs()
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::AllocateOutputs()
     {
         // pass the input through as the output
         //InputImagePointer image = const_cast<TInputImage *>( this->GetInput() );
@@ -112,24 +112,38 @@ namespace itk
         // nothing to allocate for the remaining outputs for now...
     }
 
-    template<typename TInputImage, typename TOutputImage>
-    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::BeforeThreadedGenerateData()
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::BeforeThreadedGenerateData()
     {
         // Resize he thread temporaries;
         m_minEigenValue = NumericTraits<EigenValueType>::max();
 
     }
 
-    template<typename TInputImage,typename TOutputImage>
-    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::AfterThreadedGenerateData()
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::AfterThreadedGenerateData()
     {
         const EigenValueType minimum = m_minEigenValue;
         //Set the outputs
         this->GetMinEigenValueOutput()->Set(minimum);
     }
 
-    template<typename TInputImage, typename TOutputImage>
-    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage>::DynamicThreadedGenerateData(const RegionType & regionForThread)
+    template<typename TInputImage,typename TOutputImage,typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter<TInputImage,TOutputImage,TMaskImage>::DynamicThreadedGenerateData(const RegionType & regionForThread)
+    {
+        if(m_maskImage)
+        {
+            withMask(regionForThread);
+        }
+        else
+        {
+            noMask(regionForThread);
+        }
+    }
+
+    template<typename TInputImage, typename TOutputImage, typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter< TInputImage,TOutputImage, TMaskImage >
+    ::noMask(const RegionType & regionForThread)
     {
         EigenValueType min = NumericTraits<EigenValueType>::max();
 
@@ -142,6 +156,7 @@ namespace itk
         // Walk the region of eigen values and get the objectness measure
         ImageScanlineConstIterator< TInputImage > it(this->GetInput(),regionForThread);
         ImageScanlineIterator< TOutputImage > itOut(this->GetOutput(),regionForThread);
+        
 
         it.GoToBegin();
         itOut.GoToBegin();
@@ -149,13 +164,14 @@ namespace itk
         {
             while( !it.IsAtEndOfLine() )
             {
+
                 // Eigen values from pixel's hessian
                 eigenCalculator.ComputeEigenValues(it.Get(), eigenValues);
                 
                 // noise removal on eigenValues
-                if( std::isinf(eigenValues[0]) || abs(eigenValues[0]) < 1e-4){ eigenValues[0] = 0; }
-                if( std::isinf(eigenValues[1]) || abs(eigenValues[1]) < 1e-4){ eigenValues[1] = 0; }
-                if( std::isinf(eigenValues[2]) || abs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
+                if( std::isinf(eigenValues[0]) || fabs(eigenValues[0]) < 1e-4){ eigenValues[0] = 0; }
+                if( std::isinf(eigenValues[1]) || fabs(eigenValues[1]) < 1e-4){ eigenValues[1] = 0; }
+                if( std::isinf(eigenValues[2]) || fabs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
 
                 // modified eigenvalues for meijerin's neuriteness
                 modifiedEigenValues[0] = eigenValues[0] + m_Alpha/2.0 * eigenValues[1] + m_Alpha/2.0 * eigenValues[2];
@@ -163,10 +179,10 @@ namespace itk
                 modifiedEigenValues[2] = eigenValues[2] + m_Alpha/2.0 * eigenValues[0] + m_Alpha/2.0 * eigenValues[1];
 
                 // sorting values lambda1 < lambda2 < lambda3
-                std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return abs(i) < abs(j); } );                 
+                std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return fabs(i) < fabs(j); } );                 
                 min = std::min( min,modifiedEigenValues[0] );
                 // sorting by magnitude before giving it to mesure filter
-                //std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return abs(i) < abs(j); } );
+                //std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return fabs(i) < fabs(j); } );
                 
                 itOut.Set(modifiedEigenValues);
                 
@@ -180,8 +196,80 @@ namespace itk
         m_minEigenValue = std::min(min,m_minEigenValue);
     }
 
-    template< typename TInputImage, typename TOutputImage >
-    void ModifiedHessianToEigenValuesImageFilter< TInputImage,TOutputImage >
+    template<typename TInputImage, typename TOutputImage, typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter< TInputImage,TOutputImage, TMaskImage >
+    ::withMask(const RegionType & regionForThread)
+    {
+        EigenValueType min = NumericTraits<EigenValueType>::max();
+
+        using CalculatorType = SymmetricEigenAnalysisFixedDimension<ImageDimension, PixelType, EigenValueArrayType>;
+        CalculatorType eigenCalculator;
+        eigenCalculator.SetOrderEigenMagnitudes(true);
+        EigenValueArrayType eigenValues;
+        EigenValueArrayType modifiedEigenValues;
+
+        // Walk the region of eigen values and get the objectness measure
+        ImageScanlineConstIterator< TInputImage > it(this->GetInput(),regionForThread);
+        ImageScanlineIterator< TOutputImage > itOut(this->GetOutput(),regionForThread);
+        ImageScanlineIterator< TMaskImage > itMask(this->m_maskImage,regionForThread);
+
+
+        it.GoToBegin();
+        itOut.GoToBegin();
+        itMask.GoToBegin();
+        while( !it.IsAtEnd() )
+        {
+            while( !it.IsAtEndOfLine() )
+            {
+                if(itMask.Get() == 0 )
+                {
+                    modifiedEigenValues[0] = 0;
+                    modifiedEigenValues[1] = 0;
+                    modifiedEigenValues[2] = 0;
+
+                    itOut.Set(modifiedEigenValues);
+                
+                    ++it;
+                    ++itOut;
+                    ++itMask;
+
+                    continue;
+                }
+
+                // Eigen values from pixel's hessian
+                eigenCalculator.ComputeEigenValues(it.Get(), eigenValues);
+                
+                // noise removal on eigenValues
+                if( std::isinf(eigenValues[0]) || fabs(eigenValues[0]) < 1e-4){ eigenValues[0] = 0; }
+                if( std::isinf(eigenValues[1]) || fabs(eigenValues[1]) < 1e-4){ eigenValues[1] = 0; }
+                if( std::isinf(eigenValues[2]) || fabs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
+
+                // modified eigenvalues for meijerin's neuriteness
+                modifiedEigenValues[0] = eigenValues[0] + m_Alpha/2.0 * eigenValues[1] + m_Alpha/2.0 * eigenValues[2];
+                modifiedEigenValues[1] = eigenValues[1] + m_Alpha/2.0 * eigenValues[0] + m_Alpha/2.0 * eigenValues[2];
+                modifiedEigenValues[2] = eigenValues[2] + m_Alpha/2.0 * eigenValues[0] + m_Alpha/2.0 * eigenValues[1];
+
+                // sorting values lambda1 < lambda2 < lambda3
+                std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return fabs(i) < fabs(j); } );                 
+                min = std::min( min,modifiedEigenValues[0] );
+                // sorting by magnitude before giving it to mesure filter
+                //std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return fabs(i) < fabs(j); } );
+                
+                itOut.Set(modifiedEigenValues);
+                
+                ++it;
+                ++itOut;
+                ++itMask;
+            } 
+            it.NextLine();
+            itOut.NextLine();
+        }
+        std::lock_guard<std::mutex> mutexHolder(m_mutex);
+        m_minEigenValue = std::min(min,m_minEigenValue);
+    }
+
+    template<typename TInputImage, typename TOutputImage, typename TMaskImage>
+    void ModifiedHessianToEigenValuesImageFilter< TInputImage,TOutputImage, TMaskImage >
     ::PrintSelf(std::ostream & os, Indent indent) const
     {
         Superclass::PrintSelf(os, indent);

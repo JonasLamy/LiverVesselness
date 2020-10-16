@@ -4,14 +4,36 @@
 //#include "itkViewImage.h"
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask,const std::string &id)
-	: m_truePositive(0), m_trueNegative(0), m_falsePositive(0), m_falseNegative(0), m_epsilon(0.000001f)
+Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, 
+															const typename TGroundTruthImageType::Pointer gt, 
+															const typename TMaskImageType::Pointer mask)
+	: m_truePositive(0), 
+	m_trueNegative(0), 
+	m_falsePositive(0), 
+	m_falseNegative(0), 
+	m_foreground(0),
+	m_background(0),
+	m_epsilon(0.000001f)
 {
-	countMatchesBinary(img, gt, mask, id);
+	countMatchesBinary(img, gt, mask);
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask, const std::string &id)
+Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(long tp, long tn, long fp, long fn)
+	: m_truePositive(tp), 
+	m_trueNegative(tn), 
+	m_falsePositive(fp), 
+	m_falseNegative(fn), 
+	m_foreground(0),
+	m_background(0),
+	m_epsilon(0.000001f)
+{
+}
+
+template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation,
+																				const typename TGroundTruthImageType::Pointer gt,
+																				const typename TMaskImageType::Pointer mask)
 {
 
 	typename itk::ImageRegionConstIterator<TImageType> itImg(segmentation, segmentation->GetLargestPossibleRegion());
@@ -33,6 +55,7 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	//auto writer = itk::ImageFileWriter<TImageType>::New();
 	while (!itImg.IsAtEnd())
 	{
+		// confusion matrix
 		if (itMask.Get() > 0)
 		{
 			if (itImg.Get() > 0)
@@ -75,10 +98,10 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	//if( m_truePositive == 0 and m_falsePositive == 0)
 	//{
 		// space is a rectangular cuboid, so space diagonal should be the max distance
-		int a = gt->GetLargestPossibleRegion().GetSize()[0];
-		int b = gt->GetLargestPossibleRegion().GetSize()[1];
-		int c = gt->GetLargestPossibleRegion().GetSize()[2];
-		m_hausdorff_distance = std::sqrt(a*a + b*b + c*c);
+		//int a = gt->GetLargestPossibleRegion().GetSize()[0];
+		//int b = gt->GetLargestPossibleRegion().GetSize()[1];
+		//int c = gt->GetLargestPossibleRegion().GetSize()[2];
+		//m_hausdorff_distance = std::sqrt(a*a + b*b + c*c);
 	//	std::cout<<a<<" "<<b<<" "<<c<<" "<<m_hausdorff_distance<<std::endl;
 	//}	
 	//else
@@ -94,11 +117,11 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	//}
 	
 	
-	/*
-	writer->SetFileName( std::string("toto/") + std::string("verif") + id + std::string(".nii"));
-	writer->SetInput(p);
-	writer->Update();
-	*/
+	
+	//writer->SetFileName( std::string("toto/") + std::string("verif_") + m_evalName + id + std::string(".nii"));
+	//writer->SetInput(p);
+	//writer->Update();
+	
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
@@ -148,7 +171,17 @@ long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorr
 	a *= (m_trueNegative + m_falsePositive);
 	a *= (m_trueNegative + m_falseNegative);
 
-	if( abs(a) < m_epsilon)
+	if(m_truePositive == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return 1;
+	if(m_trueNegative == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return 1;
+
+	if(m_falseNegative == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return -1;
+	if(m_falsePositive == m_truePositive+m_trueNegative+m_falsePositive+m_falseNegative)
+		return -1;
+
+	if( std::abs(a) < m_epsilon)
 		return 0;
 
 	long double b = (m_truePositive * m_trueNegative) - (m_falsePositive * m_truePositive);
@@ -165,33 +198,8 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::dice()
 }
 
 template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType,TGroundTruthImageType,TMaskImageType>::roc(VoxelsMap &vMap)
-{
-	std::cout<<vMap["TP"].size()<<std::endl;
-	
-	for(int i=0;i<vMap["TP"].size();i++)
-	{
-		std::cout<< vMap["TP"][i] << "-" << vMap["FP"][i] <<std::endl;
-	}
-}
-
-
-
-
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::print()
-{
-	std::cout << "stats\n"
-			  << "TP (1,1) :" << m_truePositive << std::endl
-			  << "TN (0,0):" << m_trueNegative << std::endl
-			  << "FP (1,0):" << m_falsePositive << std::endl
-			  << "FN (0,1):" << m_falseNegative << std::endl
-			  << std::endl
-			  << "Sensitivity:" << sensitivity() << std::endl
-			  << "Specificity:" << specificity() << std::endl
-			  << "Precision:" << precision() << std::endl
-			  << "Accuracy:" << accuracy() << std::endl
-			  << "Matthews correlation:" << matthewsCorrelation() << std::endl
-			  << "Dice:" << dice() << std::endl
-			  << "Hausdorff:"<<hausdorffDistance() <<std::endl;
+double Eval<TImageType, TGroundTruthImageType, TMaskImageType>::sparsity()
+{ 
+	// background / (background+foreground)
+	return (m_trueNegative+m_falseNegative) / (double)( (m_trueNegative+m_falseNegative) + (m_truePositive+m_falsePositive) );
 }
