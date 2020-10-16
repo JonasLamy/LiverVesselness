@@ -1,0 +1,93 @@
+
+{
+    "Antiga" :
+    [
+	{
+	    "Output":"antiga_whole.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.4"},
+		{"sigmaMax":"2.8"},
+		{"nbSigmaSteps":"4"},
+		{"alpha":"0.2"},
+		{"beta":"0.8"},
+		{"gamma":"10"}
+	    ]
+	}
+    ],
+
+    "Jerman" :
+    [
+	{
+	    "Output":"jerman_whole.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.4"},
+		{"sigmaMax":"2.6"},
+		{"nbSigmaSteps":"4"},
+		{"tau":"0.8"}
+	    ]
+	}
+    ],
+	
+    "RORPO_multiscale_usage" :
+    [
+	{
+	    "Output":"rorpo_whole.nii",
+	    "Arguments":[
+		{"scaleMin":"10"},
+		{"factor":"1.6"},
+		{"nbScales":"3"},
+		{"core":"3"}
+	    ]
+	}
+    ],
+    "Meijering" :
+    [
+	{
+	    "Output":"meijering_whole.nii",
+	    "Arguments":[
+		{"alpha":"-0.33"},
+		{"sigmaMin":"1.4"},
+		{"sigmaMax":"2.8"},	
+		{"nbSigmaSteps":"4"}
+	    ]
+	}
+    ],
+
+    "OOF":
+    [
+	{
+	    "Output":"oof_whole.nii",
+	    "Arguments":[
+		{"sigmaMin":"0.6"},
+		{"sigmaMax":"1.6"},
+		{"nbSigmaSteps":"4"},
+		{"sigma":"0.5"}
+	    ]
+	}	
+    ],
+    "RuiZhang":
+    [
+	{
+	    "Output":"ruiZhang_whole.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.4"},
+		{"sigmaMax":"3.0"},
+		{"nbSigmaSteps":"4"},
+		{"tau":"0.6"}
+	    ]
+	}	
+    ],
+    "Sato":
+    [
+	{
+	    "Output":"Sato_whole.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.4"},
+		{"sigmaMax":"2.8"},
+		{"nbSigmaSteps":"4"},
+		{"alpha1":"0.9"},
+		{"alpha2":"2.8"}
+	    ]
+	}	
+    ]
+}
