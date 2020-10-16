@@ -4,7 +4,6 @@ Repository of the work submitted to ICPR 2020:
 
 **"Vesselness Filters: A Survey with Benchmarks Applied to Liver Imaging"**, Jonas Lamy, Odyssée Merveille, Bertrand Kerautret, Nicolas Passat, Antoine Vacavant, ICPR, 2020
 
-
 The implementations of the seven vessel filtering methods are available and the results presented on the paper can be reproduced.
 An installation-free online demonstration is also available:
 [http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
