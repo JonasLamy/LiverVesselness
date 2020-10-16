@@ -8,6 +8,15 @@ The implementations of the seven vessel filtering methods are available and the 
 An installation-free online demonstration is also available:
 [http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
+## DATA
+
+Data for the benchmark comes from the modification of public datasets. The tweaked versions are available here : http://eidolon.univ-lyon2.fr/~jlamy/
+
+Original data are available on the authors websites :
+
+Ircad Dataset : https://www.ircad.fr/research/3d-ircadb-01/
+Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
+
 ## Dependancies
 - Benchmark (C/C++)
 
