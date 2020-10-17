@@ -95,9 +95,20 @@ add_subdirectory(RORPO)
 
 # benchmark ------------------------
 
-find_package(jsoncpp REQUIRED)
-get_target_property(JSON_INC_PATH jsoncpp_lib INTERFACE_INCLUDE_DIRECTORIES)
-include_directories(${JSON_INC_PATH})
+include(lib/jsoncpp.cmake)
+if(BENCHMARK_VESSEL_USE_LOCAL_JSONCPP)
+	set(JSONCPP_FOUND ${JSONCPP_FOUND} PARENT_SCOPE)
+	set(JSON_INC_PATH ${JSONCPP_INCLUDE_DIRS} PARENT_SCOPE)
+	set(JSONCPP_LIBRARIES ${JSONCPP_LIBRARIES} PARENT_SCOPE)
+	set(JSONCPP_SOURCES ${JSONCPP_SOURCES} PARENT_SCOPE)
+else()
+   find_package(jsoncpp REQUIRED) 
+   get_target_property(JSON_INC_PATH jsoncpp_lib INTERFACE_INCLUDE_DIRECTORIES)
+   include_directories(${JSON_INC_PATH})
+endif()
+
+
+
 
 add_executable(Benchmark src/benchmark.cpp)
 target_include_directories(Benchmark PUBLIC
@@ -105,7 +116,7 @@ target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
   "$<INSTALL_INTERFACE:include/Benchmark>"
   )
-target_link_libraries(Benchmark ${ITK_LIBRARIES}    jsoncpp_lib)
+target_link_libraries(Benchmark ${ITK_LIBRARIES} ${JSONCPP_LIBRARIES}   jsoncpp_lib)
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # process ircad -------------------
