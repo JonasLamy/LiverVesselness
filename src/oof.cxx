@@ -45,8 +45,12 @@ int main(int argc, char** argv)
   app.add_option("--sigma,-s",fixedSigma,"sigma for smoothing");
   app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
   app.add_option("--mask,-k",maskFile,"mask response by image")
+  
   ->check(CLI::ExistingFile);
-
+  app.get_formatter()->column_width(40);
+  CLI11_PARSE(app, argc, argv);
+  // END parse command line using CLI ----------------------------------------------
+  
   
     //********************************************************
     //                    Reading inputs
@@ -77,10 +81,12 @@ int main(int argc, char** argv)
     
     std::vector<double> radii;
     double i=sigmaMin;
-    while(i<sigmaMax)
+    int count = nbSigmaSteps-2;
+    while(count >= 0)
     {
       radii.push_back(i);
       i += step;
+      count--;
     }
     radii.push_back( sigmaMax );
 

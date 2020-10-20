@@ -1,0 +1,12 @@
+{
+    "Settings":{
+	"name":"scaleSearchOOF",
+	"path":"IRCADscaleSearch",
+	"inputVolumesList":"Reproductibility/Benchmark/ircad/fileList/ircad_111_all.txt",
+	"algorithmSets":"Reproductibility/Benchmark/ircad/parameterSets/ScaleSearch/OOFScalesSearch.json",
+	"maskList":["Organ","bifurcations","dilatedVessels"],
+	"enhancementMask":"Organ",
+	"nbThresholds":100,
+	"removeResultsVolumes":true
+    }
+}

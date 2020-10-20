@@ -26,7 +26,6 @@ int main( int argc, char* argv[] )
   float beta {0.5};
   
   int nbSigmaSteps;
-  double fixedSigma;
   std::string maskFile;
   app.add_option("-i,--input,1", inputFile, "inputName : input img" )
   ->required()
@@ -39,12 +38,12 @@ int main( int argc, char* argv[] )
   app.add_option("--alpha1,-a", alpha, "Sato's alpha1" ,true);
   app.add_option("--alpha2,-b", beta, "Sato's alpha2" ,true);
   
-  app.add_option("--sigma,-s",fixedSigma,"sigma for smoothing");
   app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
   app.add_option("--mask,-k",maskFile,"mask response by image")
   ->check(CLI::ExistingFile);
   
-  
+  app.get_formatter()->column_width(40);
+  CLI11_PARSE(app, argc, argv);
   
   constexpr unsigned int Dimension = 3;
   using PixelType = float;
@@ -52,7 +51,7 @@ int main( int argc, char* argv[] )
   
   auto inputImage = vUtils::readImage<ImageType>(inputFile,isInputDicom);
   
-  // Antiga vesselness operator
+  // Sato vesselness operator
   
   using HessianPixelType = itk::SymmetricSecondRankTensor< double, Dimension >;
   using HessianImageType = itk::Image< HessianPixelType, Dimension >;

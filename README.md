@@ -22,11 +22,11 @@ Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
 
 CMake > 3.10.2 (https://cmake.org/)
 
-ITK > 5.0 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
+ITK >= 5.2 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
 recommanded options : Module_Thickness3D, ITK_USE_FFTWF, ITK_USE_FFTWD
 
 Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp)
-Boost > 1.46.0 : needs program_option and filesystem
+
 
 - scripts ( python 3.5+)
 Pandas : (https://pandas.pydata.org/)
