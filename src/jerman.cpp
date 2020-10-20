@@ -24,11 +24,9 @@ int main( int argc, char* argv[] )
   double sigmaMin;
   double sigmaMax;
   float tau {0.75};
-  int nbClasses {5};
   bool isInputDicom = false;
   
   int nbSigmaSteps;
-  double fixedSigma;
   std::string maskFile;
   app.add_option("-i,--input,1", inputFile, "inputName : input img")
   ->required()
@@ -40,7 +38,6 @@ int main( int argc, char* argv[] )
   app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
   app.add_option("--tau,-t", tau, "Jerman tau parameter" ,true);
   
-  app.add_option("--sigma,-s",fixedSigma,"number of kmean seeds");
   app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
   app.add_option("--mask,-k",maskFile,"mask response by image")
   ->check(CLI::ExistingFile);

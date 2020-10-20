@@ -16,7 +16,7 @@ include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
 
 
-find_package(ITK 5.1 REQUIRED)
+find_package(ITK 5.2 REQUIRED)
 include(${ITK_USE_FILE})
 
 

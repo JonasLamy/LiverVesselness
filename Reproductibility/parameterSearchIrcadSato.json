@@ -1,0 +1,13 @@
+{
+    "Settings":{
+	"name":"parameterSearchSato",
+	"path":"IRCADparameterSearch",
+	"inputVolumesList":"Reproductibility/Benchmark/ircad/fileList/ircad_111_all.txt",
+	"algorithmSets":"Reproductibility/Benchmark/ircad/parameterSets/ParameterSearch/SatoPS_whole_MCC.json",
+	"maskList":["Organ","bifurcations","dilatedVessels"],
+	"enhancementMask":"Organ",
+	"nbThresholds":100,
+	"removeResultsVolumes":true
+    }
+}
+

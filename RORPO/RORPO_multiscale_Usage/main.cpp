@@ -271,7 +271,7 @@ int main(int argc, char **argv)
   ->expected(3);
   app.add_option("--scaleMin",scaleMin, "Min scale");
 
-  app.add_option("--nbCores",nbCores, "nb Cores");
+  app.add_option("--core",nbCores, "nb Cores");
   app.add_option("--factor",scaleMin, "factor");
   app.add_option("--nbScales,-n", nbScales,  "nb scales");
   app.add_option("--output,-o",outputFile, "ouputName : output img");

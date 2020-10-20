@@ -1,0 +1,14 @@
+{
+    "Settings":{
+	"name":"parameterSearchZhang",
+	"path":"VascusynthparameterSearch",
+	"inputVolumesList":"Reproductibility/Benchmark/vascusynth/fileList/vascu3V_10.txt",
+	"algorithmSets":"Reproductibility/Benchmark/vascusynth/parameterSets/ParameterSearch/vascuZhangPS_whole_MCC.json",
+	"maskList":["Organ","bifurcations","dilatedVessels"],
+	"enhancementMask":"Organ",
+	"nbThresholds":100,
+	"removeResultsVolumes":true
+    }
+}
+
+
