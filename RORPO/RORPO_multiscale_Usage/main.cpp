@@ -255,7 +255,7 @@ int main(int argc, char **argv)
   int nbScales;
   bool isInputDicom {false};
   bool verbose {false};
-  std::vector<int> window;
+  std::vector<int> window(3);
   int nbCores{1};
   int dilationSize = 3;
   std::string maskPath;
@@ -284,7 +284,6 @@ int main(int argc, char **argv)
   app.get_formatter()->column_width(40);
   CLI11_PARSE(app, argc, argv);
   // END parse command line using CLI ----------------------------------------------
-  
   
 
 
