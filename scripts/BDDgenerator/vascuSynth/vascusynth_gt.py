@@ -46,8 +46,8 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
 
                     #  create GT files
 
-                    if file.endswith('.mhd'):
-                    #if file.endswith('data.nii'):    
+                    #if file.endswith('.mhd'):
+                    if file.endswith('data.nii'):    
                         print(filePath +"/"+ "vbi_rician_20.0.nii")
                         print("vascu_2013/maskWholeImage.nii") # only image at root directory
                         print(filePath +"/"+ "bifurcationGT.nii")
@@ -61,7 +61,7 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         #generator.bifurcationCoordinatesFile(filePath,"treeStructure_"+dataNumber+".mat")
 
                         # generate bifurcations groundtruth in fork shapes (work in progress)
-                        #generator.bifurcationsYGT(filePath,"gt.nii","bifurcationGT.nii")
+                        generator.bifurcationsYGT(filePath,"binaryVessels.nii","binaryBifurcationsMask.nii")
 
                         #generator.bifurcationsPositionsGT(filePath+"/"+"bifurcations_coordinates.txt",outputFilePath+"/"+"bifurcationPositions.nii",(128,128,128))
                         #generator.paddImages(filePath+"/"+file,outputFilePath+"/"+"data.nii",(128,128,128))
@@ -75,31 +75,39 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         #generator.groundTruthBifurcation(outputFilePath+"/"+"binaryVessels.nii",filePath+"/"+"bifurcations_coordinates.txt",outputFilePath+"/"+"binaryBifurcationsMask.nii")
                         # background generation
 
-                        # rescale vessels intensity to [Imin,Imax] and set background intensity to Imin
-                        Imin = 50
-                        Imax = 150
-                        generator.vesselsAndBackground(outputFilePath+"/"+"data.nii",outputFilePath + "/vesselsAndBackground.nii",Imin,Imax)
+                        #generator.imageFromGaussianPDF(outputFilePath+"/"+"data.nii","toto.nii","MRI")
+                        
+                        
+                        # rescale vessels intensity to [Imin,Imax] and background intensity to background value
+                        
+                        # Note : IRM vessels mean value : 119 ; IRM vessels std : 16
+                        # IRM background mean 108 ; IRM background std : 12 
+                        # Manual samples on MRI slices.
+
+                        Imin =  110 # background value, we don't want vessels under the background value
+                        Imax =  125
 
                         # adding non homogeneous illumination to images
                         # sigma = size of the artefacts, Imin = intensity min of the gaussian, Imax = intensity max of the gaussian
-                        Imin = 50
-                        Imax = 90
+                        IgMin =  0#108 # (115-108 = 7)
+                        IgMax =  7#115 # ( 108 + 16 = 119)
                         nbGaussian = 3
                         sigmaMin = 30
                         sigmaMax = 50
 
+                        backgroundValue = 105
+
+                        generator.vesselsAndBackground(outputFilePath+"/"+"data.nii",outputFilePath + "/vesselsAndBackground.nii",Imin,Imax,backgroundValue,nbGaussian,sigmaMin,sigmaMax,Imin,Imax)
+
+
                         nbGaussianArtefacts = 10
-                        aSigmaMin = 5
-                        aSigmaMax = 11
-                        aImin = 90
-                        aImax = 100
+                        aSigmaMin = 3
+                        aSigmaMax = 15
+                        aImin = 0
+                        aImax = 45
+                        
                         generator.vesselsIllumination(outputFilePath+"/"+"vesselsAndBackground.nii",
                                                     outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",
-                                                    nbGaussian,
-                                                    sigmaMin,
-                                                    sigmaMax,
-                                                    Imin,
-                                                    Imax,
                                                     nbGaussianArtefacts,
                                                     aSigmaMin,
                                                     aSigmaMax,
@@ -109,3 +117,5 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         #generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_poisson" ,"poisson")
                         generator.noisyImage(outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",outputFilePath+"/"+"rician" ,"rician")
                         
+                        exit()
+                                              
