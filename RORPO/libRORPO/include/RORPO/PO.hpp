@@ -57,7 +57,7 @@ typedef long IndexType;
 
 void create_neighbourhood(int nb_col,
 			int dim_frame,
-			std::vector<int> & orientation,
+			const std::vector<int> & orientation,
 			std::vector<int> & upList,
 			std::vector<int> & downList) {
 
@@ -303,10 +303,10 @@ void propagate(IndexType p, std::vector<int>&lambda, std::vector<int>&nf,
 }
 
 template<typename T, typename MaskType>
-void PO_3D(Image3D<T> &image,
+void PO_3D(const Image3D<T> &image,
 		int L,
 		std::vector<IndexType> &index_image,
-		std::vector<int> &orientations,
+		const std::vector<int> &orientations,
 		Image3D<T> &Output,
 		std::vector<bool> b)
 
@@ -350,8 +350,6 @@ void PO_3D(Image3D<T> &image,
 			}
 		}
 	}
-
-	return ;
 }
 
 
