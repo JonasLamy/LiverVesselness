@@ -176,18 +176,27 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
                                                                                 typename TMaskImageType::Pointer mask, 
                                                                                 std::ofstream * stream)
 {
-  // compute the 0 zeros, iterate over the region of interest
+  // compute the zeros, iterate over the region of interest
   itk::ImageRegionConstIteratorWithIndex<TImageType> itFilter(outputImage,outputImage->GetLargestPossibleRegion());
   itk::ImageRegionConstIteratorWithIndex<TMaskImageType> itMask(mask,mask->GetLargestPossibleRegion());
+  itk::ImageRegionConstIteratorWithIndex<TGroundTruthImageType> itGt(gt,gt->GetLargestPossibleRegion());
 
   // positives values are stored
   typename std::list<typename TImageType::PixelType> foregroundValues;
   typename std::list<typename TImageType::IndexType> foregroundIndexes;
-  
+
   typename std::list<typename TImageType::IndexType> backgroundIndexes;
 
   itFilter.GoToBegin();
   itMask.GoToBegin();
+  itGt.GoToBegin();
+
+  // SNR and PSNR power elements
+  // The image considered is the ground truth image
+  long double powerImage = 0;
+  // The noisy image correspond in our case to the filter output
+  long double powerFilter = 0;
+  long long nbPixels = 0;
   while( !itFilter.IsAtEnd() )
   {
     if(itMask.Get() > 0 )
@@ -196,15 +205,35 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
       {
         foregroundValues.push_back( itFilter.Value() );
         foregroundIndexes.push_back( itFilter.GetIndex() );
+
+        powerFilter += itFilter.Value() * itFilter.Value(); // squared for mean squared error for snr
       }
       else
       {
         backgroundIndexes.push_back( itFilter.GetIndex() );
       }  
     }
+
+    // our GT are not normalised. For the SNR to be in line, we artificially normalise the GT 254 -> 1.
+    if(itGt.Value() > 0)
+    {
+      powerImage += 1.0; // power is mean squared. But square of 1 is one.
+    }
+
     ++itMask;
     ++itFilter;
+    ++itGt;
+
+    nbPixels++;
   }
+
+  // Finishing the computation of the SNR / PSNR
+
+  powerImage /= nbPixels;
+  powerFilter /= nbPixels;
+
+  double snr = powerImage / powerFilter;
+  double psnr = 1 / powerFilter;
   
   long TN_b=0;
   long FN_b=0;
@@ -248,7 +277,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
 
     computeConfusionValues(foregroundValues,foregroundIndexes,i/maxBoundf,TP_f,TN_f,FP_f,FN_f);
 
-    Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(TP_f, TN_f+TN_b, FP_f, FN_f+FN_b);
+    Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(snr,psnr,TP_f, TN_f+TN_b, FP_f, FN_f+FN_b);
     (*stream)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< eval;
 
     if( i%10 == 0)

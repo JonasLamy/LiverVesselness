@@ -5,6 +5,7 @@ import itk
 import matplotlib.pyplot as plt
 from scipy.stats import rice
 from scipy.stats import norm
+from scipy import ndimage
 import scipy.ndimage
 
 class Generator:
@@ -36,9 +37,9 @@ class Generator:
         
         os.system("./MakeVascuSynthBifurcationGT "+binaryVesselsPath+" "+bifurcationTxtFile+" "+bifurcationGtFilePath)
         
-        print(binaryVesselsPath)
-        print(bifurcationTxtFile)
-        print(bifurcationGtFilePath)
+        #print(binaryVesselsPath)
+        #print(bifurcationTxtFile)
+        #print(bifurcationGtFilePath)
              
     def noisyImage(self,inputPath,outputName,noiseType):
         
@@ -114,6 +115,44 @@ class Generator:
                 except:
                     pass
             itk.imwrite( itk.GetImageFromArray(imgGTPos.astype(np.float32)), outputPath )
+
+    def makeHardClassificationPatches(self,DirPath,inputPath,maskPath,outputPath):
+        imgInputPath = DirPath + "/" + inputPath #"/DATA/vascu_deepV2/maskWholeImage.nii"
+        imgMaskPath = DirPath + "/" + maskPath
+        imgROIPath = DirPath + "/" + outputPath
+
+        imgInput = itk.imread(imgInputPath)
+        imgMask = itk.imread(imgMaskPath)
+
+        PixelType = itk.UC
+        Dimension = 3
+        ImageType = itk.Image[PixelType, Dimension]
+        
+        radiusValue = 4
+        StructuringElementType = itk.FlatStructuringElement[Dimension]
+        structuringElement = StructuringElementType.Ball(radiusValue)
+        
+        DilateFilterType = itk.BinaryDilateImageFilter[ImageType,
+                                                    ImageType,
+                                                    StructuringElementType]
+        
+        dilateFilter = DilateFilterType.New()
+        
+        dilateFilter.SetInput(imgMask)
+        dilateFilter.SetKernel(structuringElement)
+        dilateFilter.SetForegroundValue(255)
+        imgMask = dilateFilter.GetOutput()
+
+        imgInput = itk.GetArrayFromImage(imgInput)
+        imgMask = itk.GetArrayFromImage(imgMask)
+
+
+        
+        imgROI = np.copy(imgInput)
+        imgROI[ imgMask > 0 ] = 0
+        
+        
+        itk.imwrite( itk.GetImageFromArray(imgROI.astype(np.uint8)),imgROIPath)
             
     def vesselsAndBackground(self,inputPath,outputPath,Imin,Imax,backgroundValue,nbGaussianBackground,sigmaMin,sigmaMax,IgMin,IgMax):
         
