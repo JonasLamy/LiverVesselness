@@ -61,7 +61,7 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         #generator.bifurcationCoordinatesFile(filePath,"treeStructure_"+dataNumber+".mat")
 
                         # generate bifurcations groundtruth in fork shapes (work in progress)
-                        generator.bifurcationsYGT(filePath,"binaryVessels.nii","binaryBifurcationsMask.nii")
+                        #generator.bifurcationsYGT(filePath,"binaryVessels.nii","binaryBifurcationsMask.nii")
 
                         #generator.bifurcationsPositionsGT(filePath+"/"+"bifurcations_coordinates.txt",outputFilePath+"/"+"bifurcationPositions.nii",(128,128,128))
                         #generator.paddImages(filePath+"/"+file,outputFilePath+"/"+"data.nii",(128,128,128))
@@ -73,6 +73,11 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
 
                         # bifurcation mask Generation
                         #generator.groundTruthBifurcation(outputFilePath+"/"+"binaryVessels.nii",filePath+"/"+"bifurcations_coordinates.txt",outputFilePath+"/"+"binaryBifurcationsMask.nii")
+                        
+                        # patch generator # TODO make different scripts instead of bumping everything with comments
+                        generator.makeHardClassificationPatches(outputFilePath,"binaryVesselDilated.nii","binaryBifurcationsMask.nii","vesselsNeighbourhoodForClassif.nii")
+                        #generator.makeHardClassificationPatches(outputFilePath,"placeholder","binaryVesselDilated.nii","backgroundForClassif.nii")
+                        
                         # background generation
 
                         #generator.imageFromGaussianPDF(outputFilePath+"/"+"data.nii","toto.nii","MRI")
@@ -97,8 +102,7 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
 
                         backgroundValue = 105
 
-                        generator.vesselsAndBackground(outputFilePath+"/"+"data.nii",outputFilePath + "/vesselsAndBackground.nii",Imin,Imax,backgroundValue,nbGaussian,sigmaMin,sigmaMax,Imin,Imax)
-
+                        #generator.vesselsAndBackground(outputFilePath+"/"+"data.nii",outputFilePath + "/vesselsAndBackground.nii",Imin,Imax,backgroundValue,nbGaussian,sigmaMin,sigmaMax,Imin,Imax)
 
                         nbGaussianArtefacts = 10
                         aSigmaMin = 3
@@ -106,16 +110,16 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         aImin = 0
                         aImax = 45
                         
-                        generator.vesselsIllumination(outputFilePath+"/"+"vesselsAndBackground.nii",
-                                                    outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",
-                                                    nbGaussianArtefacts,
-                                                    aSigmaMin,
-                                                    aSigmaMax,
-                                                    aImin,
-                                                    aImax)
+                        #generator.vesselsIllumination(outputFilePath+"/"+"vesselsAndBackground.nii",
+                        #                            outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",
+                        #                            nbGaussianArtefacts,
+                        #                            aSigmaMin,
+                        #                            aSigmaMax,
+                        #                            aImin,
+                        #                            aImax)
 
                         #generator.noisyImage(filePath,"vesselsAndBackgroundIlluminated.nii","vbi_poisson" ,"poisson")
-                        generator.noisyImage(outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",outputFilePath+"/"+"rician" ,"rician")
+                        #generator.noisyImage(outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",outputFilePath+"/"+"rician" ,"rician")
                         
-                        exit()
+                        
                                               

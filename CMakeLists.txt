@@ -144,13 +144,13 @@ set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 
 # Bifurcations VascuSynth
 
-#add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
-#target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
-#set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
+target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
+set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
 
 # Bifurcation IRCAD 
 

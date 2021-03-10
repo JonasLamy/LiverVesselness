@@ -3,7 +3,7 @@
 // Change QuickView.h for itkViewImage.h
 //#include "itkViewImage.h"
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TImageType::Pointer img, 
 															const typename TGroundTruthImageType::Pointer gt, 
 															const typename TMaskImageType::Pointer mask)
@@ -15,25 +15,27 @@ Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(const typename TIma
 	m_background(0),
 	m_epsilon(0.000001f)
 {
-	countMatchesBinary(img, gt, mask);
+	countMatches(img, gt, mask);
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(long tp, long tn, long fp, long fn)
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+Eval<TImageType, TGroundTruthImageType,TMaskImageType>::Eval(double snr, double psnr,long tp, long tn, long fp, long fn)
 	: m_truePositive(tp), 
 	m_trueNegative(tn), 
 	m_falsePositive(fp), 
 	m_falseNegative(fn), 
 	m_foreground(0),
 	m_background(0),
-	m_epsilon(0.000001f)
+	m_epsilon(0.000001f),
+	m_snr(snr),
+	m_psnr(psnr)
 {
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
-void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(const typename TImageType::Pointer segmentation,
-																				const typename TGroundTruthImageType::Pointer gt,
-																				const typename TMaskImageType::Pointer mask)
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatches(const typename TImageType::Pointer segmentation,
+																		const typename TGroundTruthImageType::Pointer gt,
+																		const typename TMaskImageType::Pointer mask)
 {
 
 	typename itk::ImageRegionConstIterator<TImageType> itImg(segmentation, segmentation->GetLargestPossibleRegion());
@@ -50,24 +52,30 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	p->Allocate();
 	p->FillBuffer(0);
 
-	typename itk::ImageRegionIterator<TImageType> itP(p, p->GetLargestPossibleRegion());
-	
+	//typename itk::ImageRegionIterator<TImageType> itP(p, p->GetLargestPossibleRegion());
 	//auto writer = itk::ImageFileWriter<TImageType>::New();
+
+	long nbVoxels;
 	while (!itImg.IsAtEnd())
 	{
 		// confusion matrix
 		if (itMask.Get() > 0)
 		{
+			nbVoxels++;
+
 			if (itImg.Get() > 0)
 			{
+				// GT is usually between [1-255], in case of SNR/PSNR between vesselness filter and GT we have filter output between 0 and 1.
+				// So GT need to be normalized to 1.
+
 				if (itGT.Get() > 0)
 				{
-					itP.Set(255); // both values
+					//itP.Set(255); // both values
 					m_truePositive++;
 				}
 				else
 				{
-					itP.Set(100); // only source image
+					//itP.Set(100); // only source image
 					m_falsePositive++;
 				}
 			}
@@ -75,12 +83,12 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 			{
 				if (itGT.Get() > 0)
 				{
-					itP.Set(50); // only gt
+					//itP.Set(50); // only gt
 					m_falseNegative++;
 				}
 				else
 				{
-					itP.Set(0); // nothing
+					//itP.Set(0); // nothing
 					m_trueNegative++;
 				}
 			}
@@ -88,11 +96,9 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 
 		++itImg;
 		++itGT;
-		++itP;
 		++itMask;
 	}
-
-
+}
 
 	// Computing haussdorffDistance
 	//if( m_truePositive == 0 and m_falsePositive == 0)
@@ -119,18 +125,16 @@ void Eval<TImageType, TGroundTruthImageType,TMaskImageType>::countMatchesBinary(
 	
 	
 	//writer->SetFileName( std::string("toto/") + std::string("verif_") + m_evalName + id + std::string(".nii"));
-	//writer->SetInput(p);
-	//writer->Update();
-	
-}
+	//writetemplate<typename TVesselnessType,typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::hausdorffDistance()
 {
 	return m_hausdorff_distance;
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::precision()
 {
 	if( (m_truePositive + m_falsePositive) == 0 )
@@ -139,7 +143,7 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::precision()
 	return m_truePositive / (long double)(m_truePositive + m_falsePositive); 
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::sensitivity()
 {
 	if( (m_truePositive + m_falseNegative) == 0 )
@@ -147,7 +151,7 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::sensitivity()
 	return m_truePositive / (long double)(m_truePositive + m_falseNegative);
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::specificity()
 {
 	if( (m_trueNegative + m_falsePositive) == 0 )
@@ -155,7 +159,7 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::specificity()
 	return m_trueNegative / (long double)(m_trueNegative + m_falsePositive);
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::accuracy()
 {
 	if( (m_truePositive + m_trueNegative + m_falsePositive + m_falseNegative) == 0)
@@ -163,7 +167,7 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::accuracy()
 	return (m_truePositive + m_trueNegative) / (long double)(m_truePositive + m_trueNegative + m_falsePositive + m_falseNegative);
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorrelation()
 {
 	long double a = (m_truePositive + m_falsePositive);
@@ -189,7 +193,7 @@ long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorr
 	return b / std::sqrt(a);
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::dice()
 {
 	if( (m_falsePositive + m_falseNegative + 2 * m_truePositive) == 0 )
@@ -197,9 +201,23 @@ double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::dice()
 	return 2 * m_truePositive / (double)(m_falsePositive + m_falseNegative + 2 * m_truePositive);
 }
 
-template <typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
 double Eval<TImageType, TGroundTruthImageType, TMaskImageType>::sparsity()
 { 
 	// background / (background+foreground)
 	return (m_trueNegative+m_falseNegative) / (double)( (m_trueNegative+m_falseNegative) + (m_truePositive+m_falsePositive) );
+}
+
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+double Eval<TImageType, TGroundTruthImageType, TMaskImageType>::snr()
+{ 
+	// background / (background+foreground)
+	return m_snr;
+}
+
+template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
+double Eval<TImageType, TGroundTruthImageType, TMaskImageType>::psnr()
+{ 
+	// background / (background+foreground)
+	return m_psnr;
 }
