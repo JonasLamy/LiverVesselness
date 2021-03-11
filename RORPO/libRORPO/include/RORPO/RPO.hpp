@@ -147,46 +147,25 @@ void Stuff_PO(Image3D<T> &dilatImageWithBorders,
 }
 
 
-
-
 template<typename T, typename MaskType>
-void RPO(const Image3D<T> &image, int L, Image3D<T> &RPO1,
-         Image3D<T> &RPO2, Image3D<T> &RPO3, Image3D<T> &RPO4,
-         Image3D<T> &RPO5,Image3D<T> &RPO6,Image3D<T> &RPO7,
-         int nb_core,int dilationSize, Image3D<MaskType> &Mask){
+std::array<std::vector<int>, 7> RPO(const Image3D<T> &image, int L, Image3D<T> &RPO1,
+                                    Image3D<T> &RPO2, Image3D<T> &RPO3, Image3D<T> &RPO4,
+                                    Image3D<T> &RPO5, Image3D<T> &RPO6, Image3D<T> &RPO7,
+                                    int nb_core, int dilationSize, Image3D<MaskType> &Mask) {
 
+    Image3D<T> *RPOs[7] = {&RPO1, &RPO2, &RPO3, &RPO4, &RPO5, &RPO6, &RPO7};
 
-// #################### Definition of the orientations #########################
-
-	// orientation vector
-	std::vector<int> orientation1(3);
-	orientation1[0] = 1;
-	orientation1[1] = 0;
-	orientation1[2] = 0;
-	std::vector<int> orientation2(3);
-	orientation2[0] = 0;
-	orientation2[1] = 1;
-	orientation2[2] = 0;
-	std::vector<int> orientation3(3);
-	orientation3[0] = 0;
-	orientation3[1] = 0;
-	orientation3[2] = 1;
-	std::vector<int> orientation4(3);
-	orientation4[0] = 1;
-	orientation4[1] = 1;
-	orientation4[2] = 1;
-	std::vector<int> orientation5(3);
-	orientation5[0] = 1;
-	orientation5[1] = 1;
-	orientation5[2] = -1;
-	std::vector<int> orientation6(3);
-	orientation6[0] = -1;
-	orientation6[1] = 1;
-	orientation6[2] = 1;
-	std::vector<int> orientation7(3);
-	orientation7[0] = -1;
-	orientation7[1] = 1;
-	orientation7[2] = -1;
+    // #################### Definition of the orientations #########################
+    // orientation vector
+    std::array<std::vector<int>, 7> orientations = {
+            std::vector<int>{1, 0, 0},//1
+            std::vector<int>{0, 1, 0},//2
+            std::vector<int>{0, 0, 1},//3
+            std::vector<int>{1, 1, 1},//4
+            std::vector<int>{1, 1, -1},//5
+            std::vector<int>{-1, 1, 1},//6
+            std::vector<int>{-1, 1, -1},//7
+    };
 
     // ################### Dilation + Add border on image ######################
 
@@ -199,15 +178,8 @@ void RPO(const Image3D<T> &image, int L, Image3D<T> &RPO1,
     Image3D<T> dilatImageWithBorders=imageDilat.add_border(2);
     imageDilat.clear_image();
 
-
-    RPO1.copy_image(dilatImageWithBorders);
-    RPO2.copy_image(dilatImageWithBorders);
-    RPO3.copy_image(dilatImageWithBorders);
-    RPO4.copy_image(dilatImageWithBorders);
-    RPO5.copy_image(dilatImageWithBorders);
-    RPO6.copy_image(dilatImageWithBorders);
-    RPO7.copy_image(dilatImageWithBorders);
-
+    for (auto rpo: RPOs)
+        rpo->copy_image(dilatImageWithBorders);
 
     std::vector<long> index_image;
     std::vector<bool>b(dilatImageWithBorders.size(),1);
@@ -226,73 +198,21 @@ void RPO(const Image3D<T> &image, int L, Image3D<T> &RPO1,
 
     #ifdef OMP
     #pragma omp parallel shared(dilatImageWithBorders, index_image)
-	{
-		#pragma omp sections nowait
-		{
-			#pragma omp section
-			{
-			#endif //OMP
-             PO_3D<T, MaskType>(dilatImageWithBorders,
-                                L, index_image, orientation1, RPO1, b);
-			 std::cout<<"orientation1 1 0 0 : passed"<<std::endl;
-			#ifdef OMP
-			}
-
-			#pragma omp section
-			{
-				#endif //OMP
-
-                PO_3D<T, MaskType>(dilatImageWithBorders,
-                                   L, index_image, orientation2, RPO2, b);
-			    std::cout<<"orientation2 0 1 0 : passed"<<std::endl;
-			#ifdef OMP
-			}
-			#pragma omp section
-			{
-				#endif
-                PO_3D<T, MaskType>(dilatImageWithBorders,
-                                   L, index_image, orientation3, RPO3, b);
-			    std::cout<<"orientation3 0 0 1 : passed"<<std::endl;
-
-			#ifdef OMP
-			}
-			#pragma omp section
-			{
-			 	#endif
-                PO_3D<T, MaskType>(dilatImageWithBorders,
-                                   L, index_image, orientation4, RPO4, b);
-			    std::cout<<"orientation4 1 1 1 : passed"<<std::endl;
-
-			#ifdef OMP
-			}
-			#pragma omp section
-			{
-				#endif
-                PO_3D<T, MaskType>(dilatImageWithBorders,
-                                   L, index_image, orientation5, RPO5, b);
-			    std::cout<<"orientation5 1 1 -1 : passed"<<std::endl;
-
-			#ifdef OMP
-			}
-			#pragma omp section
-			{
-				#endif
-                PO_3D<T, MaskType>(dilatImageWithBorders,
-                                   L, index_image, orientation6, RPO6, b);
-			    std::cout<<"orientation6 -1 1 1 : passed"<<std::endl;
-
-			#ifdef OMP
-			}
-			#pragma omp section
-			{
-				#endif
-                PO_3D<T, MaskType>(dilatImageWithBorders,
-                                   L, index_image, orientation7, RPO7, b);
-			    std::cout<<"orientation7 -1 1 -1 : passed"<<std::endl;
-
-			#ifdef OMP
-			}
-		}
+    {
+        #pragma omp single nowait
+        {
+            for (int i = 0; i < orientations.size(); ++i) {
+                #pragma omp task
+                {
+                    PO_3D<T, MaskType>(dilatImageWithBorders, L, index_image, orientations[i], *RPOs[i], b);
+                    std::cout << "orientation" << i + 1 << " "
+                              << orientations[i][0] << " "
+                              << orientations[i][1] << " "
+                              << orientations[i][2] << " : passed"
+                              << std::endl;
+                }
+            }
+        }
     }
     #endif
 
@@ -302,23 +222,12 @@ void RPO(const Image3D<T> &image, int L, Image3D<T> &RPO1,
 
     // Minimum between the computed RPO on the dilation and the initial image
     // + remove borders
-
-    RPO1.remove_border(2);
-    RPO2.remove_border(2);
-    RPO3.remove_border(2);
-    RPO4.remove_border(2);
-    RPO5.remove_border(2);
-    RPO6.remove_border(2);
-    RPO7.remove_border(2);
-
-    min_crush(RPO1, image);
-    min_crush(RPO2, image);
-    min_crush(RPO3, image);
-    min_crush(RPO4, image);
-    min_crush(RPO5, image);
-    min_crush(RPO6, image);
-    min_crush(RPO7, image);
-
+    for (auto rpo: RPOs)
+    {
+        rpo->remove_border(2);
+        min_crush(*rpo, image);
+    }
+    return orientations;
 }
 
 #endif //RPO_INCLUDED
