@@ -111,4 +111,25 @@ void mask_image(Image3D<T1> &image, const Image3D<T2> &mask){
 	}
 }
 
+template<typename Iterator>
+float computeSTD(Iterator begin, Iterator end)
+{
+    float mean = 0;
+    int k = 0;
+    for (auto i = begin; i != end; i++) {
+        mean += i->first;
+        k++;
+    }
+    mean /= k + 1;
+
+    float std = 0;
+    for (auto i = begin; i != end; i++) {
+        std += pow(i->first - mean, 2);
+    }
+    std /= k + 1;
+    std = sqrt(std);
+
+    return std;
+}
+
 #endif // ALGO_INCLUDED
