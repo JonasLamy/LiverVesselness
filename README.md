@@ -1,6 +1,6 @@
 # LiverVesselness
 
-Repository of the work submitted to ICPR 2020:
+Repository of the work published at ICPR 2020:
 
 **"Vesselness Filters: A Survey with Benchmarks Applied to Liver Imaging"**, Jonas Lamy, Odyssée Merveille, Bertrand Kerautret, Nicolas Passat, Antoine Vacavant, ICPR, 2020
 
