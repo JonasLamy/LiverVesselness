@@ -13,11 +13,11 @@ if not os.path.exists(dirPath):
     exit()
 
 bounds = BoundsSS()
-bounds.minBoundStart = 1.0
-bounds.minBoundEnd   = 2.0
-bounds.minBoundStep  = 0.4
+bounds.minBoundStart = 0.4
+bounds.minBoundEnd   = 1.4
+bounds.minBoundStep  = 0.2
 
-bounds.maxBoundStart = 2.0
+bounds.maxBoundStart = 1.4
 bounds.maxBoundEnd   = 3.0
 bounds.maxBoundStep  = 0.4
 

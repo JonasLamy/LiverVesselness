@@ -61,7 +61,7 @@ int main(int argc,char** argv)
     bool isDicom = false;
     
 
-    bool skeleton = true;
+    bool skeleton = false;
     if(argc >= 5)
         skeleton = true;
 
@@ -155,10 +155,10 @@ int main(int argc,char** argv)
     // 4) draw balls from filter
 
     auto inverseFilter = itk::BinaryThresholdImageFilter<ImageType,ImageType>::New();
-    inverseFilter->SetLowerThreshold(255);
-    inverseFilter->SetUpperThreshold(255);
+    inverseFilter->SetLowerThreshold(254);
+    inverseFilter->SetUpperThreshold(254);
     inverseFilter->SetInsideValue(0);
-    inverseFilter->SetOutsideValue(255);
+    inverseFilter->SetOutsideValue(254);
 
     inverseFilter->SetInput( mask );
     
@@ -199,35 +199,46 @@ int main(int argc,char** argv)
             continue;
         }
 
-        auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
-        ellipseToImageFilter->SetSize( imgBifurcationNode->GetLargestPossibleRegion().GetSize() );
-        ellipseToImageFilter->SetSpacing( imgBifurcationNode->GetSpacing() );
-        //ellipseToImageFilter->SetOrigin( imgBifurcationNode->GetOrigin() );
-        std::cout<<"ellipse filter spacing \n"<<imgBifurcationNode->GetSpacing() <<std::endl;
-
         auto ellipse = EllipseType::New();
         EllipseType::ArrayType radiusArray;
         int radius = static_cast<int>( std::sqrt( it.Value() ) ) | 1 ;
         radiusArray[0] = radius;
         radiusArray[1] = radius;
         radiusArray[2] = radius;
+        
+        std::cout<<radius<<std::endl;
+
+        ImageType::RegionType::SizeType imSize;
+
+        imSize[0] = radius*2 +1 ;
+        imSize[1] = radius*2 +1 ;
+        imSize[2] = radius*2 +1 ;
+
+        ImageType::SpacingType spacing;
+        spacing[0] = 1;
+        spacing[1] = 1;
+        spacing[2] = 1;
+
+        ImageType::PointType origin;
+        origin[0] = 0;//12.5;
+        origin[1] = 0;//12.5;
+        origin[2] = 0;//12.5;
+
+        auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
+        ellipseToImageFilter->SetSize( imSize );
+        ellipseToImageFilter->SetSpacing( spacing );
+        ellipseToImageFilter->SetOrigin( origin );
 
         ellipse->SetRadiusInObjectSpace(radiusArray);
-        // move the ellipse
-        auto transform = EllipseType::TransformType::New();
-        transform->SetIdentity();
-        EllipseType::TransformType::OutputVectorType translation;
-        ImageType::IndexType index;
-        index = it.GetIndex();
 
-        std::cout<<"index:"<<index<<" radius: "<<radius<<std::endl;
+        std::cout<<"ellipse filter spacing \n"<<imgBifurcationNode->GetSpacing() <<std::endl;
 
-        translation[0] = index[0];
-        translation[1] = index[1];
-        translation[2] = index[2];
-        transform->Translate(translation);
+        ellipse->SetRadiusInObjectSpace(radiusArray);
+        
+        ImageType::IndexType bifurcationIndex;
+        bifurcationIndex = it.GetIndex();
 
-        ellipse->SetObjectToParentTransform(transform);
+        std::cout<<"index:"<<bifurcationIndex<<" radius: "<<radius<<std::endl;
 
         ellipseToImageFilter->SetInput(ellipse);
         ellipse->SetDefaultInsideValue(255);
@@ -236,11 +247,22 @@ int main(int argc,char** argv)
         ellipseToImageFilter->SetOutsideValue(0);
         ellipseToImageFilter->Update();
 
-        auto maxFilter = itk::MaximumImageFilter<ImageType,ImageType>::New();
-        maxFilter->SetInput(0,resultImage);
-        maxFilter->SetInput(1,ellipseToImageFilter->GetOutput());
-        maxFilter->Update();
-        resultImage = maxFilter->GetOutput();
+        // iterate on ball and translate to real image
+        auto ball = ellipseToImageFilter->GetOutput();
+        itk::ImageRegionConstIterator<ImageType> itBall(ball,ball->GetLargestPossibleRegion());
+        while( !itBall.IsAtEnd() )
+        {
+            // get iterator index
+            auto ballIndex = itBall.GetIndex();
+            // translate indexes
+            ballIndex[0] += bifurcationIndex[0] - radius / 2;
+            ballIndex[1] += bifurcationIndex[1] - radius / 2;
+            ballIndex[2] += bifurcationIndex[2] - radius / 2;
+            //write value
+            resultImage->SetPixel(ballIndex, itBall.Value() );  
+            
+            ++itBall;
+        }
 
         ++it;
     }
