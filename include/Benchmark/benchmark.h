@@ -10,10 +10,14 @@
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
+#include <math.h>
 
 #include "itkImageFileReader.h"
 #include "itkBinaryThresholdImageFilter.h"
 #include "itkImageRegionConstIteratorWithIndex.h"
+#include "itkMinimumMaximumImageCalculator.h"
+
+
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 class Benchmark
@@ -57,9 +61,11 @@ private:
 
     // *old version * void launchScript(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName);
     // test function for speedy confusion matrix computation
-    void launchScriptFast(int algoID,const std::string &commandLine,const std::string &outputDir, const std::string &outputName);
+    void launchScriptFast(int algoID,const std::string &commandLine,const std::string &inputVolumePath,const std::string &outputDir, const std::string &outputName);
     
-    void computeMetrics(const std::string & outputName,
+    void computeMetrics(
+                        const std::string & outputName,
+                        typename TImageType::Pointer inputImage,
                         typename TImageType::Pointer outputImage,
                         typename TGroundTruthImageType::Pointer gt,
                         typename TMaskImageType::Pointer mask, 
