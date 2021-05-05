@@ -72,7 +72,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
         for (auto &arg : arguments)
         {
           std::string m = arg.getMemberNames()[0]; // only one name in the array
-          std::cout<<"toto : "<<m<<std::endl;
           if( (m.compare("sigmaMin") == 0) || (m.compare("sigmaMax") == 0) )
           {
             auto imgForHeaderData = vUtils::readImage<TImageType>(m_inputFileName, m_inputIsDicom);
@@ -91,7 +90,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
           sStream << "--mask " << m_maskEnhancementFileName << " ";
         }
         std::cout<<sStream.str()<<std::endl;
-        //launchScriptFast(m_nbAlgorithms,sStream.str(),m_inputFileName,m_outputDir,outputName);
+        launchScriptFast(m_nbAlgorithms,sStream.str(),m_inputFileName,m_outputDir,outputName);
 
         if(m_removeResultsVolume)
         {

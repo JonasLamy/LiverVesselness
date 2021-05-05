@@ -61,8 +61,20 @@ class HessianScaleSearch:
         while(minB <= self.boundsSS.minBoundEnd + self.epsilon):
             maxB = self.boundsSS.maxBoundStart
             while(maxB <= self.boundsSS.maxBoundEnd + self.epsilon):
-                
                 if(maxB-minB >= 1):
+                    l = []
+                    stepSize = ( math.log(maxB) - math/log(minB) ) / (self.boundsSS.nbScales-1)
+                    for i in range(0,self.boundsSS.nbScales):
+                        l.append(minB * math.exp(stepSize * i )
+                    
+                    ok = True
+                    for i in range(0,self.boundsSS.nbScales-1):
+                        if(l[i+1]-l[i]> 1/6):
+                            ok = False
+
+                    if(not ok):
+                        continue
+
                     parameterSet = self.instance(minB,maxB,self.boundsSS.nbScales,self.methodName,self.methodParameters)
                     parametersSets.append(parameterSet)
 
