@@ -62,6 +62,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     vesselsMaskSmall = patientDirectory + "/vesselsMaskSmall.nii"     
     vesselsMaskMedium = patientDirectory + "/vesselsMaskMedium.nii"     
     vesselsMaskLarge = patientDirectory + "/vesselsMaskLarge.nii"     
+    vesselsSkeleton = patientDirectory + "/vesselsSkeleton.nii"     
 
     print(patientOutPath)
     print(vesselsOutPath)
@@ -163,11 +164,12 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     #print(commandLine)
     #os.system(commandLine)
 
-    commandLine = "./MakeIrcadBifurcationGT " + vesselsCutOutPath + " " + liverOutPath  + " " + bifurcationsOutPath
+    commandLine = "./MakeIrcadBifurcationGT " + vesselsCutOutPath + " " + liverOutPath  + " " + bifurcationsOutPath + " " + vesselsSkeleton
     
     print(commandLine)
     os.system(commandLine)
-    exit()
+    
+    
     """
     bifurcationInPath = patientDirectory+"/bifurcationsMaskIso.nii"
     liverInPath = patientDirectory+ "/liverMaskIso.nii"

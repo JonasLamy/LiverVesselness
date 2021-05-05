@@ -168,7 +168,7 @@ target_include_directories(MakeIrcadBifurcationGT PUBLIC
   "$<INSTALL_INTERFACE:include>"
   )
 target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
-set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
 # isoFromUnit local script
 
