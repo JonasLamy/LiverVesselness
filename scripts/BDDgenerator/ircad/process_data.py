@@ -168,6 +168,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     
     print(commandLine)
     os.system(commandLine)
+    exit()
     
     
     """

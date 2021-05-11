@@ -184,6 +184,15 @@ int main(int argc,char** argv)
     bifurcations->Allocate();
     bifurcations->FillBuffer(0);
 
+    // pruned skeleton
+
+    auto prunedSkeleton = ImageType::New();
+    prunedSkeleton->SetOrigin( skeleton->GetOrigin());
+    prunedSkeleton->SetRegions( skeleton->GetLargestPossibleRegion() );
+    prunedSkeleton->SetSpacing( skeleton->GetSpacing() );
+    prunedSkeleton->Allocate();
+    prunedSkeleton->FillBuffer(0);
+
     /*
     auto maskFilter = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
     maskFilter->SetInput(  );
@@ -317,7 +326,9 @@ int main(int argc,char** argv)
       std::set<ImageType::IndexType> blackList;
       std::set<ImageType::IndexType> bifurcationsList;
 
-      nextVoxels.push_back( std::pair<int,ImageType::IndexType>(1,startingIndex[i]) );
+      std::list<ImageType::IndexType> skelBranch;
+      std::list<std::list<ImageType::IndexType>> skelBranchList;
+    
       
       // making depth first search
       ImageType::IndexType centralIndex;
@@ -328,6 +339,95 @@ int main(int argc,char** argv)
 
       bool noNeighbourBif = true;
       int label;
+
+      nextVoxels.push_back( std::pair<int,ImageType::IndexType>(1,startingIndex[i]) );
+
+      while( !nextVoxels.empty() )
+      {
+          /*************************/
+        /* Logic for propagation */
+
+        centralIndex = nextVoxels.front().second;
+        label = nextVoxels.front().first;
+
+        nextVoxels.pop_front();
+        blackList.insert(centralIndex);
+
+        skelBranch.push_back(centralIndex);
+
+        nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,skeleton,bifurcations,nextVoxels,blackList);
+
+        /*************************************************/
+        /* Logic of what do we do with the current voxel */
+        
+        if( nbNeighbours == 0) // extremity
+        {
+          nbExtremity++; 
+
+          skelBranchList.push_back(skelBranch);
+          skelBranch.clear();
+        }
+
+        if(nbNeighbours == 2 ) // bifurcations
+        {
+            if(noNeighbourBif)//
+            {
+              bifurcations->SetPixel(centralIndex,254);
+              nbBifurcations++;
+
+              // add index to bifurcation 
+              bifurcationsList.insert(centralIndex);
+
+              //skelBranchList.push_back(skelBranch);
+              skelBranch.clear();
+            }
+        }
+        if(nbNeighbours > 2) // lump
+        {
+          nbBifurcationsAmbiguous++;
+        }
+        
+        noNeighbourBif = true;
+      }
+
+      for(auto &branch : skelBranchList)
+      {
+        float meanVariation = 0;
+
+        auto it=branch.begin();
+        for(auto itPlus1=std::next(branch.begin(),1);itPlus1!=branch.end();itPlus1++)
+        {
+          meanVariation += std::abs( distanceImage->GetPixel(*itPlus1) - distanceImage->GetPixel(*it) );
+          //prunedSkeleton->SetPixel(*it, distanceImage->GetPixel(*itPlus1) - distanceImage->GetPixel(*it) );
+          it++;
+        }
+        meanVariation /= branch.size();
+        if(meanVariation < 2)
+          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,254); }
+
+
+      }
+
+
+      distanceWriter->SetFileName("prunedSkel.nii");
+      distanceWriter->SetInput(prunedSkeleton);
+      try
+      {
+          distanceWriter->Update();
+      }
+      catch (itk::ExceptionObject & excp)
+      {
+          std::cerr << excp << std::endl;
+          return EXIT_FAILURE;
+      }
+
+
+
+      nextVoxels.clear();
+      blackList.clear();
+      skelBranch.clear();
+
+      nextVoxels.push_back( std::pair<int,ImageType::IndexType>(1,startingIndex[i]) );
 
       while( !nextVoxels.empty() )
       {
@@ -340,8 +440,7 @@ int main(int argc,char** argv)
         nextVoxels.pop_front();
         blackList.insert(centralIndex);
 
-
-        nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,skeleton,bifurcations,nextVoxels,blackList);
+        nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,prunedSkeleton,bifurcations,nextVoxels,blackList);
 
         /*************************************************/
         /* Logic of what do we do with the current voxel */
@@ -351,6 +450,7 @@ int main(int argc,char** argv)
         if( nbNeighbours == 0) // extremity
         {
           nbExtremity++; 
+
         }
 
         if(nbNeighbours == 2 ) // bifurcations
@@ -370,12 +470,13 @@ int main(int argc,char** argv)
           nbBifurcationsAmbiguous++;
         }
         
-
         noNeighbourBif = true;
 
         // updating skelinnerSkelCandidateseton labels
       //std::cout<<centralIndex<<"   "<<label<<std::endl;
       }
+
+
 
       std::cout<<"Nb bifurcations:"<<nbBifurcations<<std::endl;
       std::cout<<"Nb bifurcations ambiguous:"<<nbBifurcationsAmbiguous<<std::endl;

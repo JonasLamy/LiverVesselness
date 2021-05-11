@@ -77,18 +77,14 @@ int main(int argc, char** argv)
 
     // creating radii from parameters
 
-    double step = (sigmaMax - sigmaMin) / (double)(nbSigmaSteps-2+1);
+    double step =  ( std::log(sigmaMax) - std::log(sigmaMin) ) / (double)(nbSigmaSteps-1);
     
     std::vector<double> radii;
-    double i=sigmaMin;
-    int count = nbSigmaSteps-2;
-    while(count >= 0)
+    
+    for(int level=0; level<nbSigmaSteps;level++)
     {
-      radii.push_back(i);
-      i += step;
-      count--;
+      radii.push_back(sigmaMin * std::exp(step * level));
     }
-    radii.push_back( sigmaMax );
 
     std::cout<<"scales: ";
     for(auto r :radii )
