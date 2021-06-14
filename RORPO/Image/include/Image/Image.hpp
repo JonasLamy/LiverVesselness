@@ -37,6 +37,7 @@ odyssee.merveille@gmail.com
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 
 // ###################################################################################################################
@@ -248,6 +249,7 @@ public :
 
 	void clear_image(){
 		m_vImage.clear();
+		m_vImage.shrink_to_fit(); //clear a vector of all its memory
 		m_nDimX = m_nDimY = m_nDimZ = 0;
 		m_nSize = 0;
 	}
@@ -364,6 +366,24 @@ public :
 	void turn_positive(int min_value, int max_value){
         for (auto& val: m_vImage)
     		val = (T)(max_value * ((val - (float) min_value) / (max_value - min_value)));
+	}
+
+	void turn_positive()
+	{
+		std::pair<T,T> min_max = min_max_value();
+		if( min_max.first + min_max.second > std::numeric_limits<T>::max() ) throw std::string("Can't turn volume positive, numeric limit reached");
+
+		for (auto& val: m_vImage)
+			val -= min_max.first;
+	}
+
+	// DANGEROUS FUNCTION, don't use it on images in Z set.
+	void normalize()
+	{
+		T max = max_value();
+		
+		for (auto& val: m_vImage)
+			val /= max;
 	}
 
 	private :

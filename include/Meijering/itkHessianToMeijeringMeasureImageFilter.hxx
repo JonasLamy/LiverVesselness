@@ -65,12 +65,10 @@ namespace itk{
         ptr_filter->Update();
 
         auto eigenValuesImage = ptr_filter->GetOutput();
-        std::cout<<"min eigen value:"<<ptr_filter->GetMinEigenValue()<<std::endl;
 
         EigenValueType minLambda = ptr_filter->GetMinEigenValue();
         OutputPixelType neuritenessMesure = NumericTraits< OutputPixelType >::ZeroValue();
 
-        std::cout<<"computing eigenvalues"<<std::endl;
         EigenValueType lambda1;
         EigenValueType lambda2;
         EigenValueType lambda3;
@@ -101,10 +99,10 @@ namespace itk{
             lambda3 = itEV.Value()[2];
 
             // Meijering's ratio
-            if( lambda3 > 0 )
+            if( lambda3 >= 0 )
                 neuritenessMesure = 0;
             else
-                neuritenessMesure = lambda1 /  minLambda;
+                neuritenessMesure = lambda3 /  minLambda;
             
             oit.Set( neuritenessMesure);   
 
@@ -112,17 +110,6 @@ namespace itk{
             ++itEV;
             ++itMask;
         }
-
-        std::cout<<"before stats"<<std::endl;
-
-        auto stats = StatisticsImageFilter<TOutputImage>::New();
-        stats->SetInput(output);
-        stats->Update();
-
-        std::cout<<"min"
-        <<stats->GetMinimum()<<std::endl
-        <<"mean:"<<stats->GetMean()<<std::endl
-        <<"max:"<<stats->GetMaximum()<<std::endl;
     }
     
     template<typename TInputImage,typename TOutputImage,typename TMaskImage>
@@ -146,12 +133,10 @@ namespace itk{
         ptr_filter->Update();
 
         auto eigenValuesImage = ptr_filter->GetOutput();
-        std::cout<<"min eigen value:"<<ptr_filter->GetMinEigenValue()<<std::endl;
 
         EigenValueType minLambda = ptr_filter->GetMinEigenValue();
         OutputPixelType neuritenessMesure = NumericTraits< OutputPixelType >::ZeroValue();
 
-        std::cout<<"computing eigenvalues"<<std::endl;
         EigenValueType lambda1;
         EigenValueType lambda2;
         EigenValueType lambda3;
@@ -181,16 +166,11 @@ namespace itk{
             ++itEV;
         }
 
-        std::cout<<"before stats"<<std::endl;
 
         auto stats = StatisticsImageFilter<TOutputImage>::New();
         stats->SetInput(output);
         stats->Update();
 
-        std::cout<<"min"
-        <<stats->GetMinimum()<<std::endl
-        <<"mean:"<<stats->GetMean()<<std::endl
-        <<"max:"<<stats->GetMaximum()<<std::endl;
     }
 
     template<typename TInputImage,typename TOutputImage,typename TMaskImage>

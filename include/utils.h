@@ -103,9 +103,9 @@ namespace vUtils{
         }
         else
         {
-            newSpacing[0] = 0.56;//minSpacing;
-            newSpacing[1] = 0.56;//minSpacing;
-            newSpacing[2] = 0.56;//minSpacing;
+            newSpacing[0] = minSpacing;
+            newSpacing[1] = minSpacing;
+            newSpacing[2] = minSpacing;
         }
 
         std::cout<<"new spacing:"<<newSpacing<<std::endl;

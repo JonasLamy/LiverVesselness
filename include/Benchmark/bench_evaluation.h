@@ -19,7 +19,7 @@ template<typename TImageType, typename TGroundTruthImageType, typename TMaskImag
 class Eval{
  public:
   Eval(const typename TImageType::Pointer segmentation, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
-  Eval(long tp=0,long tn=0, long fp=0, long fn=0);
+  Eval(double snr,double psnr,long tp=0,long tn=0, long fp=0, long fn=0);
 
   long TP(){return m_truePositive;}
   long TN(){return m_trueNegative;}
@@ -41,11 +41,13 @@ class Eval{
   double dice();
   double hausdorffDistance();
   long double matthewsCorrelation();
+  double snr();
+  double psnr();
   double sparsity();
 
  private:
-  void countMatchesBinary(const typename TImageType::Pointer img, const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
-  
+  void countMatchesBinary(const typename TGroundTruthImageType::Pointer gt, const typename TMaskImageType::Pointer mask);
+  void  countMatches(const typename TImageType::Pointer segmentation,const typename TGroundTruthImageType::Pointer gt,const typename TMaskImageType::Pointer mask);
 
   long m_truePositive;
   long m_trueNegative;
@@ -55,6 +57,8 @@ class Eval{
   double m_hausdorff_distance;
   long m_background;
   long m_foreground;
+  long double m_psnr;
+  long double m_snr;
 };
 
 template<typename TImageType, typename TGroundTruthImageType, typename TMaskImageType>
@@ -69,12 +73,16 @@ std::ostream& operator <<(std::ostream& out,Eval<TImageType,TGroundTruthImageTyp
 		<< eval.precision() << ","
 		<< eval.accuracy() << ","
 		<< eval.dice() << ","
-		<< eval.matthewsCorrelation()
+		<< eval.matthewsCorrelation() << ","
+    << eval.snr() << ","
+    << eval.psnr() << ","
     << std::endl;
     //<< eval.sparsity() <<std::endl;
 
     return out;
 }
+
+
 #include "bench_evaluation.hxx"
 
 #endif // bench_evaluation_h

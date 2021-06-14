@@ -1,0 +1,12 @@
+{
+    "Settings":{
+	"name":"scaleSearchOOF",
+	"path":"VascusynthscaleSearch",
+	"inputVolumesList":"Reproductibility/Benchmark/vascusynth/fileList/vascu3V_10.txt",
+	"algorithmSets":"Reproductibility/Benchmark/vascusynth/parameterSets/ScaleSearch/vascuOOFScalesSearch.json",
+	"maskList":["Organ","bifurcations","dilatedVessels"],
+	"enhancementMask":"Organ",
+	"nbThresholds":100,
+	"removeResultsVolumes":true
+    }
+}

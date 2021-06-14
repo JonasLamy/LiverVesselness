@@ -1,9 +1,13 @@
 #include <iostream>
 
 #include "bench_evaluation.h"
-
 #include "itkImageFileReader.h"
 #include <list>
+
+#include "utils.h"
+#include "itkEllipseSpatialObject.h"
+#include "itkSpatialObjectToImageFilter.h"
+#include "itkImageRegionConstIterator.h"
 
 void testFailed(const std::string &message)
 {
@@ -83,10 +87,107 @@ void test1()
     
 }
 
+void testEllipses()
+{
+    using PixelType = unsigned char;
+    using ImageType = itk::Image<PixelType,3>;
+    using FloatImageType = itk::Image<float,3>;
+
+    ImageType::RegionType::SizeType size;
+    
+    using EllipseType = itk::EllipseSpatialObject<3>;
+    using SpacialObjectToImageFilterType = itk::SpatialObjectToImageFilter<EllipseType,ImageType>;
+    
+    // define ellipse
+    auto ellipse = EllipseType::New();
+    EllipseType::ArrayType radiusArray;
+    int radius = static_cast<int>( 10 );
+    radiusArray[0] = radius;
+    radiusArray[1] = radius;
+    radiusArray[2] = radius;
+    
+    std::cout<<radius<<std::endl;
+
+    ImageType::RegionType::SizeType imSize;
+
+    imSize[0] = radius*2 +1 ;
+    imSize[1] = radius*2 +1 ;
+    imSize[2] = radius*2 +1 ;
+
+    ImageType::SpacingType spacing;
+    spacing[0] = 1;
+    spacing[1] = 1;
+    spacing[2] = 1;
+
+    ImageType::PointType origin;
+    origin[0] = 0;//12.5;
+    origin[1] = 0;//12.5;
+    origin[2] = 0;//12.5;
+
+    auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
+    ellipseToImageFilter->SetSize( imSize );
+    ellipseToImageFilter->SetSpacing( spacing );
+    ellipseToImageFilter->SetOrigin( origin );
+
+    ellipse->SetRadiusInObjectSpace(radiusArray);
+    
+    // move the ellipse
+    auto transform = EllipseType::TransformType::New();
+    transform->SetIdentity();
+    EllipseType::TransformType::OutputVectorType translation;
+    ImageType::IndexType index;
+    //index = it.GetIndex();
+
+    //std::cout<<"index:"<<index<<" radius: "<<radius<<std::endl;
+
+    translation[0] = radius;
+    translation[1] = radius;
+    translation[2] = radius;
+    transform->Translate(translation);
+
+    ellipse->SetObjectToParentTransform(transform);
+    
+    ellipseToImageFilter->SetInput(ellipse);
+    ellipse->SetDefaultInsideValue(255);
+    ellipse->SetDefaultOutsideValue(0);
+    ellipseToImageFilter->SetUseObjectValue(true);
+    ellipseToImageFilter->SetOutsideValue(0);
+    ellipseToImageFilter->Update();
+
+    auto imgElle = ellipseToImageFilter->GetOutput();
+    itk::ImageRegionIterator<ImageType> itBall(imgElle,imgElle->GetLargestPossibleRegion());
+    itBall.GoToBegin();
+
+    // go through an image
+    while( !itBall.IsAtEnd() )
+    {
+        itBall.Value();
+        ++itBall;
+
+        
+    }
+
+
+    using OutputWriterType = itk::ImageFileWriter<ImageType>;
+    auto writer = OutputWriterType::New();
+
+    writer->SetFileName("testEllipse.nii");
+    writer->SetInput( ellipseToImageFilter->GetOutput() );
+    try
+    {
+        writer->Update();
+    }
+    catch (itk::ExceptionObject & excp)
+    {
+        std::cerr << excp << std::endl;
+        return ;
+    }
+}
+
 
 int main(int argc,char** argv)
 {
-    test1();
+    testEllipses();
     std::cout<<"test finished"<<std::endl;
     return 0;
 }

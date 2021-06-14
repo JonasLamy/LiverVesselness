@@ -16,10 +16,8 @@ include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
 
 
-find_package(ITK 5.1 REQUIRED)
+find_package(ITK 5.2 REQUIRED)
 include(${ITK_USE_FILE})
-
-
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -96,16 +94,18 @@ add_subdirectory(RORPO)
 # benchmark ------------------------
 
 find_package(jsoncpp REQUIRED)
-get_target_property(JSON_INC_PATH jsoncpp_lib INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(JSON_INC_PATH jsoncpp_static INTERFACE_INCLUDE_DIRECTORIES)
 include_directories(${JSON_INC_PATH})
 
 add_executable(Benchmark src/benchmark.cpp)
+
 target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
   "$<INSTALL_INTERFACE:include/Benchmark>"
   )
-target_link_libraries(Benchmark ${ITK_LIBRARIES}    jsoncpp_lib)
+target_link_libraries(Benchmark ${ITK_LIBRARIES} jsoncpp_static)
+
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # process ircad -------------------
@@ -128,13 +128,13 @@ set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 #target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
 #set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
-#add_executable(MakeIso src/makeIso.cpp)
-#target_include_directories(MakeIso PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(MakeIso ${ITK_LIBRARIES})
-#set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+add_executable(MakeIso src/makeIso.cpp)
+target_include_directories(MakeIso PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeIso ${ITK_LIBRARIES})
+set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
 #add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
 #target_include_directories(MakeVascuSynthGT PUBLIC
@@ -144,25 +144,33 @@ set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 #target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
 #set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
-# Bifurcations VascuSynth
-
-#add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
-#target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
+#add_executable(LabelVessels src/labelVessels.cpp)
+#target_include_directories(LabelVessels PUBLIC
 #  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 #  "$<INSTALL_INTERFACE:include>"
 #  )
-#target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
-#set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#target_link_libraries(LabelVessels ${ITK_LIBRARIES})
+#set_target_properties(LabelVessels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator" )
+
+# Bifurcations VascuSynth
+
+add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
+target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
+set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
 
 # Bifurcation IRCAD 
 
-#add_executable(MakeIrcadBifurcationGT src/makeIrcadBifurcation.cpp)
-#target_include_directories(MakeIrcadBifurcationGT PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
-#set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+add_executable(MakeIrcadBifurcationGT src/makeIrcadBifurcation.cpp)
+target_include_directories(MakeIrcadBifurcationGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
+set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
 # isoFromUnit local script
 
@@ -176,12 +184,12 @@ set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 
 # TEST METRICS
 
-#add_executable(Test src/test.cpp)
-#target_include_directories(Test PUBLIC
-#"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(Test ${ITK_LIBRARIES} )
-#set_target_properties(Test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+add_executable(Test src/test.cpp)
+target_include_directories(Test PUBLIC
+"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(Test ${ITK_LIBRARIES} )
+set_target_properties(Test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 

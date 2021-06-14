@@ -99,11 +99,20 @@ int main(int argc,char** argv)
 
         using EllipseType = itk::EllipseSpatialObject<3>;
         using SpacialObjectToImageFilterType = itk::SpatialObjectToImageFilter<EllipseType,ImageType>;
-        int radius = static_cast<int>( distanceTransform->GetOutput()->GetPixel( bifurcationCoordinates ) ) | 1 ;
 
+        int dist = distanceTransform->GetOutput()->GetPixel( bifurcationCoordinates );
+        std::cout<<"distTransform :"<<dist<<std::endl;
+        /*
+        if(dist %2 == 0)
+            if(dist != 0)
+                dist--;
+        */
+        int radius = 1;//= dist; 
+        //int radius = static_cast<int>( dist ) | 1 ;
+        /*
         if( radius <= 1 )
             radius = 3;
-
+        */
         auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
         ellipseToImageFilter->SetSize( maskImg->GetLargestPossibleRegion().GetSize() );
         ellipseToImageFilter->SetSpacing( maskImg->GetSpacing() );

@@ -51,12 +51,13 @@ int main( int argc, char* argv[] )
   app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
   app.add_option("--tau,-a", tau, "Jerman's tau" ,true);
   app.add_option("--nbSeeds,-s", nbClasses, "Sato's alpha2" ,true);
-  
-  app.add_option("--sigma,-s",fixedSigma,"number of kmean seeds");
   app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
   app.add_option("--mask,-k",maskFile,"mask response by image")
   ->check(CLI::ExistingFile);
   
+  app.get_formatter()->column_width(40);
+  CLI11_PARSE(app, argc, argv);
+  // END parse command line using CLI ----------------------------------------------
   
   
   constexpr unsigned int Dimension = 3;
@@ -193,7 +194,7 @@ int main( int argc, char* argv[] )
   MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
   multiScaleEnhancementFilter->SetInput( sigmoidFilter->GetOutput() );
   multiScaleEnhancementFilter->SetHessianToMeasureFilter( ruiZhangFilter );
-  //multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
+  multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
   multiScaleEnhancementFilter->SetSigmaMinimum( sigmaMin );
   multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );
   multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );

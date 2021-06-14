@@ -15,6 +15,8 @@
 #include "itkImageRegionConstIterator.h"
 #include "itkMaximumImageFilter.h"
 
+#include "itkConnectedComponentImageFilter.h"
+
 #include "utils.h"
 
 
@@ -23,36 +25,81 @@
 
 using PixelType = unsigned char;
 using ImageType = itk::Image<PixelType,3>;
-using FloatImageType = itk::Image<float,3>;
 
-void CreateKernel(ImageType::Pointer kernel, unsigned int width)
+using PixelLabelType = int;
+using LabelImageType = itk::Image<PixelLabelType,3>;
+
+using PixelDistanceType = float;
+using FloatImageType = itk::Image<PixelDistanceType,3>;
+
+using VoxelLabelPair = std::pair<int,ImageType::IndexType>;
+
+int addNeighbours(  int label,
+                    bool &noNeighbourBif,
+                    ImageType::IndexType centralIndex, 
+                    ImageType::Pointer skeleton, 
+                    ImageType::Pointer bifurcations,
+                    std::deque<VoxelLabelPair> &nextVoxels,
+                    std::set<ImageType::IndexType> &blackList
+                    )
 {
-  ImageType::IndexType start;
-  start.Fill(0);
+    ImageType::IndexType neighbourIndex;
 
-  ImageType::SizeType size;
-  size.Fill(width);
+    std::vector<ImageType::IndexType> neighbours;
+     
+    for(int i=-1; i<=1; i++)
+      for(int j=-1; j<=1; j++)
+        for(int k=-1; k<=1; k++)
+        {
+          if(i==0 && j==0 && k==0)
+            continue;
 
-  ImageType::RegionType region;
-  region.SetSize(size);
-  region.SetIndex(start);
+          neighbourIndex = centralIndex;
+          neighbourIndex[0] += i;
+          neighbourIndex[1] += j;
+          neighbourIndex[2] += k;
 
-  kernel->SetRegions(region);
-  kernel->Allocate();
+          if( skeleton->GetPixel( neighbourIndex ) > 0 )
+          {
+            // check if it was a bifurcation before
+            if( bifurcations->GetPixel(neighbourIndex) > 0 )
+            {
+              noNeighbourBif = false;
+            }
 
-  itk::ImageRegionIterator<ImageType> imageIterator(kernel, region);
-  imageIterator.GoToBegin();
-  while (!imageIterator.IsAtEnd())
-  {
-    // imageIterator.Set(255);
-    imageIterator.Set(1);
+            
+            // checking if neighbour is not marked
+            if( blackList.end() == blackList.find(neighbourIndex) )
+            {
+                neighbours.push_back(neighbourIndex); 
+            }
+          }
+        }
 
-    ++imageIterator;
-  }
+    for(auto &voxel : neighbours)
+    {
+      auto pair = std::pair<int,ImageType::IndexType>(++label,voxel);
+      // we don't want duplicates so we look in the waiting list container if voxels is already there
+      if( std::find(nextVoxels.begin(),nextVoxels.end(),pair) == nextVoxels.end() )
+        nextVoxels.push_front( pair );
+    }
+    return neighbours.size();
 }
 
 int main(int argc,char** argv)
  {
+
+
+     /* what do we need ??
+     1) Inputs
+        - input file (binaryVessels)
+        - input mask file (binary liver)
+        - output bifurcation (balls on all bifurcations)
+     2) algorithms
+        - compute squeleton
+        - find bifurcations
+        - draw bifurcation on new image, no iteration on image
+    */
 
     std::string inputFileName(argv[1]);
     std::string maskFileName(argv[2]);
@@ -60,10 +107,15 @@ int main(int argc,char** argv)
     
     bool isDicom = false;
     
-
-    bool skeleton = true;
+    std::string skeletonFileName;
+    bool saveSkeleton = false;
     if(argc >= 5)
-        skeleton = true;
+    {
+        saveSkeleton = true;
+        skeletonFileName = argv[4];
+    }    
+
+
 
     std::cout<<"-1"<<std::endl;
     // read input
@@ -72,39 +124,44 @@ int main(int argc,char** argv)
     reader->SetFileName(inputFileName);
     reader->Update();
 
-    auto img = vUtils::readImage<ImageType>(inputFileName,isDicom);
-    auto mask = vUtils::readImage<ImageType>(maskFileName,isDicom);
+    auto binaryVessels = vUtils::readImage<ImageType>(inputFileName,isDicom);
+    auto liverMask = vUtils::readImage<ImageType>(maskFileName,isDicom);
 
-    std::cout<<"0"<<std::endl;
+    // find connected components of vessels
 
+    auto filterCC = itk::ConnectedComponentImageFilter<ImageType,ImageType,ImageType>::New();
+    filterCC->SetBackgroundValue(0);
+    filterCC->SetFullyConnected(true);
+    filterCC->SetInput(binaryVessels);
+    filterCC->Update();
+    int nbCC = filterCC->GetObjectCount();
+    auto vesselsCC = filterCC->GetOutput();
+
+    std::cout<<"number of connected components :"<<nbCC<<std::endl;
+
+    std::cout<<"thinning to get skeleton"<<std::endl;
+    /*
     auto rescaleFilter = itk::RescaleIntensityImageFilter<ImageType,ImageType>::New();
     rescaleFilter->SetOutputMaximum(1);
     rescaleFilter->SetOutputMinimum(0);
-    rescaleFilter->SetInput(img);
+    rescaleFilter->SetInput(binaryVessels);
     rescaleFilter->Update();
-
+    */
     std::cout<<"1"<<std::endl;
 
     auto thinningFilter = itk::BinaryThinningImageFilter3D<ImageType,ImageType>::New();
-    thinningFilter->SetInput(rescaleFilter->GetOutput());
+    thinningFilter->SetInput(binaryVessels);
     thinningFilter->Update();
 
-    
-
-    auto maskFilter = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
-    maskFilter->SetInput( thinningFilter->GetOutput() );
-    maskFilter->SetMaskImage( mask );
-    maskFilter->SetOutsideValue(0);
-    maskFilter->SetMaskingValue(0);
-    maskFilter->Update();
+    auto skeleton = thinningFilter->GetOutput();
 
     using WriterType = itk::ImageFileWriter<ImageType>;
-    if(skeleton)
+    if(saveSkeleton)
     {
         WriterType::Pointer thinningWriter = WriterType::New();
 
-        thinningWriter->SetFileName("skeleton.nii");
-        thinningWriter->SetInput(maskFilter->GetOutput());
+        thinningWriter->SetFileName(skeletonFileName);
+        thinningWriter->SetInput(skeleton);
         try
         {
             thinningWriter->Update();
@@ -116,36 +173,34 @@ int main(int argc,char** argv)
         }
     }
 
-    std::cout<<"2"<<std::endl;
+    std::cout<<"Making bifurcation image..."<<std::endl;
 
+    // creating bifurcation image
 
-    // creating structuring element
+    auto bifurcations = ImageType::New();
+    bifurcations->SetOrigin( skeleton->GetOrigin());
+    bifurcations->SetRegions( skeleton->GetLargestPossibleRegion() );
+    bifurcations->SetSpacing( skeleton->GetSpacing() );
+    bifurcations->Allocate();
+    bifurcations->FillBuffer(0);
 
-    auto kernel = ImageType::New();
-    CreateKernel(kernel,5);
+    // pruned skeleton
 
-    auto convFilter = itk::ConvolutionImageFilter<ImageType,ImageType>::New();
-    convFilter->SetInput(maskFilter->GetOutput());
-    convFilter->SetKernelImage(kernel);
-    convFilter->Update();
+    auto prunedSkeleton = ImageType::New();
+    prunedSkeleton->SetOrigin( skeleton->GetOrigin());
+    prunedSkeleton->SetRegions( skeleton->GetLargestPossibleRegion() );
+    prunedSkeleton->SetSpacing( skeleton->GetSpacing() );
+    prunedSkeleton->Allocate();
+    prunedSkeleton->FillBuffer(0);
 
-    auto maskFilter2 = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
-    maskFilter2->SetInput(convFilter->GetOutput());
-    maskFilter2->SetMaskImage(thinningFilter->GetOutput());
-    
-
-    std::cout<<"3"<<std::endl;
-
-    auto thresholdFilter = itk::BinaryThresholdImageFilter<ImageType,ImageType>::New();
-    thresholdFilter->SetLowerThreshold(7);
-    thresholdFilter->SetUpperThreshold(255);
-    thresholdFilter->SetInsideValue(255);
-    thresholdFilter->SetOutsideValue(0);
-    
-    thresholdFilter->SetInput( maskFilter2->GetOutput() );
-    thresholdFilter->Update();
-    
-    std::cout<<"4"<<std::endl;
+    /*
+    auto maskFilter = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
+    maskFilter->SetInput(  );
+    maskFilter->SetMaskImage( mask );
+    maskFilter->SetOutsideValue(0);
+    maskFilter->SetMaskingValue(0);
+    maskFilter->Update();
+    */
 
     // create the gt
 
@@ -155,105 +210,442 @@ int main(int argc,char** argv)
     // 4) draw balls from filter
 
     auto inverseFilter = itk::BinaryThresholdImageFilter<ImageType,ImageType>::New();
-    inverseFilter->SetLowerThreshold(255);
-    inverseFilter->SetUpperThreshold(255);
-    inverseFilter->SetInsideValue(0);
-    inverseFilter->SetOutsideValue(255);
+    inverseFilter->SetLowerThreshold(0);
+    inverseFilter->SetUpperThreshold(0);
+    inverseFilter->SetInsideValue(254);
+    inverseFilter->SetOutsideValue(0);
 
-    inverseFilter->SetInput( mask );
+    inverseFilter->SetInput( binaryVessels );
+    inverseFilter->Update();
     
     auto distanceTransform = itk::SignedMaurerDistanceMapImageFilter<ImageType,FloatImageType>::New();
     distanceTransform->SquaredDistanceOff();
     //distanceTransform->SquaredDistanceOn();
     distanceTransform->SetInput( inverseFilter->GetOutput() );
+    distanceTransform->Update();
 
-    auto maskDistanceFilter = itk::MaskImageFilter<FloatImageType,ImageType>::New();
-    maskDistanceFilter->SetInput( distanceTransform->GetOutput() );
-    maskDistanceFilter->SetMaskImage( thresholdFilter->GetOutput() );
-    maskDistanceFilter->Update();
+    // finding largest vessel radius on the skeleton
+    auto distanceImage = distanceTransform->GetOutput();
 
-    auto imgBifurcationNode = maskDistanceFilter->GetOutput();
-
-
-    // creating image
-    auto resultImage = ImageType::New();
-    resultImage->SetRegions( img->GetLargestPossibleRegion() );
+    using WriterFloatType = itk::ImageFileWriter<FloatImageType>;
     
-    resultImage->SetSpacing(img->GetSpacing() );
+    WriterFloatType::Pointer distanceWriter = WriterFloatType::New();
+
+    distanceWriter->SetFileName("distanceTransform.nii");
+    distanceWriter->SetInput(distanceImage);
+    try
+    {
+        distanceWriter->Update();
+    }
+    catch (itk::ExceptionObject & excp)
+    {
+        std::cerr << excp << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    itk::ImageRegionIterator<ImageType> imageIterator( skeleton, skeleton->GetLargestPossibleRegion() );
+    itk::ImageRegionIterator<FloatImageType> distanceImageIterator( distanceImage, distanceImage->GetLargestPossibleRegion() );
+    itk::ImageRegionIterator<ImageType> ccImageIterator( vesselsCC, vesselsCC->GetLargestPossibleRegion());
+
+    distanceImageIterator.GoToBegin();
+    imageIterator.GoToBegin();
+    ccImageIterator.GoToBegin();
+
+    ImageType::IndexType bestIndex;
+    FloatImageType::PixelType bestDistance = 0;
+
+    std::cout<<"starting skeleton traversal"<<std::endl;
+    std::cout<<"finding best starting point "<<std::endl;
+
+    // looping to find the best part to start on the skeleton (biggest vessel radius)
+    std::vector<int> startingDistance(nbCC);
+    std::vector<ImageType::IndexType> startingIndex(nbCC);
+    for(int i=0; i<nbCC;i++) startingDistance[i] = 0;
+    while (!imageIterator.IsAtEnd())
+    {
+      if(imageIterator.Value() > 0)
+      {
+        for(int i=0; i<nbCC; i++)
+        {
+          if( i+1 == ccImageIterator.Value() )
+          {
+            if(distanceImageIterator.Value() > startingDistance[i])
+            {
+              startingIndex[i] = distanceImageIterator.GetIndex();
+              startingDistance[i] = distanceImageIterator.Value();
+            }
+          }
+        }
+      }
+      ++imageIterator;
+      ++distanceImageIterator;
+      ++ccImageIterator;
+    }
+
+    using CCWriterType = itk::ImageFileWriter<ImageType>;
+    
+    CCWriterType::Pointer ccWriter = CCWriterType::New();
+
+    ccWriter->SetFileName("cc.nii");
+    ccWriter->SetInput(vesselsCC);
+    try
+    {
+        ccWriter->Update();
+    }
+    catch (itk::ExceptionObject & excp)
+    {
+        std::cerr << excp << std::endl;
+        return EXIT_FAILURE;
+    }
+
+
+        // creating image
+    auto resultImage = ImageType::New();
+    resultImage->SetRegions( binaryVessels->GetLargestPossibleRegion() );
+    
+    resultImage->SetSpacing(binaryVessels->GetSpacing() );
     resultImage->Allocate();
     resultImage->FillBuffer(0);
     std::cout<<"result image spacing \n"<<resultImage->GetSpacing() <<std::endl;
     // creating ellipses
 
-    using EllipseType = itk::EllipseSpatialObject<3>;
-    using SpacialObjectToImageFilterType = itk::SpatialObjectToImageFilter<EllipseType,ImageType>;
-    int radius;
-
-    itk::ImageRegionConstIterator<FloatImageType> it( imgBifurcationNode, imgBifurcationNode->GetLargestPossibleRegion() );
-    it.GoToBegin();
-    while( !it.IsAtEnd() )
+    for(int i=0; i<nbCC; i++)
     {
-        if(it.Value() == 0)
+      std::cout<<"best starting point : "<<startingDistance[i]<<" "<<startingIndex[i]<<std::endl;
+      if(startingDistance[i] < 1)
+      {
+        std::cout<<"skipping Connected Component : "<<i<<std::endl;
+        continue;
+      }
+      
+
+      // creating element
+      // creating index and next label pair
+
+      std::deque<VoxelLabelPair> nextVoxels;
+      std::set<ImageType::IndexType> blackList;
+      std::set<ImageType::IndexType> bifurcationsList;
+
+      std::list<ImageType::IndexType> skelBranch;
+      std::list<std::list<ImageType::IndexType>> skelBranchExtremityList;
+      std::list<std::list<ImageType::IndexType>> skelBranchCoreList;
+    
+      
+      
+      // making depth first search
+      ImageType::IndexType centralIndex;
+      short nbNeighbours = 0;
+      int nbBifurcations = 0;
+      int nbBifurcationsAmbiguous = 0;
+      int nbExtremity=0;
+
+      bool noNeighbourBif = true;
+      int label;
+      /*
+      nextVoxels.push_back( std::pair<int,ImageType::IndexType>(1,startingIndex[i]) );
+
+      while( !nextVoxels.empty() )
+      {
+          /*************************
+        // Logic for propagation 
+
+        centralIndex = nextVoxels.front().second;
+        label = nextVoxels.front().first;
+
+        nextVoxels.pop_front();
+        blackList.insert(centralIndex);
+
+        skelBranch.push_back(centralIndex);
+
+        
+        nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,skeleton,bifurcations,nextVoxels,blackList);
+
+        //*************************************************
+        // Logic of what do we do with the current voxel 
+        
+        if( nbNeighbours == 0) // extremity
         {
-            ++it;
-            continue;
+          nbExtremity++; 
+
+          skelBranchExtremityList.push_back(skelBranch);
+          skelBranch.clear();
         }
 
-        auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
-        ellipseToImageFilter->SetSize( imgBifurcationNode->GetLargestPossibleRegion().GetSize() );
-        ellipseToImageFilter->SetSpacing( imgBifurcationNode->GetSpacing() );
-        //ellipseToImageFilter->SetOrigin( imgBifurcationNode->GetOrigin() );
-        std::cout<<"ellipse filter spacing \n"<<imgBifurcationNode->GetSpacing() <<std::endl;
+        if(nbNeighbours >= 2 ) // bifurcations
+        {
+            if(noNeighbourBif)//
+            {
+              bifurcations->SetPixel(centralIndex,254);
+              nbBifurcations++;
 
-        auto ellipse = EllipseType::New();
-        EllipseType::ArrayType radiusArray;
-        int radius = static_cast<int>( std::sqrt( it.Value() ) ) | 1 ;
-        radiusArray[0] = radius;
-        radiusArray[1] = radius;
-        radiusArray[2] = radius;
+              // add index to bifurcation 
+              bifurcationsList.insert(centralIndex);
 
-        ellipse->SetRadiusInObjectSpace(radiusArray);
-        // move the ellipse
-        auto transform = EllipseType::TransformType::New();
-        transform->SetIdentity();
-        EllipseType::TransformType::OutputVectorType translation;
-        ImageType::IndexType index;
-        index = it.GetIndex();
+              skelBranchCoreList.push_back(skelBranch);
+              skelBranch.clear();
+            }
+        }
+        if(nbNeighbours > 2) // lump
+        {
+          nbBifurcationsAmbiguous++;
+        }
+        
+        noNeighbourBif = true;
+      }
 
-        std::cout<<"index:"<<index<<" radius: "<<radius<<std::endl;
+      for(auto &branch : skelBranchCoreList)
+      {
+          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,254); }
+      }
 
-        translation[0] = index[0];
-        translation[1] = index[1];
-        translation[2] = index[2];
-        transform->Translate(translation);
+      for(auto &branch : skelBranchExtremityList)
+      {
+        float meanVariation = 0;
 
-        ellipse->SetObjectToParentTransform(transform);
+        auto it=branch.begin();
+        for(auto itPlus1=std::next(branch.begin(),1);itPlus1!=branch.end();itPlus1++)
+        {
+          meanVariation += std::abs( distanceImage->GetPixel(*itPlus1) - distanceImage->GetPixel(*it) );
+          //prunedSkeleton->SetPixel(*it, distanceImage->GetPixel(*itPlus1) - distanceImage->GetPixel(*it) );
+          it++;
+        }
+        meanVariation /= branch.size();
+        std::cout<<"variation : "<<meanVariation<<std::endl;
+        if()
+        if(meanVariation <= 1 && branch.size() <= startingDistance[i] + 3 ) // ok branch
+        {
+          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,50); }
+        }
+        else{ // removed branch
+          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,150); }
+        }
+      }
 
-        ellipseToImageFilter->SetInput(ellipse);
-        ellipse->SetDefaultInsideValue(255);
-        ellipse->SetDefaultOutsideValue(0);
-        ellipseToImageFilter->SetUseObjectValue(true);
-        ellipseToImageFilter->SetOutsideValue(0);
-        ellipseToImageFilter->Update();
+      // recycling writers
+      ccWriter->SetFileName("prunedSkel.nii");
+      ccWriter->SetInput(prunedSkeleton);
+      try
+      {
+          ccWriter->Update();
+      }
+      catch (itk::ExceptionObject & excp)
+      {
+          std::cerr << excp << std::endl;
+          return EXIT_FAILURE;
+      }
 
-        auto maxFilter = itk::MaximumImageFilter<ImageType,ImageType>::New();
-        maxFilter->SetInput(0,resultImage);
-        maxFilter->SetInput(1,ellipseToImageFilter->GetOutput());
-        maxFilter->Update();
-        resultImage = maxFilter->GetOutput();
 
-        ++it;
+
+      nextVoxels.clear();
+      blackList.clear();
+      skelBranch.clear();
+      */
+      nextVoxels.push_back( std::pair<int,ImageType::IndexType>(1,startingIndex[i]) );
+
+      while( !nextVoxels.empty() )
+      {
+        /*************************/
+        /* Logic for propagation */
+
+        centralIndex = nextVoxels.front().second;
+        label = nextVoxels.front().first;
+
+        nextVoxels.pop_front();
+        blackList.insert(centralIndex);
+
+        nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,skeleton,bifurcations,nextVoxels,blackList);
+
+        /*************************************************/
+        /* Logic of what do we do with the current voxel */
+
+        //skelLabels->SetPixel(centralIndex,label);
+        
+        if( nbNeighbours == 0) // extremity
+        {
+          nbExtremity++; 
+
+        }
+
+        if(nbNeighbours == 2 ) // bifurcations
+        {
+            if(noNeighbourBif)//
+            {
+              bifurcations->SetPixel(centralIndex,254);
+              nbBifurcations++;
+
+              // add index to bifurcation 
+              bifurcationsList.insert(centralIndex);
+
+            }
+        }
+        if(nbNeighbours > 2) // lump
+        {
+          nbBifurcationsAmbiguous++;
+        }
+        
+        noNeighbourBif = true;
+
+        // updating skelinnerSkelCandidateseton labels
+      //std::cout<<centralIndex<<"   "<<label<<std::endl;
+      }
+
+
+
+      std::cout<<"Nb bifurcations:"<<nbBifurcations<<std::endl;
+      std::cout<<"Nb bifurcations ambiguous:"<<nbBifurcationsAmbiguous<<std::endl;
+      std::cout<<"Nb extremity:"<<nbExtremity<<std::endl;
+      
+      using OutputWriterType = itk::ImageFileWriter<ImageType>;
+      auto writer = OutputWriterType::New();
+
+      writer->SetFileName("bifurcation.nii");
+      writer->SetInput( bifurcations );
+      writer->Update();
+      
+
+      using EllipseType = itk::EllipseSpatialObject<3>;
+      using SpacialObjectToImageFilterType = itk::SpatialObjectToImageFilter<EllipseType,ImageType>;
+      int radius;
+
+      std::cout<<"adding ball shaped mask over bifurcations"<<std::endl;
+
+
+      for(auto &bifurcationIndex : bifurcationsList )
+      {
+        if(liverMask->GetPixel(bifurcationIndex) == 0)
+          continue;
+
+        std::cout<<"bifurcationIndex"<<std::endl;
+        std::cout<<bifurcationIndex<<std::endl;
+        
+          auto ellipse = EllipseType::New();
+          EllipseType::ArrayType radiusArray;
+          int radius = static_cast<int>( distanceImage->GetPixel(bifurcationIndex) ) | 1 ;
+          
+          switch(radius)
+          {
+            case 1:
+              radius *= 3;
+              break;
+            default:
+              radius *=2;
+            break;
+          }
+          radiusArray[0] = radius;
+          radiusArray[1] = radius;
+          radiusArray[2] = radius;
+
+          ImageType::RegionType::SizeType imSize;
+
+          imSize[0] = radius*2 +1 ;
+          imSize[1] = radius*2 +1 ;
+          imSize[2] = radius*2 +1 ;
+
+          ImageType::SpacingType spacing;
+          spacing[0] = 1;
+          spacing[1] = 1;
+          spacing[2] = 1;
+
+          ImageType::PointType origin;
+          origin[0] = 0;//12.5;
+          origin[1] = 0;//12.5;
+          origin[2] = 0;//12.5;
+
+          auto ellipseToImageFilter = SpacialObjectToImageFilterType::New();
+          ellipseToImageFilter->SetSize( imSize );
+          ellipseToImageFilter->SetSpacing( spacing );
+          ellipseToImageFilter->SetOrigin( origin );
+
+          ellipse->SetRadiusInObjectSpace(radiusArray);
+          
+
+          std::cout<<"index:"<<bifurcationIndex<<" radius: "<<radius<<"   | distance transform:"<<distanceImage->GetPixel(bifurcationIndex)<<std::endl;
+
+          // move the ellipse
+          auto transform = EllipseType::TransformType::New();
+          transform->SetIdentity();
+          EllipseType::TransformType::OutputVectorType translation;
+          ImageType::IndexType index;
+          //index = it.GetIndex();
+
+          //std::cout<<"index:"<<index<<" radius: "<<radius<<std::endl;
+
+          translation[0] = radius;
+          translation[1] = radius;
+          translation[2] = radius;
+          transform->Translate(translation);
+
+          ellipse->SetObjectToParentTransform(transform);
+
+
+          ellipseToImageFilter->SetInput(ellipse);
+          ellipse->SetDefaultInsideValue(255);
+          ellipse->SetDefaultOutsideValue(0);
+          ellipseToImageFilter->SetUseObjectValue(true);
+          ellipseToImageFilter->SetOutsideValue(0);
+          ellipseToImageFilter->Update();
+
+          // iterate on ball and translate to real image
+          std::cout<<"-- drawing ball --"<<std::endl;
+          auto ball = ellipseToImageFilter->GetOutput();
+          std::cout<<"ball size :"<<ball->GetLargestPossibleRegion().GetSize()<<std::endl;
+          std::cout<<"bifurcation index : "<<bifurcationIndex<<std::endl;
+
+          itk::ImageRegionConstIterator<ImageType> itBall(ball,ball->GetLargestPossibleRegion());
+          itBall.GoToBegin();
+          while( !itBall.IsAtEnd() )
+          {
+            if(itBall.Value() == 0 ) 
+            {
+              ++itBall;
+              continue;
+            }
+              // get iterator index
+              auto ballIndex = itBall.GetIndex();
+
+              //std::cout<<"ball index before translation: "<<ballIndex<<std::endl;              
+              // translate indexes
+              ballIndex[0] += bifurcationIndex[0]-radius;
+              ballIndex[1] += bifurcationIndex[1]-radius;
+              ballIndex[2] += bifurcationIndex[2]-radius;
+              //write value
+              //std::cout<<"ball index : "<<ballIndex<<std::endl;
+              //std::cout<<"bifurcation index : "<<bifurcationIndex<<std::endl;
+
+              auto resSize = resultImage->GetLargestPossibleRegion().GetSize();
+
+              if( ballIndex[0] >= 0 && ballIndex[0] < resSize[0] && 
+                ballIndex[1] >= 0 && ballIndex[1] < resSize[1] &&
+                ballIndex[2] >= 0 && ballIndex[2] < resSize[2])
+              {
+                resultImage->SetPixel(ballIndex, 254 ); //itBall.Value()               
+              }
+              
+              ++itBall;
+          }
+          std::cout<<"done"<<std::endl;
+      }
+
+
+      std::cout<<"ended part: "<<i<<" of bifurcation mask"<<std::endl;
     }
 
-    resultImage->SetOrigin( img->GetOrigin() );
+    resultImage->SetOrigin( binaryVessels->GetOrigin() );
 
+    
+    auto maskFilter = itk::MaskImageFilter<ImageType,ImageType,ImageType>::New();
+    maskFilter->SetInput( binaryVessels );
+    maskFilter->SetMaskImage( resultImage );
+    maskFilter->SetOutsideValue(0);
+    maskFilter->SetMaskingValue(0);
+    maskFilter->Update();
 
     std::cout<<"5"<<std::endl;
     using OutputWriterType = itk::ImageFileWriter<ImageType>;
     auto writer = OutputWriterType::New();
 
     writer->SetFileName(gtFileName);
-    writer->SetInput( resultImage );
+    writer->SetInput( maskFilter->GetOutput() );
     try
     {
         writer->Update();

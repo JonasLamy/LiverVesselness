@@ -102,9 +102,9 @@ if not os.path.exists(inputImageDir):
     os.makedirs(inputImageDir)
 
 inputCSV = inputName
-inputBest_MCC = inputName.split(".csv")[0] + "_Best_MCC.csv"
-inputBest_Dice = inputName.split(".csv")[0] + "_Best_Dice.csv"
-inputBest_RocAUC = inputName.split(".csv")[0] + "_Best_RocAUC.csv"
+#inputBest_MCC = inputName.split(".csv")[0] + "_Best_MCC.csv"
+#inputBest_Dice = inputName.split(".csv")[0] + "_Best_Dice.csv"
+#inputBest_RocAUC = inputName.split(".csv")[0] + "_Best_RocAUC.csv"
 
 
 csv_df = pd.read_csv(inputCSV)

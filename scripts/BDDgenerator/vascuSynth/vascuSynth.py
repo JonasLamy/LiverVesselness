@@ -4,10 +4,13 @@ import numpy as np
 import itk
 import matplotlib.pyplot as plt
 from scipy.stats import rice
+from scipy.stats import norm
+from scipy import ndimage
+import scipy.ndimage
 
 class Generator:
     def __init__(self):
-        self.noiseLevels = [5.0, 10.0, 20.0]
+        self.noiseLevels = [5.0,10.0,15.0]#[2.0, 4.0, 6.0, 8.0]#[2.0,3.0, 4.0,5.0, 6.0,7.0, 8.0, 9.0, 10.0]
 
     def gauss3d(self,x=0,y=0,z=0,mx=0,my=0,mz=0,sx=1,sy=1,sz=1):  
         return  1 / (sx*sy*sz * np.sqrt(2. * np.pi ) * np.sqrt(2. * np.pi ) ) * np.exp(-( (x - mx)**2. / (2. * sx**2.) + (y - my)**2. / (2. * sy**2.) + (z - mz)**2. / (2. * sz**2.) ) )  
@@ -16,9 +19,10 @@ class Generator:
     def bifurcationCoordinatesFile(self,DirPath,file):
         filePath = DirPath + "/" + file
         fileBif = DirPath + "/bifurcations_coordinates.txt"
-        
+
         matlabCall = "matlab -nojvm -nodisplay -nosplash -r"
-        scriptCall = " \"load('"+filePath+"');matTotxt(node,'"+fileBif+"');exit; \" "
+        scriptCall = " \"load('"+filePath+"');idx = strcmp('bif',{node.type});a = transpose( reshape([node(idx).coord],3,[]) );dlmwrite('"+fileBif+"',a,'delimiter',',');exit; \" "
+        print(scriptCall)
         os.system(matlabCall + scriptCall)
 
     def groundTruth(self,filePath,gtPath,gtDilatedPath):
@@ -29,17 +33,13 @@ class Generator:
         print(gtPath)
         print(gtDilatedPath)
 
-    def groundTruthBifurcation(self,DirPath,file):
+    def groundTruthBifurcation(self,binaryVesselsPath,bifurcationTxtFile,bifurcationGtFilePath):
         
-        # bifurcation mask Generation
-        filePath = DirPath + "/" + file
-        bifurcationFilePath = DirPath + "/bifurcations_coordinates.txt"
-        bifurcationGTPath = DirPath + "/bifurcationGT.nii"
-        os.system("./MakeVascuSynthBifurcationGT "+filePath+" "+bifurcationFilePath+" "+bifurcationGTPath)
+        os.system("./MakeVascuSynthBifurcationGT "+binaryVesselsPath+" "+bifurcationTxtFile+" "+bifurcationGtFilePath)
         
-        print(filePath)
-        print(bifurcationFilePath)
-        print(bifurcationGTPath)
+        #print(binaryVesselsPath)
+        #print(bifurcationTxtFile)
+        #print(bifurcationGtFilePath)
              
     def noisyImage(self,inputPath,outputName,noiseType):
         
@@ -57,6 +57,8 @@ class Generator:
                 
             datNoisy[datNoisy < 0] = 0
             datNoisy[datNoisy > 255] = 255
+            datNoisy[0,0,0] = 0 # used for easier display in slicer
+            datNoisy[0,0,1] = 255 # used for easier display in slicer
                 # writing image on disk
             noisyImg = itk.GetImageFromArray(datNoisy.astype(np.uint8))
 
@@ -70,21 +72,20 @@ class Generator:
         imgGTPath = DirPath + "/" + gtVessels
         imgGTBPath = DirPath + "/" + gtBifurcations
 
-        
         imgGT = itk.imread(imgGTPath)
         imgGTB = itk.imread(imgGTBPath)
 
         imgGT = itk.GetArrayFromImage(imgGT)
         imgGTB = itk.GetArrayFromImage(imgGTB)
+        
+        imgY = np.zeros(imgGT.size)
+        
+        imgY = imgGT & imgGTB
 
         print(imgGT.shape)
         print(imgGTB.shape)
-
-        # TODO : work in progress
-
-        imgGT[imgGTB == 0] = 0
         
-        itk.imwrite( itk.GetImageFromArray(imgGT),DirPath + "/bifurcationGTY.nii")
+        itk.imwrite( itk.GetImageFromArray(imgY.astype(np.uint8)),DirPath + "/binaryBifurcations.nii")
 
     def bifurcationsPositionsGT(self,filePath,outputPath,imgSize):
         with open(filePath) as file:
@@ -114,18 +115,86 @@ class Generator:
                 except:
                     pass
             itk.imwrite( itk.GetImageFromArray(imgGTPos.astype(np.float32)), outputPath )
+
+    def makeHardClassificationPatches(self,DirPath,inputPath,maskPath,outputPath):
+        imgInputPath = DirPath + "/" + inputPath #"/DATA/vascu_deepV2/maskWholeImage.nii"
+        imgMaskPath = DirPath + "/" + maskPath
+        imgROIPath = DirPath + "/" + outputPath
+
+        imgInput = itk.imread(imgInputPath)
+        imgMask = itk.imread(imgMaskPath)
+
+        PixelType = itk.UC
+        Dimension = 3
+        ImageType = itk.Image[PixelType, Dimension]
+        
+        radiusValue = 4
+        StructuringElementType = itk.FlatStructuringElement[Dimension]
+        structuringElement = StructuringElementType.Ball(radiusValue)
+        
+        DilateFilterType = itk.BinaryDilateImageFilter[ImageType,
+                                                    ImageType,
+                                                    StructuringElementType]
+        
+        dilateFilter = DilateFilterType.New()
+        
+        dilateFilter.SetInput(imgMask)
+        dilateFilter.SetKernel(structuringElement)
+        dilateFilter.SetForegroundValue(255)
+        imgMask = dilateFilter.GetOutput()
+
+        imgInput = itk.GetArrayFromImage(imgInput)
+        imgMask = itk.GetArrayFromImage(imgMask)
+
+
+        
+        imgROI = np.copy(imgInput)
+        imgROI[ imgMask > 0 ] = 0
+        
+        
+        itk.imwrite( itk.GetImageFromArray(imgROI.astype(np.uint8)),imgROIPath)
             
-    def vesselsAndBackground(self,inputPath,outputPath,Imin,Imax):
+    def vesselsAndBackground(self,inputPath,outputPath,Imin,Imax,backgroundValue,nbGaussianBackground,sigmaMin,sigmaMax,IgMin,IgMax):
         
         img = itk.imread(inputPath)
         dat = itk.GetArrayFromImage(img)
+        dat_save = itk.GetArrayFromImage(img)
         
-        dat = dat / np.max(dat) * (Imax - Imin) + Imin 
+        # vessels intensity rescale
+        dat[dat>0] = dat[dat>0] / np.max(dat) * (Imax - Imin) + Imin 
+        #print(dat)
+            # background intensity
+        d = np.zeros(dat.shape)
+        for i in range(nbGaussianBackground):
+            d += self.makeGaussian(dat,sigmaMin,sigmaMax)
+        # background illumination magnetic artefacts
+        print("intensities max:",d.max(),dat.max())
+        d = d/d.max() * (0.3) + 0.7
         
-        minValue = np.min(dat[dat>0])
-        print(minValue)
-        dat[dat == 0 ] = minValue
+        #dat[dat>0] = dat[dat>0] * d[dat>0]
+        
 
+
+
+        # background intensity
+        d = np.zeros(dat.shape)
+        for i in range(nbGaussianBackground):
+            d += self.makeGaussian(dat,sigmaMin,sigmaMax)
+        # background illumination magnetic artefacts
+        d = d/d.max() * (IgMax-IgMin) + IgMin
+        print(IgMin,IgMax,"toto")
+        print("d",np.max(d),np.min(d))
+
+        # adding background + vessels (additive gaussian model)
+        dat = d+dat
+        dat[dat_save==0] += backgroundValue
+
+        dat[dat < 0] = 0
+        dat[dat > 255] = 255
+
+        dat[0,0,0] = 0 # used for easier display in slicer
+        dat[0,0,1] = 255 # used for easier display in slicer
+        
         dat = dat.astype(np.uint8) # for now
         if(dat.dtype == np.uint8):
             img = itk.GetImageFromArray(dat.astype(np.uint8))
@@ -133,54 +202,71 @@ class Generator:
             img = itk.GetImageFromArray(dat.astype(np.float32)) # data is in double but it is not supported in itk
 
         itk.imwrite(img,outputPath)
+
+
+
+    def makeGaussian(self,dat,sigmaMin,sigmaMax):
+            startX = 0
+            startY = 0
+            startZ = 0
+
+            endX = dat.shape[0]
+            endY = dat.shape[1]
+            endZ = dat.shape[2]
+        
+            stepX = endX - startX
+            stepY = endY - startY
+            stepZ = endZ - startZ
+                        
+            x = np.linspace(startX,endX,stepX)
+            y = np.linspace(startY,endY,stepY)
+            z = np.linspace(startZ,endZ,stepZ)
             
-    def vesselsIllumination(self,inputPath,outputPath,sigma,IMin,IMax):
+            x, y,z = np.meshgrid(x,y,z) # get 2D variables instead of 1D
+            print(len(x),len(y),len(z))
+        
+            m_x = np.random.randint(0,endX)
+            m_y = np.random.randint(0,endY)
+            m_z = np.random.randint(0,endZ)
+
+            sigma1 = np.random.randint(sigmaMin,sigmaMax)
+            sigma2 = np.random.randint(sigmaMin,sigmaMax)
+            sigma3 = np.random.randint(sigmaMin,sigmaMax)
+
+            return self.gauss3d(x, y, z,mx=m_x,my=m_y,mz=m_z,sx=sigma1,sy=sigma2,sz=sigma3)
+
+
+    def vesselsIllumination(self,
+                            inputPath,
+                            outputPath,
+                            nbGaussianArtefacts,
+                            aSigmaMin,
+                            aSigmaMax,
+                            aImin,
+                            aImax):
         # Retrieving nifti data into arrays
         img = itk.imread(inputPath)
         dat = itk.GetArrayFromImage(img)
         dat = dat.astype(np.float32)
         
-        startX = 0
-        startY = 0
-        startZ = 0
-        
-        endX = dat.shape[0]
-        endY = dat.shape[1]
-        endZ = dat.shape[2]
-        
-        stepX = endX - startX
-        stepY = endY - startY
-        stepZ = endZ - startZ
-                        
-        x = np.linspace(startX,endX,stepX)
-        y = np.linspace(startY,endY,stepY)
-        z = np.linspace(startZ,endZ,stepZ)
+        # Artefacts
+        a = np.zeros(dat.shape)
+        if(nbGaussianArtefacts >0):
+            for i in range(nbGaussianArtefacts):
+                a += self.makeGaussian(dat,aSigmaMin,aSigmaMax)
+            
+            a = a/a.max() * (aImax-aImin) + aImin
+            a[a < aImin + 2] = 0
+            print("a",np.max(a),np.min(a))
+            dat = a + dat
 
-        halfSpaceX = (endX - startX) /2
-        halfSpaceY = (endY - startY) /2
-        halfSpaceZ = (endZ - startZ) /2
-                        
-        x, y,z = np.meshgrid(x,y,z) # get 2D variables instead of 1D
-        print(len(x),len(y),len(z))
-        # axial view in slicer is y axis in python
-        
-        sd1 = sigma
-        sd2 = sigma
-        sd3 = sigma
-
-        d1 = self.gauss3d(x, y, z,mx=0,my=0,mz=0,sx=sd1,sy=sd1,sz=sd1)                
-        d2 = self.gauss3d(x, y, z,mx=halfSpaceX,my=halfSpaceY,mz=halfSpaceZ,sx=sd2,sy=sd2,sz=sd2)
-        d3 = self.gauss3d(x, y, z,mx=endX,my=endY,mz=endZ,sx=sd3,sy=sd3,sz=sd3)
-        
-        d = d1 + d2 + d3
-        d = d/d.max() * (IMax-IMin) + IMin
-        print("d",np.max(d),np.min(d))
-                        
-        dat = np.maximum(d,dat)
                         
         dat[dat < 0] = 0
         dat[dat > 255] = 255
         
+        dat[0,0,0] = 0 # used for easier display in slicer
+        dat[0,0,1] = 255 # used for easier display in slicer
+
         # writing image on disk
         # writing image on disk
         if(dat.dtype == np.uint8):
@@ -208,3 +294,30 @@ class Generator:
 
         itk.imwrite(img,outputPath)
 
+    def imageFromGaussianPDF(self,inputPath,outputPath,dataType):
+        if(dataType == "MRI" ):
+            print("using MRI")
+            gaussianPDFLiver = norm(loc=108,scale=12)
+            gaussianPDFVessels = norm(loc=119,scale=16)
+        if(dataType == "CT" ):
+            print("using CT")
+            gaussianPDFLiver = norm(loc=101,scale=14)
+            gaussianPDFVessels = norm(loc=139,scale=16)
+
+        img = itk.imread(inputPath)
+        img_np = itk.GetArrayFromImage(img)
+        
+        mask = (img_np == 0)
+        img_np[mask] = gaussianPDFLiver.rvs(img_np[mask].shape[0])
+        
+        mask_vessels = (img_np > 0)
+        img_np[mask_vessels] = gaussianPDFVessels.rvs(img_np[mask_vessels].shape[0])
+
+        dat = img_np
+        dat = dat.astype(np.uint8) # for now
+        if(dat.dtype == np.uint8):
+            img = itk.GetImageFromArray(dat.astype(np.uint8))
+        else:
+            img = itk.GetImageFromArray(dat.astype(np.float32)) # data is in double but it is not supported in itk
+
+        itk.imwrite(img,outputPath)
