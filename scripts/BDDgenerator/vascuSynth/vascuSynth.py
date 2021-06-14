@@ -10,7 +10,7 @@ import scipy.ndimage
 
 class Generator:
     def __init__(self):
-        self.noiseLevels = [2.0, 4.0, 6.0, 8.0]#[2.0,3.0, 4.0,5.0, 6.0,7.0, 8.0, 9.0, 10.0]
+        self.noiseLevels = [5.0,10.0,15.0]#[2.0, 4.0, 6.0, 8.0]#[2.0,3.0, 4.0,5.0, 6.0,7.0, 8.0, 9.0, 10.0]
 
     def gauss3d(self,x=0,y=0,z=0,mx=0,my=0,mz=0,sx=1,sy=1,sz=1):  
         return  1 / (sx*sy*sz * np.sqrt(2. * np.pi ) * np.sqrt(2. * np.pi ) ) * np.exp(-( (x - mx)**2. / (2. * sx**2.) + (y - my)**2. / (2. * sy**2.) + (z - mz)**2. / (2. * sz**2.) ) )  
@@ -158,17 +158,20 @@ class Generator:
         
         img = itk.imread(inputPath)
         dat = itk.GetArrayFromImage(img)
+        dat_save = itk.GetArrayFromImage(img)
         
         # vessels intensity rescale
-        dat = dat / np.max(dat) * (Imax - Imin) + Imin 
+        dat[dat>0] = dat[dat>0] / np.max(dat) * (Imax - Imin) + Imin 
+        #print(dat)
             # background intensity
         d = np.zeros(dat.shape)
         for i in range(nbGaussianBackground):
             d += self.makeGaussian(dat,sigmaMin,sigmaMax)
         # background illumination magnetic artefacts
+        print("intensities max:",d.max(),dat.max())
         d = d/d.max() * (0.3) + 0.7
         
-        dat[dat>0] = dat[dat>0] * d[dat>0]
+        #dat[dat>0] = dat[dat>0] * d[dat>0]
         
 
 
@@ -184,6 +187,7 @@ class Generator:
 
         # adding background + vessels (additive gaussian model)
         dat = d+dat
+        dat[dat_save==0] += backgroundValue
 
         dat[dat < 0] = 0
         dat[dat > 255] = 255

@@ -327,8 +327,10 @@ int main(int argc,char** argv)
       std::set<ImageType::IndexType> bifurcationsList;
 
       std::list<ImageType::IndexType> skelBranch;
-      std::list<std::list<ImageType::IndexType>> skelBranchList;
+      std::list<std::list<ImageType::IndexType>> skelBranchExtremityList;
+      std::list<std::list<ImageType::IndexType>> skelBranchCoreList;
     
+      
       
       // making depth first search
       ImageType::IndexType centralIndex;
@@ -339,13 +341,13 @@ int main(int argc,char** argv)
 
       bool noNeighbourBif = true;
       int label;
-
+      /*
       nextVoxels.push_back( std::pair<int,ImageType::IndexType>(1,startingIndex[i]) );
 
       while( !nextVoxels.empty() )
       {
-          /*************************/
-        /* Logic for propagation */
+          /*************************
+        // Logic for propagation 
 
         centralIndex = nextVoxels.front().second;
         label = nextVoxels.front().first;
@@ -355,20 +357,21 @@ int main(int argc,char** argv)
 
         skelBranch.push_back(centralIndex);
 
+        
         nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,skeleton,bifurcations,nextVoxels,blackList);
 
-        /*************************************************/
-        /* Logic of what do we do with the current voxel */
+        //*************************************************
+        // Logic of what do we do with the current voxel 
         
         if( nbNeighbours == 0) // extremity
         {
           nbExtremity++; 
 
-          skelBranchList.push_back(skelBranch);
+          skelBranchExtremityList.push_back(skelBranch);
           skelBranch.clear();
         }
 
-        if(nbNeighbours == 2 ) // bifurcations
+        if(nbNeighbours >= 2 ) // bifurcations
         {
             if(noNeighbourBif)//
             {
@@ -378,7 +381,7 @@ int main(int argc,char** argv)
               // add index to bifurcation 
               bifurcationsList.insert(centralIndex);
 
-              //skelBranchList.push_back(skelBranch);
+              skelBranchCoreList.push_back(skelBranch);
               skelBranch.clear();
             }
         }
@@ -390,7 +393,12 @@ int main(int argc,char** argv)
         noNeighbourBif = true;
       }
 
-      for(auto &branch : skelBranchList)
+      for(auto &branch : skelBranchCoreList)
+      {
+          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,254); }
+      }
+
+      for(auto &branch : skelBranchExtremityList)
       {
         float meanVariation = 0;
 
@@ -402,18 +410,23 @@ int main(int argc,char** argv)
           it++;
         }
         meanVariation /= branch.size();
-        if(meanVariation < 2)
-          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,254); }
-
-
+        std::cout<<"variation : "<<meanVariation<<std::endl;
+        if()
+        if(meanVariation <= 1 && branch.size() <= startingDistance[i] + 3 ) // ok branch
+        {
+          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,50); }
+        }
+        else{ // removed branch
+          for(auto &voxel : branch){ prunedSkeleton->SetPixel(voxel,150); }
+        }
       }
 
-
-      distanceWriter->SetFileName("prunedSkel.nii");
-      distanceWriter->SetInput(prunedSkeleton);
+      // recycling writers
+      ccWriter->SetFileName("prunedSkel.nii");
+      ccWriter->SetInput(prunedSkeleton);
       try
       {
-          distanceWriter->Update();
+          ccWriter->Update();
       }
       catch (itk::ExceptionObject & excp)
       {
@@ -426,7 +439,7 @@ int main(int argc,char** argv)
       nextVoxels.clear();
       blackList.clear();
       skelBranch.clear();
-
+      */
       nextVoxels.push_back( std::pair<int,ImageType::IndexType>(1,startingIndex[i]) );
 
       while( !nextVoxels.empty() )
@@ -440,7 +453,7 @@ int main(int argc,char** argv)
         nextVoxels.pop_front();
         blackList.insert(centralIndex);
 
-        nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,prunedSkeleton,bifurcations,nextVoxels,blackList);
+        nbNeighbours = addNeighbours(label,noNeighbourBif,centralIndex,skeleton,bifurcations,nextVoxels,blackList);
 
         /*************************************************/
         /* Logic of what do we do with the current voxel */
@@ -499,6 +512,8 @@ int main(int argc,char** argv)
 
       for(auto &bifurcationIndex : bifurcationsList )
       {
+        if(liverMask->GetPixel(bifurcationIndex) == 0)
+          continue;
 
         std::cout<<"bifurcationIndex"<<std::endl;
         std::cout<<bifurcationIndex<<std::endl;
@@ -624,8 +639,6 @@ int main(int argc,char** argv)
     maskFilter->SetOutsideValue(0);
     maskFilter->SetMaskingValue(0);
     maskFilter->Update();
-    
-
 
     std::cout<<"5"<<std::endl;
     using OutputWriterType = itk::ImageFileWriter<ImageType>;
