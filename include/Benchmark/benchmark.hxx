@@ -72,15 +72,25 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
         for (auto &arg : arguments)
         {
           std::string m = arg.getMemberNames()[0]; // only one name in the array
-          sStream << "--" << m << " " << arg[m].asString() << " ";
+          if( (m.compare("sigmaMin") == 0) || (m.compare("sigmaMax") == 0) )
+          {
+            auto imgForHeaderData = vUtils::readImage<TImageType>(m_inputFileName, m_inputIsDicom);
+            auto spacing = imgForHeaderData->GetSpacing();
+
+            float scaled_spacing = std::stof( arg[m].asString() ) / spacing[0];
+            sStream << "--" << m << " " << std::setprecision(3) << scaled_spacing << " ";
+          }else
+          {
+            sStream << "--" << m << " " << arg[m].asString() << " ";  
+          }
         }
 
         if( !m_maskEnhancementFileName.empty() )
         {
           sStream << "--mask " << m_maskEnhancementFileName << " ";
         }
-
-        launchScriptFast(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
+        std::cout<<sStream.str()<<std::endl;
+        launchScriptFast(m_nbAlgorithms,sStream.str(),m_inputFileName,m_outputDir,outputName);
 
         if(m_removeResultsVolume)
         {
@@ -90,43 +100,17 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
        m_nbAlgorithms++;
       }
     }
-    else // the algorithm contains only one set of parameters
-    {
-      const std::string outputName = algo["Output"].asString();
-      const Json::Value arguments = algo["Arguments"];
-
-      std::stringstream sStream;
-      sStream << "./" << algoName << " "
-              << "--input"
-              << " " << m_inputFileName << " "
-              << "--output " << m_outputDir+ "/" + outputName << " ";
-
-      for (auto &arg : arguments)
-      {
-        std::string m = arg.getMemberNames()[0]; // only one name in the array
-        sStream << "--" << m << " " << arg[m].asString() << " ";
-      }
-
-      if( !m_maskEnhancementFileName.empty() )
-      {
-        sStream << "--mask " << m_maskEnhancementFileName << " ";
-      }
-
-      launchScriptFast(m_nbAlgorithms,sStream.str(),m_outputDir,outputName);
-      
-      if(m_removeResultsVolume)
-      {
-        remove( (m_outputDir+ "/" + outputName).c_str());
-      }
-      
-      m_nbAlgorithms++;
+    else{
+      throw "Bad parameters file, arguments formatting";
     }
+    
   }
 }
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFast(int algoID,
                                                                               const std::string &commandLine,
+                                                                              const std::string &inputVolumePath,
                                                                               const std::string &outputDir,
                                                                               const std::string &outputName)
 {
@@ -153,6 +137,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFas
 
   std::cout<<"opening result"<<std::endl;
   auto outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
+  auto inputImage = vUtils::readImage<TImageType>(inputVolumePath,false);
   
   std::cout<<"comparing output to ground truth....\n";
   if( outputImage->GetLargestPossibleRegion().GetSize() != m_gt->GetLargestPossibleRegion().GetSize() )
@@ -163,7 +148,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFas
 
   for(int i=0; i<m_maskList.size();i++)
   {
-    computeMetrics(outputName,outputImage,m_gt,m_maskList[i],m_resultsMaskList[i]);
+    computeMetrics(outputName,inputImage,outputImage,m_gt,m_maskList[i],m_resultsMaskList[i]);
   }
 
   std::cout<<"done"<<std::endl;
@@ -171,23 +156,49 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFas
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(const std::string & outputName,
+                                                                                typename TImageType::Pointer inputImage,
                                                                                 typename TImageType::Pointer outputImage,
                                                                                 typename TGroundTruthImageType::Pointer gt,
                                                                                 typename TMaskImageType::Pointer mask, 
                                                                                 std::ofstream * stream)
 {
-  // compute the 0 zeros, iterate over the region of interest
+  // compute the zeros, iterate over the region of interest
+  itk::ImageRegionConstIteratorWithIndex<TImageType> itInput(inputImage,inputImage->GetLargestPossibleRegion());
   itk::ImageRegionConstIteratorWithIndex<TImageType> itFilter(outputImage,outputImage->GetLargestPossibleRegion());
   itk::ImageRegionConstIteratorWithIndex<TMaskImageType> itMask(mask,mask->GetLargestPossibleRegion());
+  itk::ImageRegionConstIteratorWithIndex<TGroundTruthImageType> itGt(gt,gt->GetLargestPossibleRegion());
+
+  using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator<TGroundTruthImageType>;
+  auto minMaxFilter = ImageCalculatorFilterType::New();
+  minMaxFilter->SetImage(gt);
+  minMaxFilter->Compute();
+
 
   // positives values are stored
   typename std::list<typename TImageType::PixelType> foregroundValues;
   typename std::list<typename TImageType::IndexType> foregroundIndexes;
-  
+
   typename std::list<typename TImageType::IndexType> backgroundIndexes;
 
   itFilter.GoToBegin();
   itMask.GoToBegin();
+  itGt.GoToBegin();
+
+  double minInput = minMaxFilter->GetMinimum();
+  double maxInput = minMaxFilter->GetMaximum();
+
+  std::cout<<"min : "<<minInput<<" max :"<<maxInput<<std::endl; 
+
+  double intensityRange = maxInput - minInput;
+
+  // SNR and PSNR power elements
+  long double powerImage = 0;
+  // The noisy image correspond in our case to the filter output
+  long double powerFilter = 0;
+  long double MSE = 0;
+  long long nbPixels = 0;
+  // Filter output and image range are not in the same domain.....
+  double scaledFilterValue = 0;
   while( !itFilter.IsAtEnd() )
   {
     if(itMask.Get() > 0 )
@@ -200,11 +211,36 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
       else
       {
         backgroundIndexes.push_back( itFilter.GetIndex() );
-      }  
+      }
+      
+
+      scaledFilterValue = ( intensityRange * itFilter.Value() ) + minInput; 
+      
+      powerImage += itGt.Value() * itGt.Value(); 
+      powerFilter += scaledFilterValue * scaledFilterValue;
+
+      MSE += ( scaledFilterValue - itGt.Value() ) * ( scaledFilterValue - itGt.Value() ); // squared for mean squared error for snr
     }
+    
+    
+
+    ++itInput;
     ++itMask;
     ++itFilter;
+    ++itGt;
+
+    nbPixels++;
   }
+
+  // Finishing the computation of the SNR / PSNR
+
+  powerImage /= nbPixels * 2;
+  powerFilter /= nbPixels * 2;
+
+  MSE /= nbPixels * 2;
+
+  double snr = 10*std::log10(powerImage/powerFilter);
+  double psnr = 10*std::log10(maxInput / MSE);
   
   long TN_b=0;
   long FN_b=0;
@@ -248,7 +284,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
 
     computeConfusionValues(foregroundValues,foregroundIndexes,i/maxBoundf,TP_f,TN_f,FP_f,FN_f);
 
-    Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(TP_f, TN_f+TN_b, FP_f, FN_f+FN_b);
+    Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(snr,psnr,TP_f, TN_f+TN_b, FP_f, FN_f+FN_b);
     (*stream)<<m_patient<<","<<outputName<<","<<i/maxBoundf<<","<< eval;
 
     if( i%10 == 0)
@@ -267,7 +303,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
 
   computeConfusionValues(foregroundValues,foregroundIndexes,0,TP_f,TN_f,FP_f,FN_f);
 
-  Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(TP_f+FN_b, TN_f, FP_f+TN_b, FN_f);
+  Eval<TImageType, TGroundTruthImageType, TMaskImageType> eval(snr,psnr,TP_f+FN_b, TN_f, FP_f+TN_b, FN_f);
   (*stream)<<m_patient<<","<<outputName<<","<<0<<","<< eval;
 }
 

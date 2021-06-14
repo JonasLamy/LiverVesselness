@@ -43,7 +43,7 @@ odyssee.merveille@gmail.com
 
 
 template<typename PixelType, typename MaskType>
-Image3D<PixelType> RORPO_multiscale(Image3D<PixelType> &I,
+Image3D<PixelType> RORPO_multiscale(const Image3D<PixelType> &I,
                                     const std::vector<int>& S_list,
                                     int nb_core,
                                     int dilationSize,

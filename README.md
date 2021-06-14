@@ -8,16 +8,26 @@ The implementations of the seven vessel filtering methods are available and the 
 An installation-free online demonstration is also available:
 [http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
+## DATA
+
+Data for the benchmark comes from the modification of public datasets. The tweaked versions are available here : http://eidolon.univ-lyon2.fr/~jlamy/
+
+Original data are available on the authors websites :
+
+Ircad Dataset : https://www.ircad.fr/research/3d-ircadb-01/
+Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
+
 ## Dependancies
 - Benchmark (C/C++)
 
 CMake > 3.10.2 (https://cmake.org/)
 
-ITK > 5.0 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
+ITK >= 5.2 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
 recommanded options : Module_Thickness3D, ITK_USE_FFTWF, ITK_USE_FFTWD
 
 Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp)
-Boost > 1.46.0 : needs program_option and filesystem
+
+Boost Math : [Github page](https://github.com/boostorg/math). This is only required for bessel functions in OOF.
 
 - scripts ( python 3.5+)
 Pandas : (https://pandas.pydata.org/)

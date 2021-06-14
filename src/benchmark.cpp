@@ -47,7 +47,7 @@ std::ofstream initCSVFile(std::string csvFileName)
   csvFileStream.open(csvFileName, std::ios::out | std::ios::trunc); // if the file already exists, we discard content
   if( csvFileStream.is_open() )
   {
-    csvFileStream <<"SerieName,VolumeName,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC"<<std::endl;
+    csvFileStream <<"SerieName,VolumeName,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,snr,psnr"<<std::endl;
   } 
   else{ 
     std::cout<<"error couldn't open csv file..."<<std::endl; // *TODO remove cout and do proper exceptions messages

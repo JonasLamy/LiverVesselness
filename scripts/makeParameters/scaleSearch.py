@@ -1,4 +1,7 @@
 from methods import *
+import math
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class BoundsSS:
     def __init__(self):
@@ -10,7 +13,9 @@ class BoundsSS:
         self.maxBoundEnd = 0
         self.maxBoundStep = 0
         # number of scales per interval [minBound,maxBound]
-        self.nbScales = 0
+        self.nbScalesMin = 0
+        self.nbScalesMax = 0
+        self.nbScalesStep = 1
 
 class RORPOBoundsSS:
     def __init__(self):
@@ -57,18 +62,54 @@ class HessianScaleSearch:
         # if filtering parameter sets is needed, this is where it should happen
         parametersSets = []
         
-        minB = self.boundsSS.minBoundStart
-        while(minB <= self.boundsSS.minBoundEnd + self.epsilon):
-            maxB = self.boundsSS.maxBoundStart
-            while(maxB <= self.boundsSS.maxBoundEnd + self.epsilon):
-                
-                if(maxB-minB >= 1):
-                    parameterSet = self.instance(minB,maxB,self.boundsSS.nbScales,self.methodName,self.methodParameters)
-                    parametersSets.append(parameterSet)
+        pSetsX = []
+        pSetsY = []
+        pSetsZ = []
 
-                maxB += self.boundsSS.maxBoundStep
-            minB += self.boundsSS.minBoundStep
-            
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        for scaleStep in range(self.boundsSS.nbScalesMin,self.boundsSS.nbScalesMax+1,self.boundsSS.nbScalesStep):
+            minB = self.boundsSS.minBoundStart
+            while(minB <= self.boundsSS.minBoundEnd + self.epsilon):
+                maxB = self.boundsSS.maxBoundStart
+                while(maxB <= self.boundsSS.maxBoundEnd + self.epsilon):
+                    if(minB >= maxB):
+                        maxB += self.boundsSS.maxBoundStep
+                        continue
+
+                    l = []
+                    stepSize = ( math.log(maxB) - math.log(minB) ) / (scaleStep-1)
+                    for i in range(0,scaleStep):
+                        l.append(minB * math.exp(stepSize * i ))
+                    
+                    #print(l)
+                    ok = True
+                    for i in range(0,scaleStep-1):
+                        if( (l[i+1]-l[i]) <= 1/6):
+                            ok = False
+                    #print(f"param set ok :{ok}")
+
+                    if(not ok):
+                        #print("discarded")
+                        maxB += self.boundsSS.maxBoundStep
+                        continue
+
+                    parameterSet = self.instance(minB,maxB,scaleStep,self.methodName,self.methodParameters)
+                    parametersSets.append(parameterSet)
+                    pSetsX.append(minB)
+                    pSetsY.append(maxB)
+                    pSetsZ.append(scaleStep)
+
+                    maxB += self.boundsSS.maxBoundStep
+                minB += self.boundsSS.minBoundStep
+        
+        ax.scatter(pSetsX,pSetsY,pSetsZ,marker="o")
+        ax.set_xlabel("sigmaMin")
+        ax.set_ylabel("sigmaMax")
+        ax.set_zlabel("nbScales")
+        plt.title("search space sampling")
+        plt.show()
+         
         return parametersSets
            
     def __str__(self):
@@ -126,7 +167,7 @@ class RORPOScaleSearch:
     def __str__(self):
         paramSets = self.parametersSet()
         self.nbParameters = len(paramSets)
-        print(self.nbParameters)
+        #print(self.nbParameters)
         paramString = ""
         for i in range(0,len(paramSets)-1):
             paramString += str(paramSets[i]) + ",\n"

@@ -33,7 +33,7 @@ int main(int argc,char** argv)
     std::string outputMaskedLiverFileName( argv[9] );
 
     bool identitySpacing = std::atoi(argv[10]);
-    int radiusValue = 7;
+    int radiusValue = 9;
 
     // settings images types
     using DicomImageType = itk::Image<int16_t,3>;

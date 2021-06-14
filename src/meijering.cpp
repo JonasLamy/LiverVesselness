@@ -21,12 +21,10 @@ int main( int argc, char* argv[] )
   std::string outputFile;
   double sigmaMin;
   double sigmaMax;
-  float alpha {-0.33};
-  int nbClasses {5};
+  float alpha {-0.66};
   bool isInputDicom = false;
   
   int nbSigmaSteps;
-  double fixedSigma;
   std::string maskFile;
   app.add_option("-i,--input,1", inputFile, "inputName : input img")
   ->required()
@@ -37,9 +35,7 @@ int main( int argc, char* argv[] )
   app.add_option("--sigmaMax,-M", sigmaMax, "scale space sigma max");
   app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
   app.add_option("--alpha,-a", alpha, "Meijering's alpha" ,true);
-  app.add_option("--nbSeeds,-s", nbClasses, "Sato's alpha2" ,true);
   
-  app.add_option("--sigma,-s",fixedSigma,"number of kmean seeds");
   app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
   app.add_option("--mask,-k",maskFile,"mask response by image")
   ->check(CLI::ExistingFile);
@@ -78,7 +74,7 @@ int main( int argc, char* argv[] )
   MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter =  MultiScaleEnhancementFilterType::New();
   multiScaleEnhancementFilter->SetInput( image );
   multiScaleEnhancementFilter->SetHessianToMeasureFilter( meijeringFilter );
-  //multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
+  multiScaleEnhancementFilter->SetSigmaStepMethodToLogarithmic();
   multiScaleEnhancementFilter->SetSigmaMinimum( sigmaMin );
   multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );
   multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );
