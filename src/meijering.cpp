@@ -21,7 +21,7 @@ int main( int argc, char* argv[] )
   std::string outputFile;
   double sigmaMin;
   double sigmaMax;
-  float alpha {-0.33};
+  float alpha {-0.66};
   bool isInputDicom = false;
   
   int nbSigmaSteps;
