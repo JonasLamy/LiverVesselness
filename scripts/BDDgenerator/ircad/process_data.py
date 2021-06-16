@@ -12,6 +12,7 @@ IdentitySpacing = sys.argv[2]
 
 # Actual thresholds for the 3 vessels marks
 # [(0.1,3),(3.1,6),(6.1,100)]
+#/pbs/home/j/jlamy/LiverVesselnessDev/build/bin/
 
 for patientDirectory in glob.glob(outputDir +'/3D*'):
     print(patientDirectory.rsplit('/')[-1])
@@ -34,7 +35,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     bifurcationsOutPath = patientDirectory+"/bifurcationsMaskIso.nii"
     dilatedVesselsMask = patientDirectory + "/dilatedVesselsMaskIso.nii"
     dilatedVesselsMasked = patientDirectory + "/dilatedVesselsMasked.nii"
-    dilatedVesselsMasked = patientDirectory + "/dilatedVesselsCutMasked.nii"
+    #dilatedVesselsMasked = patientDirectory + "/dilatedVesselsCutMasked.nii"
 
     vesselsSizeEstimation = patientDirectory + "/vesselsSize.nii"    
     vesselsSizeEstimationMask = patientDirectory + "/vesselsSizeMask.nii"
@@ -48,15 +49,15 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     dilatedVesselsMaskLarge = patientDirectory + "/dilatedVesselsMaskLarge.nii"
 
     print(patientOutPath)
-    print(vesselsCutOutPath)
+    #print(vesselsCutOutPath)
     print(maskedLiverAndVesselsOutPath)
+    print(dilatedVesselsMasked)
     print(bifurcationsOutPath)
-    print(dilatedVesselsMask)
-    print(vesselsMaskLarge)
-    print(vesselsMaskMedium)
-    print(vesselsMaskSmall)
+    print(dilatedVesselsMaskLarge)
+    print(dilatedVesselsMaskMedium)
+    print(dilatedVesselsMaskSmall)
 
-
+    """
     # Make dilated masks for vessels of different sizes
 
     sv = itk.imread(vesselsMaskSmall)
@@ -114,25 +115,10 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
 
         writer.Update()
 
-
-    BetterDilatedVessels = np.zeros( dilatedVesselsNumpyStatic[0].shape, dtype=np.uint8 )
-    BetterDilatedVessels[ (dilatedVesselsNumpyStatic[0]>0) | (dilatedVesselsNumpyStatic[1]>0) | (dilatedVesselsNumpyStatic[2]>0)   ] = 254 
-
-    img = itk.image_from_array( BetterDilatedVessels.astype(np.uint8) )
-    img.SetSpacing( v.GetSpacing() )
-    img.SetOrigin( v.GetOrigin() )
-    
-    WriterType = itk.ImageFileWriter[ImageType]
-    writer = WriterType.New()
-    writer.SetFileName(vn)
-    writer.SetInput(dilatedVesselsMask)
-
-    writer.Update()
-    exit()
     #
     # Make masks with protal trunk using liver mask + vessels mask
     #
-    """
+    
     # vessels volume
     volume = itk.imread(vesselsIsoCutPath)
     npVolume = itk.array_from_image(volume).astype(np.uint8)
@@ -159,6 +145,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     img.SetSpacing( volume.GetSpacing() )
     img.SetOrigin( volume.GetOrigin() )
     itk.imwrite(img,maskedLiverAndVesselsOutPath)
+    
     """
     #
     # Make vesselsNeighbourhood mask masked by liver mask (not the fused one but the liver one, important)

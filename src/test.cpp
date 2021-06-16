@@ -187,6 +187,7 @@ void testEllipses()
 
 int main(int argc,char** argv)
 {
+    test1();
     testEllipses();
     std::cout<<"test finished"<<std::endl;
     return 0;
