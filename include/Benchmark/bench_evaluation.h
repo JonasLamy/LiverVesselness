@@ -75,8 +75,7 @@ std::ostream& operator <<(std::ostream& out,Eval<TImageType,TGroundTruthImageTyp
 		<< eval.dice() << ","
 		<< eval.matthewsCorrelation() << ","
     << eval.snr() << ","
-    << eval.psnr() << ","
-    << std::endl;
+    << eval.psnr() << std::endl;
     //<< eval.sparsity() <<std::endl;
 
     return out;
