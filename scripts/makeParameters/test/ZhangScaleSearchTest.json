@@ -7,7 +7,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"1.40"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -16,7 +16,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"1.80"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -25,7 +25,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"2.20"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -34,7 +34,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"2.60"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -43,7 +43,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"3.00"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -52,7 +52,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"3.40"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -61,7 +61,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"1.40"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -70,7 +70,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"1.80"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -79,7 +79,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"2.20"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -88,7 +88,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"2.60"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -97,7 +97,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"3.00"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -106,7 +106,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"3.40"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -115,7 +115,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"1.80"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -124,7 +124,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"2.20"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -133,7 +133,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"2.60"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -142,7 +142,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"3.00"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -151,7 +151,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"3.40"},
 	{"nbSigmaSteps":"3"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -160,7 +160,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"1.40"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -169,7 +169,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"1.80"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -178,7 +178,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"2.20"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -187,7 +187,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"2.60"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -196,7 +196,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"3.00"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -205,7 +205,7 @@
 	{"sigmaMin":"0.40"},
 	{"sigmaMax":"3.40"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -214,7 +214,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"1.80"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -223,7 +223,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"2.20"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -232,7 +232,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"2.60"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -241,7 +241,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"3.00"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -250,7 +250,7 @@
 	{"sigmaMin":"0.80"},
 	{"sigmaMax":"3.40"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -259,7 +259,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"1.80"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -268,7 +268,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"2.20"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -277,7 +277,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"2.60"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -286,7 +286,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"3.00"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   },
   {
@@ -295,7 +295,7 @@
 	{"sigmaMin":"1.20"},
 	{"sigmaMax":"3.40"},
 	{"nbSigmaSteps":"4"},
-	{"tau":"0.60"}
+	{"tau":"0.50"}
   	]
   } 
  ]

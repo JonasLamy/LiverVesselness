@@ -235,7 +235,7 @@ int main(int argc, char** argv)
 #else
       createDirectory( benchDir+"/"+patientName );
 #endif
-    
+
     // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
     // Mask is only useful for statistics during segmentation assessment, 
     // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed

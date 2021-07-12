@@ -240,7 +240,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
   MSE /= nbPixels * 2;
 
   double snr = 10*std::log10(powerImage/powerFilter);
-  double psnr = 10*std::log10(maxInput / MSE);
+  double psnr = 10*std::log10( (maxInput*maxInput) / MSE);
   
   long TN_b=0;
   long FN_b=0;
