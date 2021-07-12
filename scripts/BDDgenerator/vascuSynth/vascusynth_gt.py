@@ -57,9 +57,8 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         print(filePath +"/"+ "gtDilated.nii")
                         print(filePath +"/"+ "binaryVessels.nii")
 
-                        shutil.copyfile(filePath +"/"+ "binaryVessels.nii", outputFilePath +"/"+ "binaryVessels.nii")
-                        continue
-
+                        #shutil.copyfile(filePath +"/"+ "binaryVessels.nii", outputFilePath +"/"+ "binaryVessels.nii")
+                        
                         # generate bifurcation text file from .mat data
                         #now we call the script
                         #bifurcation files extraction
@@ -81,7 +80,7 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         #generator.groundTruthBifurcation(outputFilePath+"/"+"binaryVessels.nii",filePath+"/"+"bifurcations_coordinates.txt",outputFilePath+"/"+"binaryBifurcationsMask.nii")
                         
                         # patch generator # TODO make different scripts instead of bumping everything with comments
-                        #generator.makeHardClassificationPatches(outputFilePath,"binaryVesselDilated.nii","binaryBifurcationsMask.nii","vesselsNeighbourhoodForClassif.nii")
+                        generator.makeHardClassificationPatches(outputFilePath,"binaryVesselDilated.nii","binaryBifurcationsMask.nii","vesselsNeighbourhoodForClassif.nii")
                         #generator.makeHardClassificationPatches(outputFilePath,"placeholder","binaryVesselDilated.nii","backgroundForClassif.nii")
                         
                         # background generation
@@ -117,7 +116,7 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         nbGaussian = 3
                         sigmaMin = 30
                         sigmaMax = 50
-
+                        """
                         print("input dir:",  outputFilePath +"/data.nii")
                         print("output dir:", outputFilePath + "/vesselsAndBackground_ct.nii")
                         generator.vesselsAndBackground( filePath+"/data.nii", outputFilePath + "/vesselsAndBackground_ct.nii",Imin,Imax,backgroundValue,nbGaussian,sigmaMin,sigmaMax,IgMin,IgMax)
@@ -137,6 +136,7 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                                                     aImax)
 
                         generator.noisyImage(outputFilePath+"/vesselsAndBackgroundIlluminated_ct.nii",outputFilePath+"/poisson" ,"poisson")
+                        """
                         #generator.noisyImage(outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",outputFilePath+"/"+"rician" ,"rician")
                         
                         

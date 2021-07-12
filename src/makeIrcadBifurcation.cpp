@@ -645,7 +645,7 @@ int main(int argc,char** argv)
     auto writer = OutputWriterType::New();
 
     writer->SetFileName(gtFileName);
-    writer->SetInput( maskFilter->GetOutput() );
+    writer->SetInput( resultImage/*maskFilter->GetOutput()*/ );
     try
     {
         writer->Update();
