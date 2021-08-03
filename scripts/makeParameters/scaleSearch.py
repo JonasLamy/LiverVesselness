@@ -2,6 +2,7 @@ from methods import *
 import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 
 class BoundsSS:
     def __init__(self):
@@ -67,7 +68,8 @@ class HessianScaleSearch:
         pSetsZ = []
 
         fig = plt.figure()
-        ax = Axes3D(fig)
+        lScales = []
+
         for scaleStep in range(self.boundsSS.nbScalesMin,self.boundsSS.nbScalesMax+1,self.boundsSS.nbScalesStep):
             minB = self.boundsSS.minBoundStart
             while(minB <= self.boundsSS.minBoundEnd + self.epsilon):
@@ -85,7 +87,7 @@ class HessianScaleSearch:
                     #print(l)
                     ok = True
                     for i in range(0,scaleStep-1):
-                        if( (l[i+1]-l[i]) <= 1/6):
+                        if( (l[i+1]-l[i]) <= 1/6): # min gaussian resolution
                             ok = False
                     #print(f"param set ok :{ok}")
 
@@ -93,6 +95,8 @@ class HessianScaleSearch:
                         #print("discarded")
                         maxB += self.boundsSS.maxBoundStep
                         continue
+                    
+                    lScales.append(l)
 
                     parameterSet = self.instance(minB,maxB,scaleStep,self.methodName,self.methodParameters)
                     parametersSets.append(parameterSet)
@@ -102,14 +106,13 @@ class HessianScaleSearch:
 
                     maxB += self.boundsSS.maxBoundStep
                 minB += self.boundsSS.minBoundStep
-        
-        ax.scatter(pSetsX,pSetsY,pSetsZ,marker="o")
-        ax.set_xlabel("sigmaMin")
-        ax.set_ylabel("sigmaMax")
-        ax.set_zlabel("nbScales")
+        for i,l in enumerate(lScales):
+            #print(l)
+            #print( np.ones(len(l))*i )
+            plt.plot(l, np.ones( len(l) )*i,marker="x" )
         plt.title("search space sampling")
         plt.show()
-         
+        
         return parametersSets
            
     def __str__(self):
@@ -147,6 +150,9 @@ class RORPOScaleSearch:
     def parametersSet(self):
         # Warning check floating point consistency....
         # if filtering parameter sets is needed, this is where it should happen
+        fig = plt.figure()
+        lScales = []
+
         parametersSets = []
         minS = self.boundsSS.minScaleStart
         while(minS <= self.boundsSS.minScaleEnd):
@@ -154,13 +160,36 @@ class RORPOScaleSearch:
             while(factor <= self.boundsSS.factorEnd):
                 nbScales = self.boundsSS.nbScalesStart
                 while(nbScales <= self.boundsSS.nbScalesEnd):
+                    
+                    l = []
+                    #print(minS,factor,nbScales)
+                    for i in range(nbScales):
+                        l.append( (minS * factor**i ) )
 
+                    ok = True
+                    
+                    if( (l[-1]-l[0]) <= 20 or l[-1] > 200 ): # min gaussian resolution
+                            ok = False
+                    if(not ok):
+                        #print("discarded")
+                        nbScales += self.boundsSS.nbScalesStep
+                        continue
+
+                    lScales.append(l)
+                    
                     parameterSet = self.instance(minS,factor,nbScales,self.methodParameters)
                     parametersSets.append(parameterSet)
-
+                    
                     nbScales += self.boundsSS.nbScalesStep
                 factor += self.boundsSS.factorStep
             minS += self.boundsSS.minScaleStep
+
+        for i,l in enumerate(lScales):
+            #print(l)
+            #print( np.ones(len(l))*i )
+            plt.plot(l, np.ones( len(l) )*i,marker="x" )
+        plt.title("search space sampling")
+        plt.show()
             
         return parametersSets
             

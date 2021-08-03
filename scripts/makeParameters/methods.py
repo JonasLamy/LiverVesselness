@@ -170,7 +170,8 @@ class RORPO(Vesselness):
               """\t{\"nbScales\":\""""+str(self.nbScales)+"""\"},\n"""
               """\t{\"core\":\""""+str(self.RORPOParameters.core)+"""\"},\n"""
               + verbose + 
-              """\t{\"dilationSize\":\""""+str(self.RORPOParameters.dilationSize)+"""\"}\n"""
+              """\t{\"dilationSize\":\""""+str(self.RORPOParameters.dilationSize)+"""\"},\n"""
+              """\t{\"normalize\":\""""+str("")+"""\"},\n"""
               """  \t]\n"""
               """  }"""
             )

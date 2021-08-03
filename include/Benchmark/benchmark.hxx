@@ -72,16 +72,20 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
         for (auto &arg : arguments)
         {
           std::string m = arg.getMemberNames()[0]; // only one name in the array
-          if( (m.compare("sigmaMin") == 0) || (m.compare("sigmaMax") == 0) )
+
+          if( (m.compare("sigmaMin") == 0) || (m.compare("sigmaMax") == 0) || ( m.compare("scaleMin") == 0 ) )
           {
             auto imgForHeaderData = vUtils::readImage<TImageType>(m_inputFileName, m_inputIsDicom);
             auto spacing = imgForHeaderData->GetSpacing();
 
             float scaled_spacing = std::stof( arg[m].asString() ) / spacing[0];
-            sStream << "--" << m << " " << std::setprecision(3) << scaled_spacing << " ";
-          }else
-          {
-            sStream << "--" << m << " " << arg[m].asString() << " ";  
+            if( m.compare("scaleMin") == 0 ){ sStream << "--" << m << " " << (int)scaled_spacing << " "; } // rorpo is a special case wuth int parameter
+            else{ sStream << "--" << m << " " << std::setprecision(3) << scaled_spacing << " "; } // usual scale Space
+            
+          }
+          else
+          { 
+            sStream << "--" << m << " " << arg[m].asString() << " ";
           }
         }
 

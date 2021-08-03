@@ -14,7 +14,7 @@ if not os.path.exists(dirPath):
 
 bounds = BoundsSS()
 bounds.minBoundStart = 0.4
-bounds.minBoundEnd   = 1.2
+bounds.minBoundEnd   = 1.8
 bounds.minBoundStep  = 0.4
 
 bounds.maxBoundStart = 1.4
@@ -65,16 +65,15 @@ print(zhangSS, file=open(dirPath+"ZhangScaleSearchTest.json","w"))
 print("Zhang scale search:",zhangSS.nbParameters)
 
 rorpoBoundsSS = RORPOBoundsSS()
-rorpoBoundsSS.minScaleStart = 10
-rorpoBoundsSS.minScaleEnd = 50
-rorpoBoundsSS.minScaleStep = 10
+rorpoBoundsSS.minScaleStart = 30
+rorpoBoundsSS.minScaleEnd = 180
+rorpoBoundsSS.minScaleStep = 20
 
-rorpoBoundsSS.factorStart = 1.2
-rorpoBoundsSS.factorEnd = 1.4
-rorpoBoundsSS.factorStep = 0.1
-
-rorpoBoundsSS.nbScalesStart = 1
-rorpoBoundsSS.nbScalesEnd = 3
+rorpoBoundsSS.factorStart = 1.1
+rorpoBoundsSS.factorEnd = 1.6
+rorpoBoundsSS.factorStep = 0.2
+rorpoBoundsSS.nbScalesStart = 2
+rorpoBoundsSS.nbScalesEnd = 4
 rorpoBoundsSS.nbScalesStep = 1
 
 rorpoParams = RORPOParameters(core=3,dilationSize=0,verbose=True)
