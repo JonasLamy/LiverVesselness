@@ -1,7 +1,7 @@
 from methods import *
 
 class FrangiBounds:
-    def __init__(self,alphaMin=0.1,alphaMax=1,alphaStep=0.1,betaMin=0,betaMax=1,betaStep=0.1):
+    def __init__(self,alphaMin=0.1,alphaMax=1,alphaStep=0.1,betaMin=0,betaMax=1,betaStep=0.1,gammaMin=5,gammaMax=10,gammaStep=5):
         self.alphaMin = alphaMin
         self.alphaMax = alphaMax
         self.alphaStep = alphaStep
@@ -9,6 +9,10 @@ class FrangiBounds:
         self.betaMin = betaMin
         self.betaMax = betaMax
         self.betaStep = betaStep
+
+        self.gammaMin = gammaMin
+        self.gammaMax = gammaMax
+        self.gammaStep = gammaStep
 
 class SatoBounds:
     def __init__(self,alpha1Min=0.1,alpha1Max=1,alpha1Step=0.1,alpha2Min=2,alpha2Max=3,alpha2Step=0.1):
@@ -60,12 +64,15 @@ class FrangiParametersSearch:
         while(alpha <= self.boundsPS.alphaMax):
             beta = self.boundsPS.betaMin
             while(beta <= self.boundsPS.betaMax):
-                name = "{:.2f}".format(alpha)+"-"+"{:.2f}".format(beta)+".nii"
+                gamma = self.boundsPS.gammaMin 
+                while(gamma <= self.boundsPS.gammaMax):
+                    name = "{:.2f}".format(alpha)+"-"+"{:.2f}".format(beta)+".nii"
                 
-                paramSet = self.instance(name,self.sigmaMin,self.sigmaMax,self.sigmaSteps,FrangiParameters(alpha,beta,5) )
+                    paramSet = self.instance(name,self.sigmaMin,self.sigmaMax,self.sigmaSteps,FrangiParameters(alpha,beta,gamma) )
 
-                parametersSets.append( paramSet )
+                    parametersSets.append( paramSet )
                 
+                    gamma += self.boundsPS.gammaStep
                 beta += self.boundsPS.betaStep
             alpha += self.boundsPS.alphaStep
 

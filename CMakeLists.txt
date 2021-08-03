@@ -14,8 +14,6 @@ endif()
 # CLI11
 include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
-
-
 find_package(ITK 5.2 REQUIRED)
 include(${ITK_USE_FILE})
 
@@ -32,6 +30,17 @@ target_include_directories(Antiga PUBLIC
   )
 target_link_libraries(Antiga ${ITK_LIBRARIES}  )
 set_target_properties(Antiga PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+# Frangi -----------------------
+
+add_executable(Frangi src/frangi.cpp)
+target_include_directories(Frangi PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Frangi>"
+  "$<INSTALL_INTERFACE:include/Frangi>"
+  )
+target_link_libraries(Frangi ${ITK_LIBRARIES}  )
+set_target_properties(Frangi PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # Jerman -----------------------
 

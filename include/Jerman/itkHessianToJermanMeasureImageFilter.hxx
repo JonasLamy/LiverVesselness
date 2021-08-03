@@ -10,10 +10,7 @@ namespace itk{
     {
         //this->DynamicMultiThreadingOn();
         std::cout<<"Using Hessian Jerman Image Filter"<<std::endl;
-        if(this->m_maskImage)
-        {
-            std::cout<<"toto"<<std::endl;
-        }
+
     }
 
     template<typename TInputImage,typename TOutputImage, typename TMaskImage>

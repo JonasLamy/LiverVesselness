@@ -59,7 +59,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
 
     
     # Make dilated masks for vessels of different sizes
-    
+    """
     sv = itk.imread(vesselsMaskSmall)
     mv = itk.imread(vesselsMaskMedium)
     lv = itk.imread(vesselsMaskLarge)
@@ -118,7 +118,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     # Make masks with portal trunk using liver mask + vessels mask
     #
     
-    """
+    
     # vessels volume
     volume = itk.imread(vesselsIsoCutPath)
     npVolume = itk.array_from_image(volume).astype(np.uint8)
@@ -207,15 +207,11 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
 
     #print(commandLine)
     #os.system(commandLine)
-    """
+    
     commandLine = "./MakeIrcadBifurcationGT " + vesselsCutOutPath + " " + liverOutPath  + " " + bifurcationsOutPath + " " + vesselsSkeleton
     
     print(commandLine)
     os.system(commandLine)
-    
-    exit()
-    """
-    
     #bifurcationInPath = patientDirectory+"/bifurcationsMaskIso.nii"
     #liverInPath = patientDirectory+ "/liverMaskIso.nii"
     #bifurcationsOutPath = "/DATA/ircad_iso/"+patientDirectory.split("/")[3]+"/bifurcationsMaskIso.nii"

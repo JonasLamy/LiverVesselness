@@ -172,6 +172,46 @@
   	]
   },
   {
+   "Output":"1.60-2.20-3.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
+	{"sigmaMax":"2.20"},
+	{"nbSigmaSteps":"3"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
+   "Output":"1.60-2.60-3.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
+	{"sigmaMax":"2.60"},
+	{"nbSigmaSteps":"3"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
+   "Output":"1.60-3.00-3.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
+	{"sigmaMax":"3.00"},
+	{"nbSigmaSteps":"3"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
+   "Output":"1.60-3.40-3.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
+	{"sigmaMax":"3.40"},
+	{"nbSigmaSteps":"3"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
    "Output":"0.40-1.40-4.00.nii",
    "Arguments":[
 	{"sigmaMin":"0.40"},
@@ -325,6 +365,46 @@
    "Output":"1.20-3.40-4.00.nii",
    "Arguments":[
 	{"sigmaMin":"1.20"},
+	{"sigmaMax":"3.40"},
+	{"nbSigmaSteps":"4"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
+   "Output":"1.60-2.20-4.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
+	{"sigmaMax":"2.20"},
+	{"nbSigmaSteps":"4"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
+   "Output":"1.60-2.60-4.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
+	{"sigmaMax":"2.60"},
+	{"nbSigmaSteps":"4"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
+   "Output":"1.60-3.00-4.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
+	{"sigmaMax":"3.00"},
+	{"nbSigmaSteps":"4"},
+	{"alpha1":"0.50"},
+	{"alpha2":"2.00"}
+  	]
+  },
+  {
+   "Output":"1.60-3.40-4.00.nii",
+   "Arguments":[
+	{"sigmaMin":"1.60"},
 	{"sigmaMax":"3.40"},
 	{"nbSigmaSteps":"4"},
 	{"alpha1":"0.50"},
