@@ -71,7 +71,7 @@ class Antiga(Hessian):
               + superSt +
               """\t{\"alpha\":\""""+"{:.2f}".format(self.frangiParameters.alpha)+"""\"},\n"""
               """\t{\"beta\":\""""+"{:.2f}".format(self.frangiParameters.beta)+"""\"},\n"""
-              """\t{\"gamma\":\""""+"{:.2f}".format(self.frangiParameters.gamma)+"""\"}\n"""
+              """\t{\"gamma\":\""""+str(self.frangiParameters.gamma)+"""\"}\n"""
               """  \t]\n"""
               """  }"""
         )
