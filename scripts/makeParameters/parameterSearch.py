@@ -66,7 +66,7 @@ class FrangiParametersSearch:
             while(beta <= self.boundsPS.betaMax):
                 gamma = self.boundsPS.gammaMin 
                 while(gamma <= self.boundsPS.gammaMax):
-                    name = "{:.2f}".format(alpha)+"-"+"{:.2f}".format(beta)+".nii"
+                    name = "{:.2f}".format(alpha)+"-"+"{:.2f}".format(beta)+"-"+str(gamma)+".nii"
                 
                     paramSet = self.instance(name,self.sigmaMin,self.sigmaMax,self.sigmaSteps,FrangiParameters(alpha,beta,gamma) )
 

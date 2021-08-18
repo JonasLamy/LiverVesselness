@@ -65,28 +65,18 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         dataNumber = data.rpartition('a')[2]
                         #generator.bifurcationCoordinatesFile(filePath,"treeStructure_"+dataNumber+".mat")
 
-                        # generate bifurcations groundtruth in fork shapes (work in progress)
-                        #generator.bifurcationsYGT(filePath,"binaryVessels.nii","binaryBifurcationsMask.nii")
-
                         #generator.bifurcationsPositionsGT(filePath+"/"+"bifurcations_coordinates.txt",outputFilePath+"/"+"bifurcationPositions.nii",(128,128,128))
                         #generator.paddImages(filePath+"/"+file,outputFilePath+"/"+"data.nii",(128,128,128))
 
                         # groundTruth generation
                         #generator.groundTruth(outputFilePath+"/"+"data.nii",outputFilePath+"/"+"binaryVessels.nii",outputFilePath+"/"+"binaryVesselDilated.nii")
-                        
-                        # bifurcation mask Generation
 
                         # bifurcation mask Generation
                         #generator.groundTruthBifurcation(outputFilePath+"/"+"binaryVessels.nii",filePath+"/"+"bifurcations_coordinates.txt",outputFilePath+"/"+"binaryBifurcationsMask.nii")
                         
                         # patch generator # TODO make different scripts instead of bumping everything with comments
-                        generator.makeHardClassificationPatches(outputFilePath,"binaryVesselDilated.nii","binaryBifurcationsMask.nii","vesselsNeighbourhoodForClassif.nii")
-                        #generator.makeHardClassificationPatches(outputFilePath,"placeholder","binaryVesselDilated.nii","backgroundForClassif.nii")
-                        
-                        # background generation
-
-                        #generator.imageFromGaussianPDF(outputFilePath+"/"+"data.nii","toto.nii","MRI")
-                        
+                        #generator.makeHardClassificationPatches(outputFilePath,"binaryVesselDilated.nii","binaryBifurcationsMask.nii","vesselsNeighbourhoodForClassif.nii")
+                        #generator.makeHardClassificationPatches(outputFilePath,"placeholder","binaryVesselDilated.nii","backgroundForClassif.nii")                        
                         
                         # rescale vessels intensity to [Imin,Imax] and background intensity to background value
 
@@ -94,32 +84,33 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         # IRM background mean 108 ; IRM background std : 12 
                         # Manual samples on MRI slices.
 
-                        Imin = 140 # (value CT ) #110 (value IRM) # background value, we don't want vessels under the background value
-                        Imax = 146 # (value CT) #125 (value IRM)
+                        backgroundValue = 108
+
+                        vesselsPonderation = 0.3
+                        backgroundPonderation = 0.4
+                        Imin = 103 #140 (value CT ) #110 (value IRM) # background value, we don't want vessels under the background value
+                        Imax = 119 #146 (value CT) #125 (value IRM)
 
                         # adding non homogeneous illumination to images
                         # sigma = size of the artefacts, Imin = intensity min of the gaussian, Imax = intensity max of the gaussian
-                        #IgMin =  0#108 # (115-108 = 7)
-                        #IgMax =  7#115 # ( 108 + 16 = 119)
-                        #nbGaussian = 3
-                        #sigmaMin = 30
-                        #sigmaMax = 50
-
-                        backgroundValue = 100
-
+                        IgMin =  0 # 0 # (115-108 = 7)
+                        IgMax =  12 # 7 ( 108 + 16 = 119)
+                        nbGaussian = 3
+                        sigmaMin = 30
+                        sigmaMax = 50
 
                         # Note : CT liver mean=101, std=14
                         # Vessels CT mean=139, std=16
 
-                        IgMin =  0
-                        IgMax =  15
-                        nbGaussian = 3
-                        sigmaMin = 30
-                        sigmaMax = 50
-                        """
+                        #IgMin =  0
+                        #IgMax =  15
+                        #nbGaussian = 3
+                        #sigmaMin = 30
+                        #sigmaMax = 50
+                        
                         print("input dir:",  outputFilePath +"/data.nii")
-                        print("output dir:", outputFilePath + "/vesselsAndBackground_ct.nii")
-                        generator.vesselsAndBackground( filePath+"/data.nii", outputFilePath + "/vesselsAndBackground_ct.nii",Imin,Imax,backgroundValue,nbGaussian,sigmaMin,sigmaMax,IgMin,IgMax)
+                        print("output dir:", outputFilePath + "/vesselsAndBackground.nii")
+                        generator.vesselsAndBackground( filePath+"/data.nii", outputFilePath + "/vesselsAndBackground.nii",Imin,Imax,backgroundValue,nbGaussian,sigmaMin,sigmaMax,IgMin,IgMax,vesselsPonderation,backgroundPonderation)
 
                         nbGaussianArtefacts = 10
                         aSigmaMin = 3
@@ -127,17 +118,17 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         aImin = 0
                         aImax = 45
                         
-                        generator.vesselsIllumination(outputFilePath+"/vesselsAndBackground_ct.nii",
-                                                    outputFilePath+"/vesselsAndBackgroundIlluminated_ct.nii",
+                        generator.vesselsIllumination(outputFilePath+"/vesselsAndBackground.nii",
+                                                    outputFilePath+"/vesselsAndBackgroundIlluminated.nii",
                                                     nbGaussianArtefacts,
                                                     aSigmaMin,
                                                     aSigmaMax,
                                                     aImin,
                                                     aImax)
 
-                        generator.noisyImage(outputFilePath+"/vesselsAndBackgroundIlluminated_ct.nii",outputFilePath+"/poisson" ,"poisson")
-                        """
-                        #generator.noisyImage(outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",outputFilePath+"/"+"rician" ,"rician")
+                        #generator.noisyImage(outputFilePath+"/vesselsAndBackgroundIlluminated_ct.nii",outputFilePath+"/poisson" ,"poisson")
                         
+                        generator.noisyImage(outputFilePath+"/"+"vesselsAndBackgroundIlluminated.nii",outputFilePath+"/"+"rician" ,"rician")
                         
+                        exit()
                                               
