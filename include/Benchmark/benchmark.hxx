@@ -93,7 +93,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
         {
           sStream << "--mask " << m_maskEnhancementFileName << " ";
         }
-        std::cout<<sStream.str()<<std::endl;
         launchScriptFast(m_nbAlgorithms,sStream.str(),m_inputFileName,m_outputDir,outputName);
 
         if(m_removeResultsVolume)
@@ -243,7 +242,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
 
   MSE /= nbPixels * 2;
 
-  double snr = 10*std::log10(powerImage/powerFilter);
+  double snr = 10*std::log10(powerImage/powerFilter);//10*std::log10(powerFilter/powerImage); //
   double psnr = 10*std::log10( (maxInput*maxInput) / MSE);
   
   long TN_b=0;

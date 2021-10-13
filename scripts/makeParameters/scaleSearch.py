@@ -168,7 +168,7 @@ class RORPOScaleSearch:
 
                     ok = True
                     
-                    if( (l[-1]-l[0]) <= 20 or l[-1] > 200 ): # min gaussian resolution
+                    if( (l[-1]-l[0]) <= 20 or l[-1] > 200 ): 
                             ok = False
                     if(not ok):
                         #print("discarded")
