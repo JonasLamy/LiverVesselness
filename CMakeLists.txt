@@ -17,7 +17,7 @@ include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 find_package(ITK 5.2 REQUIRED)
 include(${ITK_USE_FILE})
 
-set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Release)
 
 #Executable Section:
 
@@ -95,6 +95,17 @@ target_include_directories(OOF PUBLIC
   )
 target_link_libraries(OOF ${ITK_LIBRARIES} )
 set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+# OOF Geometric mean -----------------
+
+add_executable(OOF_GM src/oof_GM.cxx)
+target_include_directories(OOF_GM PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/OOF>"
+  "$<INSTALL_INTERFACE:include/OOF>"
+  )
+target_link_libraries(OOF_GM ${ITK_LIBRARIES} )
+set_target_properties(OOF_GM PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # RORPO ----------------------------
 
@@ -180,6 +191,16 @@ target_include_directories(MakeIrcadBifurcationGT PUBLIC
   )
 target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
 set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
+
+# Shapes 
+
+add_executable(MakeVascuSynthSizeLabels src/makeVascuSizeLabels.cpp)
+target_include_directories(MakeVascuSynthSizeLabels PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeVascuSynthSizeLabels ${ITK_LIBRARIES})
+set_target_properties(MakeVascuSynthSizeLabels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
 
 # isoFromUnit local script
 

@@ -198,6 +198,8 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
         itk.imwrite(img,l[j])
         i+=1
         j+=1
+
+        
     # calling external program
     # missing outputs
     #commandLine = "./MakeIso " + patientPath + " " + liverPath + " " + venousPath + " " + portalPath + " "

@@ -26,7 +26,6 @@
 
 int main( int argc, char* argv[] )
 {
-  
   // parse command line using CLI ----------------------------------------------
   CLI::App app;
   app.description("Apply the ruiZhang algorithm");
@@ -50,15 +49,15 @@ int main( int argc, char* argv[] )
   app.add_option("--sigmaMax,-M", sigmaMax, "scale space sigma max");
   app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
   app.add_option("--tau,-a", tau, "Jerman's tau" ,true);
-  app.add_option("--nbSeeds,-s", nbClasses, "Sato's alpha2" ,true);
+  app.add_option("--nbSeeds,-s", nbClasses, "K-mean number of classes" ,true);
   app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
   app.add_option("--mask,-k",maskFile,"mask response by image")
   ->check(CLI::ExistingFile);
   
   app.get_formatter()->column_width(40);
   CLI11_PARSE(app, argc, argv);
+
   // END parse command line using CLI ----------------------------------------------
-  
   
   constexpr unsigned int Dimension = 3;
   using PixelType = double;
@@ -123,8 +122,6 @@ int main( int argc, char* argv[] )
   double max = stats->GetMaximum(); // 4/4
   
   EstimatorType::ParametersType initialMeans(nbClasses);
-  
-  
   
   std::cout<<"min seed: "<<min<<std::endl;
   
