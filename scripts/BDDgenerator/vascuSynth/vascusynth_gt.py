@@ -81,8 +81,6 @@ for dirName in listDir[1][ :int( len(listDir[1]) ) ]:
                         print( dilatedVesselsMaskMedium )
                         print( dilatedVesselsMaskSmall )
 
-                        
-
 
                         #shutil.copyfile(filePath +"/"+ "binaryVessels.nii", outputFilePath +"/"+ "binaryVessels.nii")
                         

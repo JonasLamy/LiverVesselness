@@ -136,9 +136,18 @@ def getAUCandROCPerVolume(dataFrame):
     for serieName,data in result:
         groupedData = data.groupby(["VolumeName"]) # group by parameter set
         for volumeName,dataFiltered in groupedData:
+
+            ratio_P_N = (dataFiltered['TP'].values[0]+dataFiltered['FN'].values[0]) / (dataFiltered['TN'].values[0]+dataFiltered['FP'].values[0]) 
             
             TruePositiveRate = dataFiltered['sensitivity'].values
-            FalsePositiveRate = 1 - dataFiltered['specificity'].values
+            FalsePositiveRate = (1 - dataFiltered['specificity'].values) / ratio_P_N
+
+            newFPR = np.geomspace( 0.0001, 0.5, len(TruePositiveRate) )
+            newTPR = np.interp(newFPR,FalsePositiveRate,TruePositiveRate)
+
+            #TruePositiveRate = newTPR
+            #FalsePositiveRate = newFPR / ratio_P_N
+            #FalsePositiveRate = np.divide( dataFiltered['FP'].values, dataFiltered["FP"].values + dataFiltered["TN"].values)
             auc = round(metrics.auc(FalsePositiveRate, TruePositiveRate),4)
 
             listBestROCPerVolume.append([serieName,volumeName,TruePositiveRate,FalsePositiveRate])
@@ -160,14 +169,6 @@ def getMeanPerParameterSets(dataFrame):
         filteredData = data[ ~data.isin([np.nan, np.inf, -np.inf]).any(1) ]
         mean_perPS = filteredData.mean().round(4)
         std_perPS  = filteredData.std().round(4)
-
-
-        
-        print("mean corrected")
-        print("MCC",mean_perPS["MCC"],std_perPS["MCC"])
-        print("SNR",mean_perPS["snr"],std_perPS["snr"])
-
-        print("--------")
         
         l1 = [volumeName,
               mean_perPS["Threshold"],std_perPS["Threshold"],
@@ -291,11 +292,14 @@ def formatLineToSummaryLine(aoi,metric,best_line,aucForBestParam,mean_sensitivit
     
     return l
 
-def formatLineToROCSummaryLine(aoi,metric,volumeName,TPR,FPR):
+def formatLineToROCSummaryLine(aoi,metric,volumeName,meanThreshold,mean_TPR_optim,mean_FPR_optim,TPR,FPR):
     l = []
     l.append(aoi)
     l.append(volumeName)
     l.append(metric)
+    l.append(meanThreshold)
+    l.append(mean_TPR_optim)
+    l.append(mean_FPR_optim)
     l.append(TPR)
     l.append(FPR)
     return l
@@ -325,9 +329,28 @@ def getInfoFromBestPS(dfBestMetric,dfInfoAOI,metric,best_aoi_PS):
 
         if(rocInfos.empty):
             continue
+        """
+        print(o_serie, best_aoi_PS)
+        print("TP \n",rocInfos['TP'].values)
+        print("FN \n",rocInfos['FN'].values)
+        print("TN \n",rocInfos['TN'].values)
+        print("FP \n",rocInfos['FP'].values)
+        print("---")
+        """
+        if( (rocInfos['TN'].values[0]+rocInfos['FP'].values[0]) == 0 ): # annoying case for bifurcation area, where FP and TN doesn't exists
+            ratio_P_N = 1
+        else:
+            ratio_P_N = (rocInfos['TP'].values[0]+rocInfos['FN'].values[0]) / (rocInfos['TN'].values[0]+rocInfos['FP'].values[0])
         
         TruePositiveRate = rocInfos['sensitivity'].values
-        FalsePositiveRate = 1 - rocInfos['specificity'].values
+        FalsePositiveRate = (1 - rocInfos['specificity'].values) / ratio_P_N
+
+        newFPR = np.geomspace( 0.0001, 0.5, len(FalsePositiveRate) )
+        newTPR = np.interp(newFPR,FalsePositiveRate,TruePositiveRate)
+
+        #TruePositiveRate = newTPR
+        #FalsePositiveRate = newFPR / ratio_P_N
+        #FalsePositiveRate = np.divide( np.divide(rocInfos['FP'].values,rocInfos['TP'].values), rocInfos["FP"].values + rocInfos["FN"].values)
         
         auc = round(metrics.auc(FalsePositiveRate, TruePositiveRate),4)
 
@@ -426,7 +449,8 @@ def plotROCCurve(rootDirectory,metric,dfROCSummary,benchName,optim_aoi,informati
     # use dfSummary
     lTPR = []
     lFPR = []
-        
+
+    
     d = dfROCSummary[ dfROCSummary["optimMetric"] == metric ]
 
     optim_PS = dfROCSummary[ (dfROCSummary["Region"] == optim_aoi) & (dfROCSummary["optimMetric"] == metric)]["ParameterSet"].item()

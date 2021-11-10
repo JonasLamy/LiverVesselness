@@ -16,7 +16,8 @@
 #include "itkBinaryThresholdImageFilter.h"
 #include "itkImageRegionConstIteratorWithIndex.h"
 #include "itkMinimumMaximumImageCalculator.h"
-
+#include "itkRescaleIntensityImageFilter.h"
+#include "itkImageFileWriter.h"
 
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
@@ -39,6 +40,7 @@ public:
     void SetPatientDirectory(const std::string &patient){m_patient = patient;}
     void SetEnhancementMaskName(const std::string &maskEnhancementFileName){m_maskEnhancementFileName = maskEnhancementFileName;}
     void SetNbThresholds(int nbThresholds){m_nbThresholds=nbThresholds;}
+    void SetRescaleFilters(bool rescaleFilter){m_rescaleFilters=rescaleFilter;}
     void run();
     
 private:
@@ -53,6 +55,7 @@ private:
     bool m_inputIsDicom;
     bool m_computeMetricsOnly;
     bool m_removeResultsVolume;
+    bool m_rescaleFilters;
     Json::Value m_rootNode;
 
     std::vector< std::ofstream*> m_resultsMaskList;
@@ -65,7 +68,7 @@ private:
     
     void computeMetrics(
                         const std::string & outputName,
-                        typename TImageType::Pointer inputImage,
+                        //typename TImageType::Pointer inputImage,
                         typename TImageType::Pointer outputImage,
                         typename TGroundTruthImageType::Pointer gt,
                         typename TMaskImageType::Pointer mask, 
