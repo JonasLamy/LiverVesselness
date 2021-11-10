@@ -111,6 +111,15 @@ set_target_properties(OOF_GM PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY
 
 add_subdirectory(RORPO)
 
+# rescale Filter
+
+add_executable(Rescale src/rescale.cpp)
+target_include_directories(Rescale PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+)
+target_link_libraries(Rescale ${ITK_LIBRARIES} )
+set_target_properties(Rescale PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
 # benchmark ------------------------
 
 find_package(jsoncpp REQUIRED)
@@ -127,6 +136,7 @@ target_include_directories(Benchmark PUBLIC
 target_link_libraries(Benchmark ${ITK_LIBRARIES} jsoncpp_static)
 
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
 
 # process ircad -------------------
 

@@ -83,29 +83,19 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::run()
             else{ sStream << "--" << m << " " << std::setprecision(3) << scaled_spacing << " "; } // usual scale Space
             
           }
-          else
-          { 
-            sStream << "--" << m << " " << arg[m].asString() << " ";
-          }
+          else{ sStream << "--" << m << " " << arg[m].asString() << " "; }
         }
 
-        if( !m_maskEnhancementFileName.empty() )
-        {
-          sStream << "--mask " << m_maskEnhancementFileName << " ";
-        }
+        if( !m_maskEnhancementFileName.empty() ){sStream << "--mask " << m_maskEnhancementFileName << " ";}
+
         launchScriptFast(m_nbAlgorithms,sStream.str(),m_inputFileName,m_outputDir,outputName);
 
-        if(m_removeResultsVolume)
-        {
-          remove( (m_outputDir+ "/" + outputName).c_str() );
-        }
+        if(m_removeResultsVolume){remove( (m_outputDir+ "/" + outputName).c_str() );}
 
-       m_nbAlgorithms++;
+        m_nbAlgorithms++;
       }
     }
-    else{
-      throw "Bad parameters file, arguments formatting";
-    }
+    else{throw "Bad parameters file, arguments formatting";}
     
   }
 }
@@ -139,8 +129,31 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFas
   }
 
   std::cout<<"opening result"<<std::endl;
-  auto outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
-  auto inputImage = vUtils::readImage<TImageType>(inputVolumePath,false);
+  typename TImageType::Pointer outputImage;
+  if(m_rescaleFilters)
+  {
+    std::cout<<"rescaling results"<<std::endl;
+    auto o_img = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
+    auto rescaleFilter = itk::RescaleIntensityImageFilter<TImageType,TImageType>::New();
+    rescaleFilter->SetInput(o_img);
+    rescaleFilter->SetOutputMinimum(0.0);
+    rescaleFilter->SetOutputMaximum(1.0);
+    rescaleFilter->Update();
+    outputImage = rescaleFilter->GetOutput();
+
+    // Warning, rescale might work only for NIFTI images !
+    auto writer = itk::ImageFileWriter< TImageType  >::New();
+    writer->SetInput( outputImage ); 
+    writer->SetFileName( m_outputDir+ "/" + outputName );
+    writer->Update();
+  }
+  else{
+    outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
+  }
+   
+  //auto inputImage = vUtils::readImage<TImageType>(inputVolumePath,false);
+
+   
   
   std::cout<<"comparing output to ground truth....\n";
   if( outputImage->GetLargestPossibleRegion().GetSize() != m_gt->GetLargestPossibleRegion().GetSize() )
@@ -151,7 +164,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFas
 
   for(int i=0; i<m_maskList.size();i++)
   {
-    computeMetrics(outputName,inputImage,outputImage,m_gt,m_maskList[i],m_resultsMaskList[i]);
+    computeMetrics(outputName,outputImage,m_gt,m_maskList[i],m_resultsMaskList[i]);
   }
 
   std::cout<<"done"<<std::endl;
@@ -159,14 +172,14 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFas
 
 template<class TImageType, class TGroundTruthImageType, class TMaskImageType>
 void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(const std::string & outputName,
-                                                                                typename TImageType::Pointer inputImage,
+                                                                                //typename TImageType::Pointer inputImage,
                                                                                 typename TImageType::Pointer outputImage,
                                                                                 typename TGroundTruthImageType::Pointer gt,
                                                                                 typename TMaskImageType::Pointer mask, 
                                                                                 std::ofstream * stream)
 {
   // compute the zeros, iterate over the region of interest
-  itk::ImageRegionConstIteratorWithIndex<TImageType> itInput(inputImage,inputImage->GetLargestPossibleRegion());
+  //itk::ImageRegionConstIteratorWithIndex<TImageType> itInput(inputImage,inputImage->GetLargestPossibleRegion());
   itk::ImageRegionConstIteratorWithIndex<TImageType> itFilter(outputImage,outputImage->GetLargestPossibleRegion());
   itk::ImageRegionConstIteratorWithIndex<TMaskImageType> itMask(mask,mask->GetLargestPossibleRegion());
   itk::ImageRegionConstIteratorWithIndex<TGroundTruthImageType> itGt(gt,gt->GetLargestPossibleRegion());
@@ -180,7 +193,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
   // positives values are stored
   typename std::list<typename TImageType::PixelType> foregroundValues;
   typename std::list<typename TImageType::IndexType> foregroundIndexes;
-
   typename std::list<typename TImageType::IndexType> backgroundIndexes;
 
   itFilter.GoToBegin();
@@ -190,7 +202,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
   double minInput = minMaxFilter->GetMinimum();
   double maxInput = minMaxFilter->GetMaximum();
 
-  std::cout<<"min : "<<minInput<<" max :"<<maxInput<<std::endl; 
+  //std::cout<<"min : "<<minInput<<" max :"<<maxInput<<std::endl; 
 
   double intensityRange = maxInput - minInput;
 
@@ -200,7 +212,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
   long double powerFilter = 0;
   long double MSE = 0;
   long long nbPixels = 0;
-  // Filter output and image range are not in the same domain.....
+  // Filter output and image range are not necessarily in the same domain.....
   double scaledFilterValue = 0;
   while( !itFilter.IsAtEnd() )
   {
@@ -227,7 +239,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
     
     
 
-    ++itInput;
+    //++itInput;
     ++itMask;
     ++itFilter;
     ++itGt;
@@ -242,7 +254,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
 
   MSE /= nbPixels * 2;
 
-  double snr = 10*std::log10(powerImage/powerFilter);//10*std::log10(powerFilter/powerImage); //
+  double snr = 10*std::log10(powerImage/powerFilter); //10*std::log10(powerFilter/powerImage); //
   double psnr = 10*std::log10( (maxInput*maxInput) / MSE);
   
   long TN_b=0;
