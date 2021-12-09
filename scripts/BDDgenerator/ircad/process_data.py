@@ -9,31 +9,10 @@ outputDir = sys.argv[1]
 IdentitySpacing = sys.argv[2]
 
 
-bornes = {
-    "3Dircadb1.1":((1,3),(4,6),(7,30)),
-    "3Dircadb1.2":((1,2),(3,5),(7,30)),
-    "3Dircadb1.3":((1,2),(3,7),(8,30)),
-    "3Dircadb1.4":((1,3),(4,6),(7,30)),
-    "3Dircadb1.5":((1,3),(4,6),(7,30)),
-    "3Dircadb1.6":((1,5),(6,7),(8,30)),
-    "3Dircadb1.7":((1,4),(5,7),(8,30)),
-    "3Dircadb1.8":((1,5),(6,8),(9,30)),
-    "3Dircadb1.9":((1,3),(4,7),(8,30)),
-    "3Dircadb1.10":((1,3),(4,6),(7,30)),
-    "3Dircadb1.11":((1,4),(5,7),(7,30)),
-    "3Dircadb1.12":((1,5),(6,8),(10,30)),
-    "3Dircadb1.13":((1,4),(5,8),(10,30)),
-    "3Dircadb1.14":((1,3),(4,8),(10,30)),
-    "3Dircadb1.15":((1,2),(3,6),(7,30)),
-    "3Dircadb1.16":((1,4),(5,7),(8,30)),
-    "3Dircadb1.17":((1,6),(7,9),(10,30)),
-    "3Dircadb1.18":((1,2),(3,5),(6,30)),
-    "3Dircadb1.19":((1,3),(4,7),(9,30)),
-    "3Dircadb1.20":((1,4),(5,8),(9,30)),
-}
-# Actual thresholds for the 3 vessels marks
 
+# Actual thresholds for the 3 vessels marks
 # [(0.1,3),(3.1,6),(6.1,100)]
+#/pbs/home/j/jlamy/LiverVesselnessDev/build/bin/
 
 for patientDirectory in glob.glob(outputDir +'/3D*'):
     print(patientDirectory.rsplit('/')[-1])
@@ -56,6 +35,7 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     bifurcationsOutPath = patientDirectory+"/bifurcationsMaskIso.nii"
     dilatedVesselsMask = patientDirectory + "/dilatedVesselsMaskIso.nii"
     dilatedVesselsMasked = patientDirectory + "/dilatedVesselsMasked.nii"
+    #dilatedVesselsMasked = patientDirectory + "/dilatedVesselsCutMasked.nii"
 
     vesselsSizeEstimation = patientDirectory + "/vesselsSize.nii"    
     vesselsSizeEstimationMask = patientDirectory + "/vesselsSizeMask.nii"
@@ -64,19 +44,81 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     vesselsMaskLarge = patientDirectory + "/vesselsMaskLarge.nii"     
     vesselsSkeleton = patientDirectory + "/vesselsSkeleton.nii"     
 
+    dilatedVesselsMaskSmall = patientDirectory + "/dilatedVesselsMaskSmall.nii"
+    dilatedVesselsMaskMedium = patientDirectory + "/dilatedVesselsMaskMedium.nii"
+    dilatedVesselsMaskLarge = patientDirectory + "/dilatedVesselsMaskLarge.nii"
+
     print(patientOutPath)
-    print(vesselsOutPath)
-    print(liverOutPath)
-    print(bifurcationsOutPath)
-    print(dilatedVesselsMask)
     print(vesselsCutOutPath)
+    print(maskedLiverAndVesselsOutPath)
     print(dilatedVesselsMasked)
+    print(bifurcationsOutPath)
+    print(dilatedVesselsMaskLarge)
+    print(dilatedVesselsMaskMedium)
+    print(dilatedVesselsMaskSmall)
 
-
-    #
-    # Make masks with protal trunk using liver mask + vessels mask
-    #
+    
+    # Make dilated masks for vessels of different sizes
     """
+    sv = itk.imread(vesselsMaskSmall)
+    mv = itk.imread(vesselsMaskMedium)
+    lv = itk.imread(vesselsMaskLarge)
+
+    PixelType = itk.UC
+    Dimension = 3
+    ImageType = itk.Image[PixelType, Dimension]
+
+    vessels = [lv,mv,sv]
+    radius = [9,7,5]
+    volumeNames = [dilatedVesselsMaskLarge,dilatedVesselsMaskMedium,dilatedVesselsMaskSmall]
+
+    dilatedVessels = []
+    dilatedVesselsNumpy = []
+    dilatedVesselsNumpyStatic = []
+    for v,r,vn in zip(vessels,radius,volumeNames):
+        print(r,vn) 
+        StructuringElementType = itk.FlatStructuringElement[Dimension]
+        structuringElement = StructuringElementType.Ball(r)
+
+        DilateFilterType = itk.BinaryDilateImageFilter[
+        ImageType, ImageType, StructuringElementType
+        ]
+        dilateFilter = DilateFilterType.New()
+        dilateFilter.SetInput(v)
+        dilateFilter.SetKernel(structuringElement)
+        dilateFilter.SetForegroundValue(255)
+        dilatedVessels.append(dilateFilter.GetOutput()) 
+        
+        dilatedVesselsNumpy.append( itk.array_view_from_image( dilateFilter.GetOutput() ).astype(np.uint8) )
+        dilatedVesselsNumpyStatic.append( itk.array_view_from_image( dilateFilter.GetOutput() ).astype(np.uint8) )
+
+    #dilatedVesselsNumpy[0][ (dilatedVesselsNumpyStatic[0] > 0) & (dilatedVesselsNumpyStatic[1] > 0) ] = 0
+    #dilatedVesselsNumpy[0][ (dilatedVesselsNumpyStatic[0] > 0) & (dilatedVesselsNumpyStatic[2] > 0) ] = 0
+
+    dilatedVesselsNumpy[1][ (dilatedVesselsNumpyStatic[1] > 0) & (dilatedVesselsNumpyStatic[0] > 0) ] = 0
+    #dilatedVesselsNumpy[1][ (dilatedVesselsNumpyStatic[1] > 0) & (dilatedVesselsNumpyStatic[2] > 0) ] = 0
+    
+    #dilatedVesselsNumpy[2][ (dilatedVesselsNumpyStatic[2] > 0) & (dilatedVesselsNumpyStatic[0] > 0) ] = 0
+    dilatedVesselsNumpy[2][ (dilatedVesselsNumpyStatic[2] > 0) & (dilatedVesselsNumpyStatic[1] > 0) ] = 0
+
+    for vn,v,nv in zip(volumeNames,dilatedVessels,dilatedVesselsNumpy):
+
+        img = itk.image_from_array( nv.astype(np.uint8) )
+        img.SetSpacing( v.GetSpacing() )
+        img.SetOrigin( v.GetOrigin() )
+
+        WriterType = itk.ImageFileWriter[ImageType]
+        writer = WriterType.New()
+        writer.SetFileName(vn)
+        writer.SetInput(img)
+
+        writer.Update()
+    
+    #
+    # Make masks with portal trunk using liver mask + vessels mask
+    #
+    
+    
     # vessels volume
     volume = itk.imread(vesselsIsoCutPath)
     npVolume = itk.array_from_image(volume).astype(np.uint8)
@@ -103,12 +145,13 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     img.SetSpacing( volume.GetSpacing() )
     img.SetOrigin( volume.GetOrigin() )
     itk.imwrite(img,maskedLiverAndVesselsOutPath)
-    """
+    
     #
     # Make vesselsNeighbourhood mask masked by liver mask (not the fused one but the liver one, important)
     #
 
     # dilated volumes
+    """
     """
     volume = itk.imread(dilatedVesselsMask)
     npVolume = itk.array_from_image(volume)
@@ -129,22 +172,21 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
     
     commandLine = "./estimObjectWidthFMM -i " + vesselsCutOutPath +" -o "+ vesselsSizeEstimation + " 0"
     os.system(commandLine)
-    """
+    
     # thresholding values
     
-    """
+    
     volume = itk.imread(vesselsSizeEstimation)
     spacing = volume.GetSpacing()
     npVolume = itk.array_from_image(volume)
 
     npVol = npVolume.astype(np.float32) / spacing[0]
 
-    bornSet = bornes[patientDirectory.rsplit('/')[-1]]
     i=1
     j=0
     print(bornSet)
     l = [vesselsMaskSmall,vesselsMaskMedium,vesselsMaskLarge]
-    for bMin,bMax in [(0.1,3),(3.1,6),(6.1,100)]:#bornSet:
+    for bMin,bMax in [(0.1,3),(3.1,6),(6.1,100)]:
         #npVolume[ (npVol >= bMin) & (npVol <= bMax) ] = i
 
         vol = np.zeros(npVolume.shape,dtype=np.uint8)
@@ -156,27 +198,27 @@ for patientDirectory in glob.glob(outputDir +'/3D*'):
         itk.imwrite(img,l[j])
         i+=1
         j+=1
+
+        
     # calling external program
     # missing outputs
     #commandLine = "./MakeIso " + patientPath + " " + liverPath + " " + venousPath + " " + portalPath + " "
     #commandLine += patientOutPath + " " + liverOutPath + " " + vesselsOutPath + " " + dilatedVesselsMask + " " + maskedLiverOutPath  + " " + IdentitySpacing
     """
+
+
     #print(commandLine)
     #os.system(commandLine)
-
+    
     commandLine = "./MakeIrcadBifurcationGT " + vesselsCutOutPath + " " + liverOutPath  + " " + bifurcationsOutPath + " " + vesselsSkeleton
     
     print(commandLine)
     os.system(commandLine)
-    exit()
-    
-    
-    """
-    bifurcationInPath = patientDirectory+"/bifurcationsMaskIso.nii"
-    liverInPath = patientDirectory+ "/liverMaskIso.nii"
-    bifurcationsOutPath = "/DATA/ircad_iso/"+patientDirectory.split("/")[3]+"/bifurcationsMaskIso.nii"
-    commandLine = "./isoFromUnit " + bifurcationInPath + " " + liverInPath + " " + bifurcationsOutPath
+    #bifurcationInPath = patientDirectory+"/bifurcationsMaskIso.nii"
+    #liverInPath = patientDirectory+ "/liverMaskIso.nii"
+    #bifurcationsOutPath = "/DATA/ircad_iso/"+patientDirectory.split("/")[3]+"/bifurcationsMaskIso.nii"
+    #commandLine = "./isoFromUnit " + bifurcationInPath + " " + liverInPath + " " + bifurcationsOutPath
     #print(commandLine)
-    os.system(commandLine)
-    """
+    #os.system(commandLine)
+    
     

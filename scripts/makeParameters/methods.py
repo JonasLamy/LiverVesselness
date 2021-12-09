@@ -71,7 +71,7 @@ class Antiga(Hessian):
               + superSt +
               """\t{\"alpha\":\""""+"{:.2f}".format(self.frangiParameters.alpha)+"""\"},\n"""
               """\t{\"beta\":\""""+"{:.2f}".format(self.frangiParameters.beta)+"""\"},\n"""
-              """\t{\"gamma\":\""""+"{:.2f}".format(self.frangiParameters.gamma)+"""\"}\n"""
+              """\t{\"gamma\":\""""+str(self.frangiParameters.gamma)+"""\"}\n"""
               """  \t]\n"""
               """  }"""
         )
@@ -170,7 +170,8 @@ class RORPO(Vesselness):
               """\t{\"nbScales\":\""""+str(self.nbScales)+"""\"},\n"""
               """\t{\"core\":\""""+str(self.RORPOParameters.core)+"""\"},\n"""
               + verbose + 
-              """\t{\"dilationSize\":\""""+str(self.RORPOParameters.dilationSize)+"""\"}\n"""
+              """\t{\"dilationSize\":\""""+str(self.RORPOParameters.dilationSize)+"""\"},\n"""
+              """\t{\"normalize\":\""""+str("")+"""\"},\n"""
               """  \t]\n"""
               """  }"""
             )

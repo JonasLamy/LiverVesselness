@@ -246,7 +246,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
     typename ImageType::Pointer input = ImageType::New();
     input->Graft(const_cast<ImageType *>(this->GetInput()));
 
-   using FFTType = itk::FFTWForwardFFTImageFilter<TInputImage>;
+   using FFTType = typename itk::FFTWForwardFFTImageFilter<TInputImage>;
     auto FFTfilter = FFTType::New();
     FFTfilter->SetInput(input);
 
@@ -440,5 +440,7 @@ void itk::OptimallyOrientedFlux<TInputImage,TOutputImage>::GenerateData()
         std::cout<<"done"<<std::endl;
     }
     
+    int a=0;
+    a +=1;
     this->GraftOutput(outputImage);
 }

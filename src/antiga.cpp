@@ -36,7 +36,7 @@ int main( int argc, char* argv[] )
   app.add_option("--nbSigmaSteps,-n",nbSigmaSteps,  "nb steps sigma");
   app.add_option("--alpha,-a", alpha, "Frangi's alpha" ,true);
   app.add_option("--beta,-b", beta, "Frangi's beta" ,true);
-  app.add_option("--gamma", beta, "max vessel intensity" ,true);
+  app.add_option("--gamma", gamma, "max vessel intensity" ,true);
   app.add_flag("--inputIsDicom,-d",isInputDicom ,"specify dicom input");
   app.add_option("--mask,-k",maskFile,"mask response by image")
   ->check(CLI::ExistingFile);

@@ -8,75 +8,17 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib
 import os
+from pathlib import Path
 
-# mean of best MCC,Dice and ROC per parameter sets
-def meanBestMetric(csv_df,df_best_MCC,df_best_Dice,df_roc_auc,saveRocCurves):
-    # Grouping by parameter sets
-    grouped_df_mcc = df_best_MCC.groupby(["VolumeName"])
-    grouped_df_dice = df_best_Dice.groupby(["VolumeName"])
-    grouped_roc_auc = df_roc_auc.groupby(["VolumeName"])
+def plotLabels(ax,myList):
+    for p in myList:
+        height = p.get_height() / 2
+        ax.annotate('{}'.format( round(p.get_height(),3) ),
+                    xy=(p.get_x() + p.get_width() / 2, height),
+                    xytext=(0, 3), # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
 
-    result_rows = []
-    for triple in zip(grouped_df_mcc,grouped_df_dice,grouped_roc_auc):
-        # key is the name of the filter used, rows are others
-        mcc_infos,dice_infos,roc_auc_infos = triple
-        key_mcc,rows_mcc = mcc_infos
-        key_dice,rows_dice = dice_infos
-        key_roc_auc,rows_roc_auc = roc_auc_infos
-
-        # Computing mean of best MCC per parameter sets
-        mcc_std = rows_mcc["MCC"].std()
-        mcc_mean = rows_mcc["MCC"].mean()
-        # Computing mean of best Dice per parameter sets
-        dice_std = rows_dice["Dice"].std()
-        dice_mean = rows_dice["Dice"].mean()
-
-        #computing mean of best RocDist per parameter sets
-        roc_auc_std = rows_roc_auc["AUC"].std()
-        roc_auc_mean = rows_roc_auc["AUC"].mean()
-
-
-        TPR = []
-        FPR = []
-        for sn in rows_mcc["SerieName"]:
-            print(sn,key_mcc)
-            li = csv_df[ (csv_df["SerieName"] == sn) & (csv_df["VolumeName"] == key_mcc) ]
-            TPR.append(li["sensitivity"])
-            FPR.append(1 - li["sensitivity"] )
-
-        result_rows.append([key_mcc,mcc_mean,mcc_std,dice_mean,dice_std,roc_auc_mean,roc_auc_std])            
-        
-    result_df = pd.DataFrame(result_rows,columns=["ParameterSet","MCC","MCC_std","Dice","Dice_std","ROC_auc","ROC_auc_std"])
-    
-    # roc curves
-    print("totot")
-    for k,infos in grouped_df_mcc:
-        print(k,infos["SerieName"])
-    print("_____")
-    return result_df
-
-def plotROCCurves(csv_df,SerieNames,VolumeName):
-    
-    print("totot",SerieName,VolumeName)
-
-    
-
-        
-    x_mean = []#np.mean( np.array(rocDataX),axis=0)
-    y_mean = []#np.mean( np.array(rocDataY),axis=0)
-        
-    # printing mean curve
-    plt.plot(x_mean,y_mean,color='green')
-    # printing mean radius
-    #plt.plot([0,mean_FPR],[1,mean_TPR],color='red')
-    # printing distance circle
-    #circle = plt.Circle((0,1),roc_auc_mean,color='red',alpha=0.2)
-    #fig.axes[0].add_artist(circle)
-    # isotropic plot property, otherwise aspect is deformed
-    plt.gca().set_aspect('equal', adjustable='box')
-    #plt.show()
-    #fig.savefig( inputImageDir+ "/" + "auc_"+ SerieName + "_"+ VolumeName  + ".pdf" )
-    
 ################
 #     Main
 ################
@@ -87,39 +29,190 @@ matplotlib.rcParams.update({
     'font.family':'serif',
     'text.usetex':True,
     'pgf.rcfonts':False,
-    'font.size':16
+    'font.size':16,
+    'figure.figsize':(20,10)
 })
 
 # start in the benchmark folder the csv/ folder should be one of the childen
-inputName = sys.argv[1]
-saveRocCurves = bool(sys.argv[2])
+dirPath = sys.argv[1]
 
-# adding imageDirectory
-benchName = inputName.split('csv/')[1].split('.csv')[0]
-inputImageDir = inputName.split("csv/",1)[0] +"csv/roc_curves_" + benchName 
-print(inputImageDir)
-if not os.path.exists(inputImageDir):
-    os.makedirs(inputImageDir)
-
-inputCSV = inputName
-inputBest_MCC = inputName.split(".csv")[0] + "_Best_MCC.csv"
-inputBest_Dice = inputName.split(".csv")[0] + "_Best_Dice.csv"
-inputBest_RocAUC = inputName.split(".csv")[0] + "_Best_RocAUC.csv"
+benchName = dirPath.split("/")[-1]
+dirPath = dirPath + "/csv"
+summaryDir =  dirPath + "/summary"
 
 
-csv_df = pd.read_csv(inputCSV)
-best_mcc_df = pd.read_csv(inputBest_MCC)
-best_dice_df = pd.read_csv(inputBest_Dice)
-roc_auc_df = pd.read_csv(inputBest_RocAUC)
+# Getting all file names necessary for computations, sorted by aoi, metric, type
+csvFiles = dict()
+for aoi in ["Organ","VN","Vlarge","Vmedium","Vsmall","Bifurcations"]:
+    aoiPath = dirPath + "/" + aoi
+    csvFiles[aoi] = dict()
+    for metric in ["MCC","Dice"]:
+        csvFiles[aoi][metric] = dict()
+        csvFiles[aoi][metric]["Mean"] = aoiPath + "/Best_mean/" + benchName + "_" + aoi + f"_BestMeanMetrics_{metric}.csv"
+        csvFiles[aoi][metric]["PerPS"] = aoiPath + "/Best_per_PS/" + benchName + "_" + aoi + f"_bestTperPS_{metric}.csv"
+        
+    csvFiles[aoi]["AUC"] = dict()
+    csvFiles[aoi]["AUC"]["Mean"] = aoiPath + "/Best_mean/" + benchName + "_" + aoi + "_PerPSmeanAUC.csv"
+    csvFiles[aoi]["AUC"]["PerPS"] = aoiPath + "/Best_per_PS/" + benchName + "_" + aoi + "_PerPSAUC.csv"
 
-print('----------- MCC ------------')
-print(best_mcc_df)
-print('----------- Dice ------------')
-print(best_dice_df)
-print('----------- ROC ------------')
-print(roc_auc_df)
-print("----------------------------")
+    
+Path(summaryDir).mkdir(parents=True, exist_ok=True)
+# For each organ used for optimization get all optimised values
+for aoi in ["Organ"]:
+    aoiPath = dirPath + "/" + aoi
+    resultsFile = aoiPath + "/" + benchName + "_" + aoi + "_Best_Metrics.csv"
+    
+    best_mean_AUC =  pd.read_csv( csvFiles[aoi]["AUC"]["Mean"] )
+    best_mean_Dice = pd.read_csv( csvFiles[aoi]["Dice"]["Mean"] )
+    best_mean_MCC =  pd.read_csv( csvFiles[aoi]["MCC"]["Mean"] )
+    #best_ROC = pd.read_csv(csvFileName_ROC)
 
-results = meanBestMetric(csv_df,best_mcc_df,best_dice_df,roc_auc_df,saveRocCurves)
-results.to_csv(inputName + "_analysed_results.csv",index=False,float_format='%2.3f')
+    # ------------------------------------
+    # Best mean AUC - best mean MCC - best mean DICE
+    # ------------------------------------
+    
+    cols_best = ["Region","VolumeName","Metric","mean_value","std_dev"]
+    data_best = list()
+
+    # For each metric, retrieve the highest value
+    
+    for metric,best_df in zip(["AUC","MCC","Dice"],[best_mean_AUC,best_mean_Dice,best_mean_MCC]):
+        metricMean = "mean_"+metric
+        metricStd = "std_"+metric
+
+        print(metricMean,metricStd)
+
+        index = np.argmax(best_df[metricMean].values)
+        maxValue = np.max(best_df[metricMean].values)
+        metric_line = best_df.iloc[index,:]
+        try:
+            data_best += [ [aoi,metric_line["VolumeName"],metric,metric_line[metricMean],metric_line[metricStd] ] ]
+        except:
+            data_best += [ [aoi,metric_line["VolumeName"],metric,metric_line[metricMean],"NULL"] ]
+
+            
+    df_best = pd.DataFrame(data_best,columns=cols_best)
+    saveName = summaryDir + "/" + benchName + "_" +aoi+"_best_summary.csv"
+    df_best.to_csv(saveName,index=False)
+    print("---- df_best ----")
+    print(df_best)
+
+    #-----------------------------------------
+    # Mean AUC - Mean MCC - Mean Dice for best Organ Metric
+    # ----------------------------------------
+    
+    # We optimize along several metrics :
+    for metric,best_df in zip(["MCC","Dice"],[best_mean_MCC,best_mean_Dice]):
+        data = list()
+        metricMean = "mean_"+metric
+        metricStd = "std_"+metric
+
+        best_metric_perPS = pd.read_csv(csvFiles[aoi][metric]["PerPS"])
+
+        
+        # retrieving best parameter name per metric 
+        optim_param = df_best[df_best["Metric"] == metric]["VolumeName"].item()
+        # for best parameter name, get the associated thresholds
+        optim_thresholds = best_metric_perPS[best_metric_perPS["VolumeName"] == optim_param ]["Threshold"]
+        optim_series = best_metric_perPS[best_metric_perPS["VolumeName"] == optim_param ]["SerieName"]
+
+
+        # getting the mean metrics for this optimal parameters
+        print(index,maxValue,optim_param)
+        auc_line = best_mean_AUC.loc[best_mean_AUC["VolumeName"] == optim_param]
+        mcc_line = best_mean_MCC.loc[best_mean_MCC["VolumeName"] == optim_param]
+        dice_line = best_mean_Dice.loc[best_mean_Dice["VolumeName"] == optim_param]
+
+        print(f"---{optim_param}--00000--")
+        print(auc_line)
+        print(mcc_line)
+        print(dice_line)
+        print("------")
+        
+        # Data for summary file, we also want other areas so we will use the data variable later
+        
+        cols = ["Region","VolumeName","optim_metric","Metric","mean_value","std_dev"]
+        data += [ [aoi, optim_param, metricMean,"AUC" ,auc_line["mean_AUC"].item() ,np.NAN                  ],
+                  [aoi, optim_param, metricMean,"MCC" ,mcc_line["mean_MCC"].item() ,mcc_line["std_MCC"].item() ],
+                  [aoi, optim_param, metricMean,"Dice",mcc_line["mean_Dice"].item(),mcc_line["std_Dice"].item()]]
+
+    
+        # For each other areas of interest, 
+        for aoi2 in ["VN","Vlarge","Vmedium","Vsmall","Bifurcations"]:
+            csvFileName  = dirPath + "/" + benchName + "_" + aoi2 + ".csv"
+            info = pd.read_csv(csvFileName)
+
+            print("optim volume")
+            print(optim_param)
+            print("optim thresholds")
+            print(optim_thresholds)
+            print("optim series")
+            print(optim_series)
+            
+            
+            info_mcc_from_best_organ_PS = pd.DataFrame(columns=info.columns)
+            for o_serie,o_threshold in zip(optim_series,optim_thresholds):
+                info_mcc_from_best_organ_PS  = info_mcc_from_best_organ_PS.append(  info.loc[ (info["SerieName"] == o_serie ) & (info["Threshold"] == o_threshold ) & (info["VolumeName"] == optim_param)  ] )
+
+            print(info_mcc_from_best_organ_PS)
+            print("------")
+
+            temp_MEAN = info_mcc_from_best_organ_PS.mean()
+            temp_STD = info_mcc_from_best_organ_PS.std()
+             
+            data += [ [aoi2, optim_param, metricMean,"AUC" ,i_auc_line["mean_AUC"].item() ,np.NAN                  ],
+                      [aoi2, optim_param, metricMean,"MCC" ,temp_Mean["MCC"].item() ,temp_STD["MCC"].item() ],
+                      [aoi2, optim_param, metricMean,"Dice" ,temp_Mean["Dice"].item(),temp_STD["Dice"].item()]]
+
+        print(data)
+        
+        """
+        df = pd.DataFrame(data,columns=cols)
+        saveName = summaryDir + "/" + benchName + "_" +aoi+"_"+ metricMean + "_summary.csv"
+        df.to_csv(saveName,index=False,na_rep='NULL')
+
+        lMCC = []
+        lAUC = []
+        lDice = []
+
+        lMCCstd = []
+        lAUCstd = []
+        lDicestd = []
+
+        labels = ["Organ","VN","Vlarge","Vmedium","Vsmall","Bifurcations"]
+        
+        for i in range(0,len(labels)*3,3):
+    
+            lAUC.append(data[i][4])
+            lMCC.append(data[i+1][4])
+            lDice.append(data[i+2][4])
+
+            lAUCstd.append(data[i][5])
+            lMCCstd.append(data[i+1][5])
+            lDicestd.append(data[i+2][5])
+
+        fig,ax = plt.subplots()
+        x = np.arange(len(labels))
+        width = 0.60
+        
+        rAUC  = ax.bar(x-width/3,lAUC,width/3,label="mean AUROC",yerr=lAUCstd)
+        rMCC  = ax.bar(x,lMCC,width/3,label="mean MCC",yerr=lMCCstd)
+        rDice = ax.bar(x+width/3,lDice, width/3,label="mean Dice",yerr=lDicestd)
+
+        plotLabels(ax,rAUC)
+        plotLabels(ax,rMCC)
+        plotLabels(ax,rDice)
+        
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        ax.set_ylabel('Metrics')
+        ax.set_title(benchName + " " + optim_param + " " + metricMean)
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels)
+        ax.legend()
+        
+        fig.tight_layout()
+        plt.gca().set_aspect('equal', adjustable='box')
+        fig.savefig( summaryDir + "/"+ benchName + "_"+aoi+"_"+ metricMean + "_summary.pdf",dpi=150)
+        plt.close()"""
+        
         

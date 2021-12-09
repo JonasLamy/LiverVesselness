@@ -14,12 +14,10 @@ endif()
 # CLI11
 include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
-
-
 find_package(ITK 5.2 REQUIRED)
 include(${ITK_USE_FILE})
 
-set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Release)
 
 #Executable Section:
 
@@ -32,6 +30,17 @@ target_include_directories(Antiga PUBLIC
   )
 target_link_libraries(Antiga ${ITK_LIBRARIES}  )
 set_target_properties(Antiga PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+# Frangi -----------------------
+
+add_executable(Frangi src/frangi.cpp)
+target_include_directories(Frangi PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Frangi>"
+  "$<INSTALL_INTERFACE:include/Frangi>"
+  )
+target_link_libraries(Frangi ${ITK_LIBRARIES}  )
+set_target_properties(Frangi PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # Jerman -----------------------
 
@@ -87,24 +96,47 @@ target_include_directories(OOF PUBLIC
 target_link_libraries(OOF ${ITK_LIBRARIES} )
 set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
+# OOF Geometric mean -----------------
+
+add_executable(OOF_GM src/oof_GM.cxx)
+target_include_directories(OOF_GM PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/OOF>"
+  "$<INSTALL_INTERFACE:include/OOF>"
+  )
+target_link_libraries(OOF_GM ${ITK_LIBRARIES} )
+set_target_properties(OOF_GM PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
 # RORPO ----------------------------
 
 add_subdirectory(RORPO)
 
+# rescale Filter
+
+add_executable(Rescale src/rescale.cpp)
+target_include_directories(Rescale PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+)
+target_link_libraries(Rescale ${ITK_LIBRARIES} )
+set_target_properties(Rescale PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
 # benchmark ------------------------
 
 find_package(jsoncpp REQUIRED)
-get_target_property(JSON_INC_PATH jsoncpp_lib INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(JSON_INC_PATH jsoncpp_static INTERFACE_INCLUDE_DIRECTORIES)
 include_directories(${JSON_INC_PATH})
 
 add_executable(Benchmark src/benchmark.cpp)
+
 target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
   "$<INSTALL_INTERFACE:include/Benchmark>"
   )
-target_link_libraries(Benchmark ${ITK_LIBRARIES}    jsoncpp_lib)
+target_link_libraries(Benchmark ${ITK_LIBRARIES} jsoncpp_static)
+
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
 
 # process ircad -------------------
 
@@ -169,6 +201,16 @@ target_include_directories(MakeIrcadBifurcationGT PUBLIC
   )
 target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
 set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
+
+# Shapes 
+
+add_executable(MakeVascuSynthSizeLabels src/makeVascuSizeLabels.cpp)
+target_include_directories(MakeVascuSynthSizeLabels PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeVascuSynthSizeLabels ${ITK_LIBRARIES})
+set_target_properties(MakeVascuSynthSizeLabels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
 
 # isoFromUnit local script
 

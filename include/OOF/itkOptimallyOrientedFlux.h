@@ -75,4 +75,4 @@ namespace itk{
     #include "itkOptimallyOrientedFlux.hxx"
 #endif
 
-#endif // itkHessianToEigenValues_h
+#endif // _itkOptimallyOrientedFlux_h

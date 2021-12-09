@@ -46,7 +46,8 @@ std::ofstream initCSVFile(std::string csvFileName)
   std::ofstream csvFileStream;
   csvFileStream.open(csvFileName, std::ios::out | std::ios::trunc); // if the file already exists, we discard content
   if( csvFileStream.is_open() )
-  {
+  { 
+    // Note : In case new metrics are used, this line should be edited to match the output of operator << of the bench_evaluation class
     csvFileStream <<"SerieName,VolumeName,Threshold,TP,TN,FP,FN,sensitivity,specificity,precision,accuracy,Dice,MCC,snr,psnr"<<std::endl;
   } 
   else{ 
@@ -101,8 +102,10 @@ int main(int argc, char** argv)
   const Json::Value benchMaskList = benchParameters["maskList"];
   std::string enhancementMask = benchParameters["enhancementMask"].asString();
   bool removeResultsVolumes = benchParameters["removeResultsVolumes"].asBool();
-  bool computeMetricsOnly = false; // feature comming soon
+  bool rescaleFilters = benchParameters["rescaleFilters"].asBool();
   int nbThresholds = benchParameters["nbThresholds"].asInt();
+  bool computeMetricsOnly = false; // feature comming soon
+  
 
   
   
@@ -115,6 +118,7 @@ int main(int argc, char** argv)
             <<"Algorithms set list : "<<algorithmSetsPath << std::endl
             <<"NbThresholds : "<<nbThresholds << std::endl
             <<"Remove volumes :"<< removeResultsVolumes << std::endl
+            <<"Rescale filters :"<< rescaleFilters << std::endl
             <<"Mask type :"<< benchMaskList << std::endl;
 
 
@@ -235,7 +239,7 @@ int main(int argc, char** argv)
 #else
       createDirectory( benchDir+"/"+patientName );
 #endif
-    
+
     // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
     // Mask is only useful for statistics during segmentation assessment, 
     // drawback : Computation is done on full image with ircad DB, advantages : No registration required, no heavy refactoring needed
@@ -264,6 +268,7 @@ int main(int argc, char** argv)
         b.SetRemoveResultsVolume(removeResultsVolumes);
         b.SetEnhancementMaskName(enhancementMaskPath);
         b.SetNbThresholds(nbThresholds);
+        b.SetRescaleFilters(rescaleFilters);
         
         b.run();
     }
@@ -291,6 +296,7 @@ int main(int argc, char** argv)
         b.SetRemoveResultsVolume(removeResultsVolumes);
         b.SetEnhancementMaskName(enhancementMaskPath);
         b.SetNbThresholds(nbThresholds);
+        b.SetRescaleFilters(rescaleFilters);
         b.run();
       }
       

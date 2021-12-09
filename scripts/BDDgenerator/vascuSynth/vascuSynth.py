@@ -154,36 +154,48 @@ class Generator:
         
         itk.imwrite( itk.GetImageFromArray(imgROI.astype(np.uint8)),imgROIPath)
             
-    def vesselsAndBackground(self,inputPath,outputPath,Imin,Imax,backgroundValue,nbGaussianBackground,sigmaMin,sigmaMax,IgMin,IgMax):
+    def vesselsAndBackground(self,inputPath,outputPath,Imin,Imax,backgroundValue,nbGaussianBackground,sigmaMin,sigmaMax,IgMin,IgMax,VponderationWeight,BGponderationWeight):
         
         img = itk.imread(inputPath)
-        dat = itk.GetArrayFromImage(img)
-        
-        # vessels intensity rescale
-        dat = dat / np.max(dat) * (Imax - Imin) + Imin 
-            # background intensity
-        d = np.zeros(dat.shape)
+        vessels = itk.GetArrayFromImage(img)
+        dat_save = itk.GetArrayFromImage(img)
+
+        # process
+        # get vessels
+        # ponderate using gaussians
+        # rescale so that lowest pixels is higher than background
+        # add bachground to it
+        # use ponderation on whole image
+        # add noise
+        # add artefacts
+     
+        # vessels intensity rescale 
+        # generating gaussian ponderation
+        vesselsPonderation = np.zeros(vessels.shape)
         for i in range(nbGaussianBackground):
-            d += self.makeGaussian(dat,sigmaMin,sigmaMax)
-        # background illumination magnetic artefacts
-        d = d/d.max() * (0.3) + 0.7
+            vesselsPonderation += self.makeGaussian(vesselsPonderation,sigmaMin,sigmaMax)
+        print("vessels ponderation min-max:",vesselsPonderation.min(),vesselsPonderation.max())
+        vesselsPonderation = vesselsPonderation/vesselsPonderation.max() * BGponderationWeight + (1-BGponderationWeight)
+        # applying ponderation
+        vessels[vessels>0] = vessels[vessels>0] * vesselsPonderation[vessels>0]
         
-        dat[dat>0] = dat[dat>0] * d[dat>0]
-        
+                # vessels are rescaled to desired intensity and weighted by gaussian intensity artefacts
+        vessels[vessels>0] = vessels[vessels>0] / np.max(vessels) * (Imax - Imin) + Imin
 
-
+        vessels[vessels==0] += backgroundValue
+        VesselsAndBackground = vessels
 
         # background intensity
-        d = np.zeros(dat.shape)
+        bgPonderation = np.zeros(VesselsAndBackground.shape)
         for i in range(nbGaussianBackground):
-            d += self.makeGaussian(dat,sigmaMin,sigmaMax)
+            bgPonderation += self.makeGaussian(bgPonderation,sigmaMin,sigmaMax)
         # background illumination magnetic artefacts
-        d = d/d.max() * (IgMax-IgMin) + IgMin
-        print(IgMin,IgMax,"toto")
-        print("d",np.max(d),np.min(d))
+        bgPonderation = bgPonderation/bgPonderation.max() * VponderationWeight + (1-VponderationWeight)
+        #bgPonderation = bgPonderation/bgPonderation.max() * (IgMax-IgMin) + IgMin
+        print(IgMin,IgMax,"background min-max")
+        print("bgPonderation",np.max(bgPonderation),np.min(bgPonderation))
 
-        # adding background + vessels (additive gaussian model)
-        dat = d+dat
+        dat = VesselsAndBackground * bgPonderation
 
         dat[dat < 0] = 0
         dat[dat > 255] = 255
