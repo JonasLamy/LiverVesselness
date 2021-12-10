@@ -1,8 +1,10 @@
 # LiverVesselness
 
-Repository of the work submitted to ICPR 2020:
+This is the Repository for the journal article in review : 
 
-**"Vesselness Filters: A Survey with Benchmarks Applied to Liver Imaging"**, Jonas Lamy, Odyssée Merveille, Bertrand Kerautret, Nicolas Passat, Antoine Vacavant, ICPR, 2020
+**"A Benchmark Framework for Multi-Region Analysis of Vesselness Filters"** Jonas Lamy, Odyssee Merveille, Bertrand Kerautret, Nicolas Passat
+
+For results on the work submitted to ICPR 2020, please see the ICPR_2020 branch.
 
 The implementations of the seven vessel filtering methods are available and the results presented on the paper can be reproduced.
 An installation-free online demonstration is also available:
@@ -273,15 +275,31 @@ Each ROI folder contains a number of results files:
 
 ```
 ROI
-	|_ Best_mean_metric
-	|	|_ XXX_Best_CF_M.csv : mean metrics values for the maximized metric M per parameter set
-	|	|_ XXX_Best_mean_M.csv : mean metrics values for the maximized metric M per parameter set
-	|_ Best_metric_per_volume
-	|	|_ XXX_Best_M_per_volume.csv : Metrics values for the threshold maximizing the metric M for all pairs {volume, parameter set}
- 	|	|_ XXX_Best_M_per_volume_summary.csv : Metrics values for the threshold maximizing the metric M the best pair {volume, parameter set}
-	|_ mean_metric
-		|_ XXX_mean_M.csv :
-		|_ XXX_mean_CF_M.csv :
+|_ Best_mean_metric
+|	|_ XXX_Best_CF_M.csv : mean metrics values for the maximized metric M per parameter set
+|	|_ XXX_Best_mean_M.csv : mean metrics values for the maximized metric M per parameter set
+|_ Best_metric_per_volume
+|	|_ XXX_Best_M_per_volume.csv : Metrics values for the threshold maximizing the metric M for all pairs {volume, parameter set}
+|	|_ XXX_Best_M_per_volume_summary.csv : Metrics values for the threshold maximizing the metric M the best pair {volume, parameter set}
+|_ mean_metric
+	|_ XXX_mean_M.csv : mean metrics values in ROI for the parameter set chosen by the optimization of metric M in the Organ ROI
+	|_ XXX_mean_CF_M.csv : mean metrics values in ROI for the parameter set chosen by the optimization of metric M in the Organ ROI
 ```
 
-The pickle folder contains the intermediary matrices
+#### agregrateResults.py
+
+This scripts agregate the results of each filters into pdf and csv files.
+
+With the following hierarchy :
+```
+Benchmark
+|_ ircad_PS_Frangi
+|_ ircad_PS_Sato
+|_ ircad_PS_Jerman
+```
+usage: 
+```
+python3 agregateResults.py Benchmark
+```
+
+The command will create several files with a summary of the best parameters and associated metrics of each filters present in the folder.
