@@ -17,6 +17,8 @@ Original data are available on the authors websites :
 Ircad Dataset : https://www.ircad.fr/research/3d-ircadb-01/
 Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
 
+Scripts to transform data are available in the scripts/BDDgenerator folder
+
 ## Dependancies
 - Benchmark (C/C++)
 
@@ -32,6 +34,7 @@ Boost Math : [Github page](https://github.com/boostorg/math). This is only requi
 - scripts ( python 3.5+)
 Pandas : (https://pandas.pydata.org/)
 Numpy : (https://numpy.org/)
+Sklearn : (https://sklearn.org/)
 Matplotlib : (https://matplotlib.org/)
 
 ## Build
@@ -66,7 +69,7 @@ The metrics are analysed using python scripts (ROC curves, mean metrics, etc.).
 
 ### Features
 - Seven vesselness filters available (Sato, Frangi, Meijering, OOF(|lambda_1 + lambda_2|), Jerman, Zhang, RORPO)
-- The benchmark is design to easily add extra vesselness filters.
+- The benchmark is designed to easily add extra vesselness filters.
 - Supports all medical formats read by ITK (.mhd,.nii, etc.) as well as DICOM series
 - Scripts to automate the vesselness filters parameters generation are provided.
 - Computed metrics : confusions matrix (TP,FP,TN,FN), sensitivity, specificity, precision, accuracy, Dice, MCC
@@ -95,6 +98,7 @@ The settings file options are the following :
 - **enhancementMask** : The name of the mask used as a region of interest for the enhancement filters. This parameter can be set with an empty string if no enhancement mask is used.*
 - **nbThresholds** : Number of thresholds to compute the different metrics. Each metric compare a binary volume to the ground truth, the binary volume is obtained by thresholding the vesselness result. As the results are normalized between 0 and 1, nbThreshold = 5 would yield 5 thresholds: 0, 0.25, 0.5, 0.75, 1. This parameter also controls the amount of points of the ROC curves
 - **removeResultsVolumes** : true/false. If true, the output volumes are discarded after the metrics computation. This option is useful to save disk space. 
+- **normalize** : true/false. If true, the output of the filter is normalized to 0, 1. This option might be usefull to compare metrics such as SNR/PSNR on the same level.
 
 Example of settings file:
 ```
@@ -107,7 +111,8 @@ Example of settings file:
 	"maskList":["Organ","Vessels","Bifurcations],
 	"enhancementMask":"Organ",
 	"nbThresholds":200,
-	"removeResultsVolumes":false
+	"removeResultsVolumes":false,
+	"normalize":true
     }
 }
 ```
@@ -248,34 +253,35 @@ Any extra vesselness filter can be included by following these two steps:
 The minimal call of a new filter should be : ./YourVesselness --input inputVolume.nii --output outputVolume.nii
 
 ### Analyse scripts
+These scripts compute, per parameter set, the mean of the binary filter output that maximize the MCC over the "Organ" ROI.
 
-Update : In the paper the global best mean MCC is computed over all segmentation thresholds. The scripts are now computing the mean of the best MCC of each volumes.
+The csv metric files can be processed using two files AnalyseBenchmark.py and aggregateResults.py
 
-The scripts provided are used to find the mean of the best MCC, Dice and ROC dist as well as computing the ROC curves once the metrics are computed. 
+#### AnalyseBenchmark.py
 
-- **parsing csv**
-This script ouputs the best set of parameters and threshold according to each metric (MCC, Dice or Roc Dist) for each result (volume, parameter set and filter) of the benchmark. The outputs are distributed into 3 CSV files, one per metric.
+This script expects output benchmark folders with names in the form {database name}_{optimization step}_{filter name} for example 'ircad_PS_Frangi'.
 
-Usage
+usage:
 ```
-python3 parseCSV.py pathToCSV/myResultCSVFile.csv
-
+python3 analyseBenchmark.py ircad_PS_Frangi
 ```
-- **analysing results** (means per parameter sets)
 
-This script computes the mean and standard deviation of the best MCC, DICE and ROC dist for each parameters sets and summarize it in a csv file.
+This scripts create one folder per ROI mask, a folder named Summary and a Pickle Folder.
 
-Moreover, you can choose to save the ROC curves for visualization.
-
-```
-python3 parseCSV.py <path to csv> <save plot ROC>
-python3 parseCSV.py pathToCSV/myResultCSVFile.csv 1 
-
-output example :
-ParameterSet ,MCC   ,MCC_std ,Dice,  Dice_std ,ROC_dist ,ROC_dist_std
-antiga1.nii  ,0.347 ,0.021   ,0.356 ,0.021    ,0.609    ,0.145
-antiga2.nii  ,0.418 ,0.030   ,0.435 ,0.024    ,0.345    ,0.161
-antiga3.nii  ,0.340 ,0.028   ,0.352 ,0.024    ,0.338    ,0.106
-meijering.nii,0.000 ,0.000   ,0.064 ,0.025    ,1.000    ,0.000
+The summary folder contains the MCC, Dice, SNR, PSNR for all ROI of the best parameter set.
+Each ROI folder contains a number of results files: 
 
 ```
+ROI
+	|_ Best_mean_metric
+	|	|_ XXX_Best_CF_M.csv : mean metrics values for the maximized metric M per parameter set
+	|	|_ XXX_Best_mean_M.csv : mean metrics values for the maximized metric M per parameter set
+	|_ Best_metric_per_volume
+	|	|_ XXX_Best_M_per_volume.csv : Metrics values for the threshold maximizing the metric M for all pairs {volume, parameter set}
+ 	|	|_ XXX_Best_M_per_volume_summary.csv : Metrics values for the threshold maximizing the metric M the best pair {volume, parameter set}
+	|_ mean_metric
+		|_ XXX_mean_M.csv :
+		|_ XXX_mean_CF_M.csv :
+```
+
+The pickle folder contains the intermediary matrices

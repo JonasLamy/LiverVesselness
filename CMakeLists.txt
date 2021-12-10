@@ -140,23 +140,23 @@ set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 
 # process ircad -------------------
 
-#add_executable(CropImages src/crop_ircad_data.cpp)
-#target_include_directories(CropImages PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(CropImages ${ITK_LIBRARIES})
-#set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+add_executable(CropImages src/crop_ircad_data.cpp)
+target_include_directories(CropImages PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(CropImages ${ITK_LIBRARIES})
+set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 # utilities --------------------------------
 
-#add_executable(ChangeLabelDicom src/changeLabelDicom.cpp)
-#target_include_directories(ChangeLabelDicom PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
-#set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+add_executable(ChangeLabelDicom src/changeLabelDicom.cpp)
+target_include_directories(ChangeLabelDicom PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
+set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 add_executable(MakeIso src/makeIso.cpp)
 target_include_directories(MakeIso PUBLIC
@@ -166,21 +166,21 @@ target_include_directories(MakeIso PUBLIC
 target_link_libraries(MakeIso ${ITK_LIBRARIES})
 set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
-#add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
-#target_include_directories(MakeVascuSynthGT PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
-#set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
+target_include_directories(MakeVascuSynthGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
+set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
-#add_executable(LabelVessels src/labelVessels.cpp)
-#target_include_directories(LabelVessels PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(LabelVessels ${ITK_LIBRARIES})
-#set_target_properties(LabelVessels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator" )
+add_executable(LabelVessels src/labelVessels.cpp)
+target_include_directories(LabelVessels PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(LabelVessels ${ITK_LIBRARIES})
+set_target_properties(LabelVessels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator" )
 
 # Bifurcations VascuSynth
 
