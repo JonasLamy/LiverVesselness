@@ -1,0 +1,12 @@
+{
+     "Settings":{
+     "name":"ircad_PS_Jerman",
+     "path":"resultsExtendedBenchmark_mean",
+     "inputVolumesList":"FileLists/extendedBenchmark_ircad_iso.txt",
+     "algorithmSets":"FiltersParamSets/Jerman/JermanPS.json",
+     "maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+     "enhancementMask":"Organ",
+     "nbThresholds":200,
+     "rescaleFilters":false
+     }
+}

@@ -1,0 +1,13 @@
+{
+     "Settings":{
+     "name":"vascu_2_PS_Sato",
+     "path":"resultsExtendedBenchmark_mean",
+     "inputVolumesList":"FileLists/vascu_2_0_extendedBenchmark.txt",
+     "algorithmSets":"FiltersParamSets/Sato/SatoPS.json",
+     "maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+     "enhancementMask":"Organ",
+     "nbThresholds":200,
+     "removeResultsVolumes":true,
+     "rescaleFilters":false
+     }
+}

@@ -1,0 +1,13 @@
+{
+    "Settings":{
+	"name":"vascu_8_SS_Meijering",
+	"path":"resultsExtendedBenchmark",
+	"inputVolumesList":"FileLists/vascu_8_0_extendedBenchmark.txt",
+	"algorithmSets":"FiltersParamSets/vascu_SS_Meijering.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"rescaleFilters":false
+    }
+}

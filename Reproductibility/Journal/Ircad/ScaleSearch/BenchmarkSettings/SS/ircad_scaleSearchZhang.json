@@ -1,0 +1,12 @@
+{
+    "Settings":{
+	"name":"ircad_SS_Zhang",
+	"path":"resultsExtendedBenchmark",
+	"inputVolumesList":"FileLists/extendedBenchmark_ircad_iso.txt",
+	"algorithmSets":"FiltersParamSets/ZhangScaleSearch.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"rescaleFilters":false
+    }
+}

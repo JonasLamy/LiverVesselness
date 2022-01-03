@@ -1,0 +1,13 @@
+{
+     "Settings":{
+     "name":"vascu_8_PS_OOF_GM",
+     "path":"resultsExtendedBenchmark_mean",
+     "inputVolumesList":"FileLists/vascu_8_0_extendedBenchmark.txt",
+     "algorithmSets":"FiltersParamSets/OOF_GM/OOFGMPS.json",
+     "maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+     "enhancementMask":"Organ",
+     "nbThresholds":200,
+     "removeResultsVolumes":true,
+     "rescaleFilters":false
+     }
+}

@@ -1,0 +1,13 @@
+{
+    "Settings":{
+	"name":"vascu_4_SS_Zhang",
+	"path":"resultsExtendedBenchmark",
+	"inputVolumesList":"FileLists/vascu_4_0_extendedBenchmark.txt",
+	"algorithmSets":"FiltersParamSets/vascu_SS_Zhang.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"rescaleFilters":false
+    }
+}

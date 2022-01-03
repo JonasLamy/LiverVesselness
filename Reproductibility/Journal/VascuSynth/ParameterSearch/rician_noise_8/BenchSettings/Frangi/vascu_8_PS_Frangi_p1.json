@@ -1,0 +1,13 @@
+{
+     "Settings":{
+     "name":"vascu_8_PS_Frangi_p1",
+     "path":"resultsExtendedBenchmark_mean",
+     "inputVolumesList":"FileLists/vascu_8_0_extendedBenchmark_p1.txt",
+     "algorithmSets":"FiltersParamSets/Frangi/FrangiPS.json",
+     "maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+     "enhancementMask":"Organ",
+     "nbThresholds":200,
+     "removeResultsVolumes":true,
+     "rescaleFilters":false
+     }
+}

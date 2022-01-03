@@ -40,7 +40,7 @@ Sklearn : (https://sklearn.org/)
 Matplotlib : (https://matplotlib.org/)
 
 ## Build
-Livervesselness should be build with cmake and generate:
+Livervesselness should be built with cmake and generate:
 - An executable for each vesselness filter implemented (see [Vesselness filters](#vesselness-filters) for more details)
 - A benchmark executable to easily compare different vesselness filters on the same dataset with different parameters (see [Benchmark](#benchmark) for more details)
 
@@ -100,7 +100,7 @@ The settings file options are the following :
 - **enhancementMask** : The name of the mask used as a region of interest for the enhancement filters. This parameter can be set with an empty string if no enhancement mask is used.*
 - **nbThresholds** : Number of thresholds to compute the different metrics. Each metric compare a binary volume to the ground truth, the binary volume is obtained by thresholding the vesselness result. As the results are normalized between 0 and 1, nbThreshold = 5 would yield 5 thresholds: 0, 0.25, 0.5, 0.75, 1. This parameter also controls the amount of points of the ROC curves
 - **removeResultsVolumes** : true/false. If true, the output volumes are discarded after the metrics computation. This option is useful to save disk space. 
-- **normalize** : true/false. If true, the output of the filter is normalized to 0, 1. This option might be usefull to compare metrics such as SNR/PSNR on the same level.
+- **rescaleFilters** : true/false. If true, the output of the filter is rescaled to 0, 1. This option might be usefull to compare metrics such as SNR/PSNR on the same level.
 
 Example of settings file:
 ```
@@ -114,7 +114,7 @@ Example of settings file:
 	"enhancementMask":"Organ",
 	"nbThresholds":200,
 	"removeResultsVolumes":false,
-	"normalize":true
+	"rescaleFilters":true /* Note: this option is only available with the journal version of the benchmark */
     }
 }
 ```
