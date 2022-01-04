@@ -176,8 +176,8 @@ namespace itk
                 if( std::isinf(eigenValues[2]) || fabs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
 
                 // modified eigenvalues for meijerin's neuriteness
-                modifiedEigenValues[0] = eigenValues[0] + eigenValues[1] + eigenValues[2];
-                modifiedEigenValues[1] = eigenValues[1] + eigenValues[0] + eigenValues[2];
+                modifiedEigenValues[0] = m_Alpha * eigenValues[0] + eigenValues[1] + eigenValues[2];
+                modifiedEigenValues[1] = m_Alpha * eigenValues[1] + eigenValues[0] + eigenValues[2];
                 modifiedEigenValues[2] = m_Alpha * eigenValues[2] + eigenValues[0] + eigenValues[1];
 
                 // sorting by magnitude before giving it to mesure filter
@@ -246,8 +246,8 @@ namespace itk
                 if( std::isinf(eigenValues[2]) || fabs(eigenValues[2]) < 1e-4){ eigenValues[2] = 0; }
 
                 // modified eigenvalues for meijerin's neuriteness
-                modifiedEigenValues[0] = eigenValues[0] + eigenValues[1] + eigenValues[2];
-                modifiedEigenValues[1] = eigenValues[1] + eigenValues[0] + eigenValues[2];
+                modifiedEigenValues[0] = m_Alpha * eigenValues[0] + eigenValues[1] + eigenValues[2];
+                modifiedEigenValues[1] = m_Alpha * eigenValues[1] + eigenValues[0] + eigenValues[2];
                 modifiedEigenValues[2] = m_Alpha * eigenValues[2] + eigenValues[0] + eigenValues[1];
 
                 // sorting values lambda1 < lambda2 < lambda3

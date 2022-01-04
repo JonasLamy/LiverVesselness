@@ -158,7 +158,7 @@ namespace itk{
             if( lambda3 > 0 )
                 neuritenessMesure = 0;
             else
-                neuritenessMesure = lambda1 /  minLambda;
+                neuritenessMesure = lambda3 /  minLambda;
             
             oit.Set( neuritenessMesure);   
 
