@@ -6,5 +6,8 @@ MethodsRecap/
 .vol
 .tar.xz
 *~
+<<<<<<< HEAD
 .pyc
 .zip
+=======
+>>>>>>> c3eb276534e58677589fc392169d7d1b99e61748
