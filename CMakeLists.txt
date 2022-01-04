@@ -157,11 +157,9 @@ target_include_directories(ChangeLabelDicom PUBLIC
   )
 target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
 set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
-
-# Shapes 
-
-add_executable(MakeVascuSynthSizeLabels src/makeVascuSizeLabels.cpp)
-target_include_directories(MakeVascuSynthSizeLabels PUBLIC
+  
+add_executable(MakeIso src/makeIso.cpp)
+target_include_directories(MakeIso PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
   )
