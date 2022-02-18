@@ -72,7 +72,7 @@ int main( int argc, char* argv[] )
   multiScaleEnhancementFilter->SetSigmaMaximum( sigmaMax );
   multiScaleEnhancementFilter->SetNumberOfSigmaSteps( nbSigmaSteps );
   
-  // end Antiga vesselness operator
+  // end vesselness operator
   using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, ImageType >;
   RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
   

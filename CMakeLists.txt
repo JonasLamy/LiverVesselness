@@ -166,6 +166,16 @@ target_include_directories(MakeIso PUBLIC
 target_link_libraries(MakeIso ${ITK_LIBRARIES})
 set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
+  
+add_executable(MakeIsoBullit src/makeIsoBullit.cpp)
+target_include_directories(MakeIsoBullit PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeIsoBullit ${ITK_LIBRARIES})
+set_target_properties(MakeIsoBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
+
+
 add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
 target_include_directories(MakeVascuSynthGT PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -201,6 +211,17 @@ target_include_directories(MakeIrcadBifurcationGT PUBLIC
   )
 target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
 set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
+
+# Bifurcation Bullit 
+
+add_executable(MakeBullitBifurcationGT src/makeBullitBifurcations.cpp)
+target_include_directories(MakeBullitBifurcationGT PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(MakeBullitBifurcationGT ${ITK_LIBRARIES})
+set_target_properties(MakeBullitBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bulit" )
+
 
 # Shapes 
 

@@ -37,10 +37,6 @@ using VoxelLabelPair = std::pair<int,ImageType::IndexType>;
 // bad practice but tired
 static int labelNumber=6;
 
-// We need two things
-// A function going through a branch
-
-
 template<class TIndex>
 struct Branch{
   int typeBif;
