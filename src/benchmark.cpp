@@ -104,7 +104,7 @@ int main(int argc, char** argv)
   bool removeResultsVolumes = benchParameters["removeResultsVolumes"].asBool();
   bool rescaleFilters = benchParameters["rescaleFilters"].asBool();
   int nbThresholds = benchParameters["nbThresholds"].asInt();
-  bool computeMetricsOnly = false; // feature comming soon
+  bool computeMetricsOnly = benchParameters["computeMetricsOnly"].asBool();
   
 
   

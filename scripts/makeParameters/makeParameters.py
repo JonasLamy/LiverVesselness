@@ -13,19 +13,19 @@ if not os.path.exists(dirPath):
     exit()
 
 bounds = BoundsSS()
-bounds.minBoundStart = 0.4
-bounds.minBoundEnd   = 1.8
+bounds.minBoundStart = 0.2
+bounds.minBoundEnd   = 1.6
 bounds.minBoundStep  = 0.4
 
-bounds.maxBoundStart = 1.4
-bounds.maxBoundEnd   = 3.4
+bounds.maxBoundStart = 1.2
+bounds.maxBoundEnd   = 3.2
 bounds.maxBoundStep  = 0.4
 
 bounds.nbScalesMin = 3
 bounds.nbScalesMax = 4
 bounds.nbScalesStep = 1
 
-"""
+
 print("Scale search - Number of parameters sets")
 print("--------------------")
 # Frangi SS
@@ -63,15 +63,15 @@ zhangParams = ZhangParameters(tau=0.5)
 zhangSS = HessianScaleSearch(bounds,"Zhang",zhangParams)
 print(zhangSS, file=open(dirPath+"ZhangScaleSearchTest.json","w"))
 print("Zhang scale search:",zhangSS.nbParameters)
-"""
+
 rorpoBoundsSS = RORPOBoundsSS()
-rorpoBoundsSS.minScaleStart = 30
-rorpoBoundsSS.minScaleEnd = 180
-rorpoBoundsSS.minScaleStep = 20
+rorpoBoundsSS.minScaleStart = 10
+rorpoBoundsSS.minScaleEnd = 90
+rorpoBoundsSS.minScaleStep = 10
 
 rorpoBoundsSS.factorStart = 1.1
-rorpoBoundsSS.factorEnd = 1.6
-rorpoBoundsSS.factorStep = 0.2
+rorpoBoundsSS.factorEnd = 1.5
+rorpoBoundsSS.factorStep = 0.1
 
 rorpoBoundsSS.nbScalesStart = 2
 rorpoBoundsSS.nbScalesEnd = 4
@@ -81,6 +81,7 @@ rorpoParams = RORPOParameters(core=7,dilationSize=0,verbose=True)
 rorpoSS = RORPOScaleSearch("RORPO_multiscale_usage",rorpoBoundsSS,rorpoParams)
 print(rorpoSS,file=open(dirPath+"RORPOScaleSearchTest.json","w"))
 print("RORPO scale search:",rorpoSS.nbParameters)
+
 """
 # Frangi PS
 frangiBoundsPS = FrangiBounds()

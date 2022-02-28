@@ -192,6 +192,16 @@ target_include_directories(LabelVessels PUBLIC
 target_link_libraries(LabelVessels ${ITK_LIBRARIES})
 set_target_properties(LabelVessels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator" )
 
+add_executable(LabelVesselsBullit src/labelVesselsBullit.cpp)
+target_include_directories(LabelVesselsBullit PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(LabelVesselsBullit ${ITK_LIBRARIES})
+set_target_properties(LabelVesselsBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
+
+
+
 # Bifurcations VascuSynth
 
 add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
@@ -220,7 +230,7 @@ target_include_directories(MakeBullitBifurcationGT PUBLIC
   "$<INSTALL_INTERFACE:include>"
   )
 target_link_libraries(MakeBullitBifurcationGT ${ITK_LIBRARIES})
-set_target_properties(MakeBullitBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bulit" )
+set_target_properties(MakeBullitBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
 
 
 # Shapes 
