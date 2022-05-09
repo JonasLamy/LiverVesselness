@@ -253,6 +253,7 @@ Any extra vesselness filter can be included by following these two steps:
 1) Put the new vesselness filter executable in the same directory as the Benchmark executable so that it can be called using bash command ./YourVesselnessName.
 2) The new vesselness filter executable should be called using --option. Also --input and --ouput are compulsory parameters.
 The minimal call of a new filter should be : ./YourVesselness --input inputVolume.nii --output outputVolume.nii
+3) An optionnal --mask option is also prefered, when used it should return a masked version of the vesselness. Vesselness pixels masked by the foreground pixels values should be preserved.
 
 ### Analyse scripts
 These scripts compute, per parameter set, the mean of the binary filter output that maximize the MCC over the "Organ" ROI.
