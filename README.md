@@ -70,7 +70,7 @@ This step is also implemented in C/C++ as 3D data are expensive to process.
 The metrics are analysed using python scripts (ROC curves, mean metrics, etc.).
 
 ### Features
-- Seven vesselness filters available (Sato, Frangi, Meijering, OOF(|lambda_1 + lambda_2|), Jerman, Zhang, RORPO)
+- Seven vesselness filters available (Sato, Frangi, Meijering, OOF(|lambda_1 + lambda_2|), OOF_GM (geometric mean), Jerman, Zhang, RORPO)
 - The benchmark is designed to easily add extra vesselness filters.
 - Supports all medical formats read by ITK (.mhd,.nii, etc.) as well as DICOM series
 - Scripts to automate the vesselness filters parameters generation are provided.
