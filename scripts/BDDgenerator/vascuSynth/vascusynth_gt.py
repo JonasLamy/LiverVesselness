@@ -4,7 +4,7 @@ import os
 import numpy as np
 import glob
 import fnmatch
-import vascuSynth
+import vascuSynth as vascuSynth
 import shutil
 
 from scipy import ndimage

@@ -37,7 +37,7 @@ def loadPickleToDF(picklePath):
     data = pd.read_pickle(picklePath)
     return data
 
-def saveBestParameterSet(rootDirectory,benchName,aoi,metric,dataFrame):
+def saveBestParameterSetPerVolume(rootDirectory,benchName,aoi,metric,dataFrame):
     saveName = rootDirectory + "/" +aoi+ "/Best_metric_per_volume/" + f"{benchName}_{aoi}_Best_{metric}_per_volume.csv"
     dataFrame.to_csv(saveName,index=False)
     saveName = rootDirectory + "/Pickle/" + f"{benchName}_{aoi}_Best_{metric}_per_volume.pkl"
@@ -91,9 +91,15 @@ def saveMeanAUCandROCperParameterSet(rootDirectory,benchName,aoi,aucDF,rocDF):
     rocDF.to_pickle(saveName)
 
 def saveSummary(rootDirectory,dfSummary,benchName,aoi):
-    saveName = rootDirectory + "/Summary/" + f"{benchName}_{aoi}_summary.csv"
+    saveName = rootDirectory + "/Summary/" + f"{benchName}_{aoi}_metrics_summary.csv"
     dfSummary.to_csv(saveName,index=False)
-    saveName = rootDirectory +  "/Pickle/" + f"{benchName}_{aoi}_summary.pkl"
+    saveName = rootDirectory +  "/Pickle/" + f"{benchName}_{aoi}_metrics_summary.pkl"
+    dfSummary.to_pickle(saveName)
+
+def saveCMSummary(rootDirectory,dfSummary,benchName,aoi):
+    saveName = rootDirectory + "/Summary/" + f"{benchName}_{aoi}_cm_summary.csv"
+    dfSummary.to_csv(saveName,index=False)
+    saveName = rootDirectory +  "/Pickle/" + f"{benchName}_{aoi}_cm_summary.pkl"
     dfSummary.to_pickle(saveName)
 
 def saveROCSummary(rootDirectory,dfSummary,benchName,aoi):
@@ -102,13 +108,13 @@ def saveROCSummary(rootDirectory,dfSummary,benchName,aoi):
     saveName = rootDirectory +  "/Pickle/" + f"{benchName}_{aoi}_roc_summary.pkl"
     dfSummary.to_pickle(saveName)
 
-#def saveInfoMean(rootDirectory,dfInfoMean,benchName):
-#    saveName = rootDirectory + "/" +aoi+ "/Best_mean_metric/" + f"{benchName}_{aoi}_Best_mean_CF_{metric}.csv"
-#    dataFrame_part1.to_csv(saveName,index=False)
-#    saveName = rootDirectory + "/Pickle/" + f"{benchName}_{aoi}_Best_mean_CF_{metric}.pkl"
-#    dataFrame_part1.to_pickle(saveName)
+def saveRescaledROCSummary(rootDirectory,dfSummary,benchName,aoi):
+    saveName = rootDirectory + "/Summary/" + f"{benchName}_{aoi}_roc_rescaled_summary.csv"
+    dfSummary.to_csv(saveName,index=False)
+    saveName = rootDirectory +  "/Pickle/" + f"{benchName}_{aoi}_roc_rescaled_summary.pkl"
+    dfSummary.to_pickle(saveName)
     
-def getBestMetricPerVolume(dataFrame,metric):
+def getBestMetricPerVolumePerParameterSet(dataFrame,metric):
     result = dataFrame.groupby(["SerieName"]) # group by volume
 
     listBestMetricPerVolume = []
@@ -126,10 +132,14 @@ def getBestMetricPerVolume(dataFrame,metric):
     dfBestMetricPerVolume = pd.DataFrame(listBestMetricPerVolume).sort_values(by=["SerieName","VolumeName",metric],ascending=True)
     return dfBestMetricPerVolume
 
-def getAUCandROCPerVolume(dataFrame):
+def getAUCandROCPerVolume(dataFrame,scaleP_N,interpValue):
     dataFiltered = dataFrame[ ~dataFrame.isin([np.nan, np.inf, -np.inf]).any(1) ]
     
     result = dataFrame.groupby(["SerieName"]) # group by volume
+
+    nbSamples = len( next(iter(result))[1]["sensitivity"] )
+    newFPR = np.geomspace( 0.0001, 1, interpValue )
+    newFPRRescaled = np.geomspace( 0.0001, 10, nbSamples )
 
     listBestAUCPerVolume = []
     listBestROCPerVolume = []
@@ -140,17 +150,20 @@ def getAUCandROCPerVolume(dataFrame):
             ratio_P_N = (dataFiltered['TP'].values[0]+dataFiltered['FN'].values[0]) / (dataFiltered['TN'].values[0]+dataFiltered['FP'].values[0]) 
             
             TruePositiveRate = dataFiltered['sensitivity'].values
-            FalsePositiveRate = (1 - dataFiltered['specificity'].values) / ratio_P_N
 
-            newFPR = np.geomspace( 0.0001, 0.5, len(TruePositiveRate) )
+            if(scaleP_N):
+                FalsePositiveRate = (1 - dataFiltered['specificity'].values) / ratio_P_N
+                newTPR = np.interp(newFPRRescaled,FalsePositiveRate,TruePositiveRate)
+            else:
+                FalsePositiveRate = (1 - dataFiltered['specificity'].values)
+                newTPR = np.interp(newFPR,FalsePositiveRate,TruePositiveRate)
+            # apply interpolation and curves ressampling
+    
             newTPR = np.interp(newFPR,FalsePositiveRate,TruePositiveRate)
-
-            #TruePositiveRate = newTPR
-            #FalsePositiveRate = newFPR / ratio_P_N
-            #FalsePositiveRate = np.divide( dataFiltered['FP'].values, dataFiltered["FP"].values + dataFiltered["TN"].values)
+            
             auc = round(metrics.auc(FalsePositiveRate, TruePositiveRate),4)
 
-            listBestROCPerVolume.append([serieName,volumeName,TruePositiveRate,FalsePositiveRate])
+            listBestROCPerVolume.append([serieName,volumeName,newTPR,newFPR])
             listBestAUCPerVolume.append([serieName,volumeName,auc])
 
     df_roc = pd.DataFrame(listBestROCPerVolume,columns=["SerieName","VolumeName","TPR","FPR"]).sort_values(by=["SerieName","VolumeName"],ascending=True)
@@ -243,7 +256,7 @@ def getMeanAUCandROCperParameterSets(aucDF,rocDF):
     return dfmeanAUC,dfmeanROC
 
 
-def getMeanAUCandROC(ps,aucDF,rocDF):
+def getMeanAUCandROC(ps,rocDF):
     
     meanTPR =  rocDF["TPR"].mean().round(4)
     meanFPR =  rocDF["FPR"].mean().round(4)
@@ -272,7 +285,7 @@ def getValuesForMaxMetric(dataFrame,metric):
 def getValuesForParameter(dataFrame,param):
     return dataFrame[dataFrame["VolumeName"] == param]
 
-def formatLineToSummaryLine(aoi,metric,best_line,aucForBestParam,mean_sensitivity,std_sensitivity):
+def formatLineToSummaryLine(aoi,metric,best_line,aucForBestParam,mean_sensitivity,std_sensitivity,mean_FPR,std_FPR):
     l = []
     l.append(aoi)
     l.append(best_line["VolumeName"])
@@ -288,9 +301,49 @@ def formatLineToSummaryLine(aoi,metric,best_line,aucForBestParam,mean_sensitivit
     l.append(aucForBestParam)
     l.append(mean_sensitivity)
     l.append(std_sensitivity)
-
+    l.append(mean_FPR)
+    l.append(std_FPR)
     
     return l
+
+def formatLineToSummaryLine_legacy(aoi,metric,best_line,aucForBestParam,mean_sensitivity,std_sensitivity):
+    l = []
+    l.append(aoi)
+    l.append(best_line["VolumeName"])
+    l.append(metric)
+    l.append(best_line["mean_MCC"] )
+    l.append(best_line["std_MCC"]  )
+    l.append(best_line["mean_Dice"])
+    l.append(best_line["std_Dice"] )
+    l.append(best_line["mean_snr"])
+    l.append(best_line["std_snr"])
+    l.append(best_line["mean_psnr"])
+    l.append(best_line["std_psnr"])
+    l.append(aucForBestParam)
+    l.append(mean_sensitivity)
+    l.append(std_sensitivity)
+    l.append(0)
+    l.append(0)
+
+    return l
+
+def formatLineToCMSummaryLine(aoi,metric,best_line):
+    l = []
+    l.append(aoi)
+    l.append(best_line["VolumeName"].item() )
+    l.append(metric)
+    l.append( best_line["mean_sensitivity"].item() )
+    l.append( best_line["std_sensitivity"].item() ) ,
+    l.append( best_line["mean_specificity"].item() ),
+    l.append( best_line["std_specificity"].item() ),
+    l.append( best_line["mean_precision"].item() ),
+    l.append( best_line["std_precision"].item() ),
+    l.append( best_line["mean_accuracy"].item() ),
+    l.append( best_line["std_accuracy"].item() )
+
+    return l
+
+
 
 def formatLineToROCSummaryLine(aoi,metric,volumeName,meanThreshold,mean_TPR_optim,mean_FPR_optim,TPR,FPR):
     l = []
@@ -304,7 +357,7 @@ def formatLineToROCSummaryLine(aoi,metric,volumeName,meanThreshold,mean_TPR_opti
     l.append(FPR)
     return l
 
-def getInfoFromBestPS(dfBestMetric,dfInfoAOI,metric,best_aoi_PS):
+def getInfoFromBestPS(dfBestMetric,dfInfoAOI,best_aoi_PS,scaleP_N,interpValue):
     # finding best thresholds from parameters
 
     dfBestMetric = dfBestMetric[ ~dfBestMetric.isin([np.nan, np.inf, -np.inf]).any(1) ]
@@ -343,18 +396,19 @@ def getInfoFromBestPS(dfBestMetric,dfInfoAOI,metric,best_aoi_PS):
             ratio_P_N = (rocInfos['TP'].values[0]+rocInfos['FN'].values[0]) / (rocInfos['TN'].values[0]+rocInfos['FP'].values[0])
         
         TruePositiveRate = rocInfos['sensitivity'].values
-        FalsePositiveRate = (1 - rocInfos['specificity'].values) / ratio_P_N
 
-        newFPR = np.geomspace( 0.0001, 0.5, len(FalsePositiveRate) )
+        if(scaleP_N):
+            FalsePositiveRate = (1 - rocInfos['specificity'].values) / ratio_P_N
+        else:
+            FalsePositiveRate = (1 - rocInfos['specificity'].values)
+
+        # apply interpolation and curves ressampling
+        newFPR = np.geomspace( 0.0001, interpValue, len(FalsePositiveRate) )
         newTPR = np.interp(newFPR,FalsePositiveRate,TruePositiveRate)
 
-        #TruePositiveRate = newTPR
-        #FalsePositiveRate = newFPR / ratio_P_N
-        #FalsePositiveRate = np.divide( np.divide(rocInfos['FP'].values,rocInfos['TP'].values), rocInfos["FP"].values + rocInfos["FN"].values)
-        
         auc = round(metrics.auc(FalsePositiveRate, TruePositiveRate),4)
 
-        listROC.append([o_serie,best_aoi_PS,TruePositiveRate,FalsePositiveRate])
+        listROC.append([o_serie,best_aoi_PS,newTPR,newFPR])
         listAUC.append([o_serie,best_aoi_PS,auc])
 
     df_roc = pd.DataFrame(listROC,columns=["SerieName","VolumeName","TPR","FPR"]).sort_values(by=["SerieName","VolumeName"],ascending=True)
@@ -462,8 +516,8 @@ def plotROCCurve(rootDirectory,metric,dfROCSummary,benchName,optim_aoi,informati
         if( d["Region"].iloc[i] == "Bifurcations"):
             continue
 
-        TPR = d["TPR"].iloc[i][1:-2]
-        FPR = d["FPR"].iloc[i][1:-2]
+        TPR = d["TPR"].iloc[i]#[1:-2]
+        FPR = d["FPR"].iloc[i]#[1:-2]
         
         ax.plot(FPR,TPR,label=d["Region"].iloc[i])
     
@@ -479,4 +533,40 @@ def plotROCCurve(rootDirectory,metric,dfROCSummary,benchName,optim_aoi,informati
     fig.savefig( rootDirectory + "/Summary/"+ benchName + "_"+optim_aoi+"_"+ metric + "_roc_summary.pdf")
     plt.close()
     
+
+def plotRescaledROCCurve(rootDirectory,metric,dfROCSummary,benchName,optim_aoi,informative_aoi):
+    
+    # use dfSummary
+    lTPR = []
+    lFPR = []
+
+    
+    d = dfROCSummary[ dfROCSummary["optimMetric"] == metric ]
+
+    optim_PS = dfROCSummary[ (dfROCSummary["Region"] == optim_aoi) & (dfROCSummary["optimMetric"] == metric)]["ParameterSet"].item()
+
+    print("optim parameters",optim_PS)
+    
+    fig,ax = plt.subplots()
+    for i in range(len(d)):
+        if( d["Region"].iloc[i] == "Bifurcations"):
+            continue
+
+        TPR = d["TPR"].iloc[i]#[1:-2]
+        FPR = d["FPR"].iloc[i]#[1:-2]
+        
+        ax.plot(FPR,TPR,label=d["Region"].iloc[i])
+    
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    
+    ax.set_ylabel('Metrics')
+    ax.set_ylim([0,1]) 
+    ax.set_xlim([0,10])
+    ax.set_title(benchName + " " + optim_PS + " mean " + metric)
+    ax.legend()
+
+    ax.autoscale_view()
+    
+    fig.savefig( rootDirectory + "/Summary/"+ benchName + "_"+optim_aoi+"_"+ metric + "_rescaled_roc_summary.pdf")
+    plt.close()
     

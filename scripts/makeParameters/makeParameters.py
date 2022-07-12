@@ -12,14 +12,15 @@ if not os.path.exists(dirPath):
     print("path to directory "+dirPath+" does not exists...aborting")
     exit()
 
+"""
 bounds = BoundsSS()
 bounds.minBoundStart = 0.2
 bounds.minBoundEnd   = 1.6
-bounds.minBoundStep  = 0.4
+bounds.minBoundStep  = 0.8
 
 bounds.maxBoundStart = 1.2
 bounds.maxBoundEnd   = 3.2
-bounds.maxBoundStep  = 0.4
+bounds.maxBoundStep  = 0.8
 
 bounds.nbScalesMin = 3
 bounds.nbScalesMax = 4
@@ -63,7 +64,7 @@ zhangParams = ZhangParameters(tau=0.5)
 zhangSS = HessianScaleSearch(bounds,"Zhang",zhangParams)
 print(zhangSS, file=open(dirPath+"ZhangScaleSearchTest.json","w"))
 print("Zhang scale search:",zhangSS.nbParameters)
-
+"""
 rorpoBoundsSS = RORPOBoundsSS()
 rorpoBoundsSS.minScaleStart = 10
 rorpoBoundsSS.minScaleEnd = 90
@@ -82,6 +83,8 @@ rorpoSS = RORPOScaleSearch("RORPO_multiscale_usage",rorpoBoundsSS,rorpoParams)
 print(rorpoSS,file=open(dirPath+"RORPOScaleSearchTest.json","w"))
 print("RORPO scale search:",rorpoSS.nbParameters)
 
+
+
 """
 # Frangi PS
 frangiBoundsPS = FrangiBounds()
@@ -91,8 +94,9 @@ frangiBoundsPS.alphaStep = 0.2
 frangiBoundsPS.betaMin   = 0.2
 frangiBoundsPS.betaMax   = 1
 frangiBoundsPS.betaStep  = 0.2
+TODO : add gamma
 
-frangiPS = FrangiParametersSearch("Antiga",frangiBoundsPS,sigmaMin=1,sigmaMax=3,sigmaSteps=3)
+frangiPS = FrangiParametersSearch("Antiga",frangiBoundsPS,sigmaMin=0.60,sigmaMax=1.20,sigmaSteps=3)
 print(frangiPS,file=open(dirPath+"FrangiParameterSearch.json","w"))
 print("frangi parameters search:",frangiPS.nbParameters)
 
@@ -105,7 +109,7 @@ satoBoundsPS.alpha2Min   = 1
 satoBoundsPS.alpha2Max   = 2
 satoBoundsPS.alpha2Step  = 0.2
 
-satoPS = SatoParametersSearch("Sato",satoBoundsPS,sigmaMin=1,sigmaMax=3,sigmaSteps=3)
+satoPS = SatoParametersSearch("Sato",satoBoundsPS,sigmaMin=0.2,sigmaMax=1.20,sigmaSteps=3)
 print(satoPS,file=open(dirPath+"SatoParameterSearch.json","w"))
 print("sato parameters search:",satoPS.nbParameters)
 
@@ -130,7 +134,7 @@ OOFBoundsPS.sigmaMin  = 0.1
 OOFBoundsPS.sigmaMax  = 1
 OOFBoundsPS.sigmaStep = 0.1
 
-OOFPS = OOFParametersSearch("OOF",OOFBoundsPS,sigmaMin=1,sigmaMax=3,sigmaSteps=3)
+OOFPS = OOFParametersSearch("OOF",OOFBoundsPS,sigmaMin=0.6,sigmaMax=1.2,sigmaSteps=3)
 print(OOFPS,file=open(dirPath+"OOFParameterSearch.json","w"))
 print("OOF parameters search:",OOFPS.nbParameters)
 
@@ -140,7 +144,7 @@ jermanBoundsPS.tauMin  = 0.1
 jermanBoundsPS.tauMax  = 1
 jermanBoundsPS.tauStep = 0.1
 
-jermanPS = JermanParametersSearch("Jerman",jermanBoundsPS,sigmaMin=1,sigmaMax=3,sigmaSteps=3)
+jermanPS = JermanParametersSearch("Jerman",jermanBoundsPS,sigmaMin=0.20,sigmaMax=1.20,sigmaSteps=3)
 print(jermanPS,file=open(dirPath+"JermanParameterSearch.json","w"))
 print("Jerman parameters search:",jermanPS.nbParameters)
 
@@ -150,7 +154,7 @@ zhangBoundsPS.tauMin  = 0.1
 zhangBoundsPS.tauMax  = 1
 zhangBoundsPS.tauStep = 0.1
 
-zhangPS = ZhangParametersSearch("Zhang",zhangBoundsPS,sigmaMin=1,sigmaMax=3,sigmaSteps=3)
+zhangPS = ZhangParametersSearch("Zhang",zhangBoundsPS,sigmaMin=0.60,sigmaMax=1.20,sigmaSteps=3)
 print(zhangPS,file=open(dirPath+"ZhangParameterSearch.json","w"))
 print("Zhang parameters search:",zhangPS.nbParameters)
 """

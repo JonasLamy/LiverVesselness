@@ -18,7 +18,7 @@ int main( int argc, char* argv[] )
 {
   // parse command line using CLI ----------------------------------------------
   CLI::App app;
-  app.description("Apply the Meijering algorithm");
+  app.description("Apply the Jerman algorithm");
   std::string inputFile ;
   std::string outputFile;
   double sigmaMin;

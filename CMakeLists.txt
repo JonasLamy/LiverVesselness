@@ -53,6 +53,19 @@ target_include_directories(Jerman PUBLIC
 target_link_libraries(Jerman ${ITK_LIBRARIES})
 set_target_properties(Jerman PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
+# Jerman blobness -----------------------
+
+add_executable(JermanBlobness src/jermanBlobness.cpp)
+target_include_directories(JermanBlobness PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/JermanBlobness>"
+  "$<INSTALL_INTERFACE:include/JermanBlobness>"
+  )
+target_link_libraries(JermanBlobness ${ITK_LIBRARIES})
+set_target_properties(JermanBlobness PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+
+
 # RhuiZhang -----------------------
 
 add_executable(RuiZhang src/ruiZhang.cpp)
