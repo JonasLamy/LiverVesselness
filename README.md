@@ -1,6 +1,6 @@
 # LiverVesselness
 
-This is the Repository for the journal article in review : 
+This is the Repository for the IEEE, Transaction on medical imaging journal article : 
 
 **"A Benchmark Framework for Multi-Region Analysis of Vesselness Filters"** Jonas Lamy, Odyssee Merveille, Bertrand Kerautret, Nicolas Passat
 
@@ -70,7 +70,7 @@ This step is also implemented in C/C++ as 3D data are expensive to process.
 The metrics are analysed using python scripts (ROC curves, mean metrics, etc.).
 
 ### Features
-- Seven vesselness filters available (Sato, Frangi, Meijering, OOF(|lambda_1 + lambda_2|), Jerman, Zhang, RORPO)
+- Seven vesselness filters available (Sato, Frangi, Meijering, OOF(|lambda_1 + lambda_2|), OOF_GM (geometric mean), Jerman, Zhang, RORPO)
 - The benchmark is designed to easily add extra vesselness filters.
 - Supports all medical formats read by ITK (.mhd,.nii, etc.) as well as DICOM series
 - Scripts to automate the vesselness filters parameters generation are provided.
@@ -253,6 +253,7 @@ Any extra vesselness filter can be included by following these two steps:
 1) Put the new vesselness filter executable in the same directory as the Benchmark executable so that it can be called using bash command ./YourVesselnessName.
 2) The new vesselness filter executable should be called using --option. Also --input and --ouput are compulsory parameters.
 The minimal call of a new filter should be : ./YourVesselness --input inputVolume.nii --output outputVolume.nii
+3) An optionnal --mask option is also prefered, when used it should return a masked version of the vesselness. Vesselness pixels masked by the foreground pixels values should be preserved.
 
 ### Analyse scripts
 These scripts compute, per parameter set, the mean of the binary filter output that maximize the MCC over the "Organ" ROI.
