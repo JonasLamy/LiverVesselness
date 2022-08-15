@@ -305,6 +305,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
     if( i%10 == 0)
     {
       std::cout<<"threshold:"<<i/maxBoundf<<std::endl;
+      std::cout<<"epsilon:"<<m_epsilon<<std::endl;
       std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
             << " false positive rate : " << 1.0f - eval.specificity() << "\n";
     }
@@ -337,7 +338,7 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeConfusio
     while( itResponse != foregroundValues.end() )
     {
       // check for threshold
-      if(*itResponse >= threshold)
+      if( *itResponse >= (threshold - m_epsilon) )
       {
         // the values is thresholded to 1
         if (m_gt->GetPixel(*itIndex) > 0)
