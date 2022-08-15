@@ -6,6 +6,8 @@
 #include "itkImageRegionConstIterator.h"
 #include "itkHausdorffDistanceImageFilter.h"
 #include <iostream>
+#include <cmath>
+#include "utils.h"
 
 
 struct ConfusionMatrix{
