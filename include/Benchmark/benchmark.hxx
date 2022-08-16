@@ -142,10 +142,10 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::launchScriptFas
     outputImage = rescaleFilter->GetOutput();
 
     // Warning, rescale might work only for NIFTI images !
-    auto writer = itk::ImageFileWriter< TImageType  >::New();
-    writer->SetInput( outputImage ); 
-    writer->SetFileName( m_outputDir+ "/" + outputName );
-    writer->Update();
+    //auto writer = itk::ImageFileWriter< TImageType  >::New();
+    //writer->SetInput( outputImage ); 
+    //writer->SetFileName( m_outputDir+ "/" + outputName );
+    //writer->Update();
   }
   else{
     outputImage = vUtils::readImage<TImageType>(m_outputDir+ "/" + outputName,false);
@@ -231,13 +231,12 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
 
       scaledFilterValue = ( intensityRange * itFilter.Value() ) + minInput; 
       
+      // SNR stuff
       powerImage += itGt.Value() * itGt.Value(); 
       powerFilter += scaledFilterValue * scaledFilterValue;
-
-      MSE += ( scaledFilterValue - itGt.Value() ) * ( scaledFilterValue - itGt.Value() ); // squared for mean squared error for snr
+      // PSNR stuff
+      MSE += ( scaledFilterValue - itGt.Value() ) * ( scaledFilterValue - itGt.Value() ); // squared for mean squared error for psnr
     }
-    
-    
 
     //++itInput;
     ++itMask;
@@ -252,10 +251,13 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
   powerImage /= nbPixels * 2;
   powerFilter /= nbPixels * 2;
 
-  MSE /= nbPixels * 2;
+  MSE /= nbPixels;
+  std::cout<<"mse : "<<MSE<<std::endl;
 
   double snr = 10*std::log10(powerImage/powerFilter); //10*std::log10(powerFilter/powerImage); //
+
   double psnr = 10*std::log10( (maxInput*maxInput) / MSE);
+  
   
   long TN_b=0;
   long FN_b=0;
@@ -305,7 +307,6 @@ void Benchmark<TImageType,TGroundTruthImageType,TMaskImageType>::computeMetrics(
     if( i%10 == 0)
     {
       std::cout<<"threshold:"<<i/maxBoundf<<std::endl;
-      std::cout<<"epsilon:"<<m_epsilon<<std::endl;
       std::cout<<"true positive rate : " << eval.sensitivity() << "\n"
             << " false positive rate : " << 1.0f - eval.specificity() << "\n";
     }
