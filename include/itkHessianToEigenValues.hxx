@@ -190,6 +190,8 @@ namespace itk
 
         using CalculatorType = SymmetricEigenAnalysisFixedDimension<ImageDimension, PixelType, EigenValueArrayType>;
         CalculatorType eigenCalculator;
+        // eigenValues are sorted by magnitude order.
+        // so |l1| <= |l2| <= |l3| meaning that l3 <= l2 <= l1
         eigenCalculator.SetOrderEigenMagnitudes(true);
         EigenValueArrayType eigenValues;
 

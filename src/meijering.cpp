@@ -89,19 +89,20 @@ int main( int argc, char* argv[] )
   <<"mean:"<<stats->GetMean()<<std::endl
   <<"max:"<<stats->GetMaximum()<<std::endl;
   
-  using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, ImageType >;
-  RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
+  //using RescaleFilterType = itk::RescaleIntensityImageFilter< ImageType, ImageType >;
+  //RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
   
  
-  rescaleFilter->SetInput(multiScaleEnhancementFilter->GetOutput());
-  rescaleFilter->SetOutputMinimum(0.0f);
-  rescaleFilter->SetOutputMaximum(1.0f);
+  //rescaleFilter->SetInput(multiScaleEnhancementFilter->GetOutput());
+  //rescaleFilter->SetOutputMinimum(0.0f);
+  //rescaleFilter->SetOutputMaximum(1.0f);
 
 
   using imageWriterType = OutputImageType;
   typedef  itk::ImageFileWriter< imageWriterType  > WriterType;
   WriterType::Pointer writer = WriterType::New();
-  writer->SetInput( rescaleFilter->GetOutput() );
+  //writer->SetInput( rescaleFilter->GetOutput() );
+  writer->SetInput( multiScaleEnhancementFilter->GetOutput() );
   writer->SetFileName( std::string(outputFile) );
   writer->Update();
   

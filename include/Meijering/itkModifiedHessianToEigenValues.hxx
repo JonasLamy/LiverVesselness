@@ -250,11 +250,23 @@ namespace itk
                 modifiedEigenValues[1] = m_Alpha * eigenValues[1] + eigenValues[0] + eigenValues[2];
                 modifiedEigenValues[2] = m_Alpha * eigenValues[2] + eigenValues[0] + eigenValues[1];
 
-                // sorting values lambda1 < lambda2 < lambda3
-                std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return fabs(i) < fabs(j); } );                 
+                // intent of the article is not clear....
+                // From "the design and validation of a neurite tracking tool" : "where lambda is the larger in magnitude of the two eigenvalues
+                // and lmabda min denotes the smallest lambda over all pixels, which in practice will always be smaller than zero.
+                // two possibilities here : The context is kept between the two variables and both are sorted by magnitude, the the smallest is min of all lambda 1.
+                // The context is different for both variables, the first is sorted by magnitude, the second is sorted by natural order.
+                // This lead to different responses in 1) lambda is bounded between [0 and magnitude max] with lambda min > lambda and approaching 0. 
+                // This lead to a really high response for 1) when lambda 1 approach 0 (with limit reaching infinity). Meaning bright enhancement no matter the size of the artefact
+                // 2) means lambda min is in fact the largest absolute eigenvalue over the whole image and lambda is bounded between 0 and 1. This is nicer but enhancement is probably less strong.
+
+                // First hypothesis is easier to handle, we will use it here. Both hypothesis differ by a multiplicative factor and doesn't impact 
+                // the global appearance of the enhancement.
+                
+                // find minimum eigen value over all pixels (meaning largest lambda)
+                std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return i < j; } );                 
                 min = std::min( min,modifiedEigenValues[0] );
                 // sorting by magnitude before giving it to mesure filter
-                //std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return fabs(i) < fabs(j); } );
+                std::sort(modifiedEigenValues.begin(), modifiedEigenValues.end(), [](EigenValueType i, EigenValueType j) { return fabs(i) < fabs(j); } );
                 
                 itOut.Set(modifiedEigenValues);
                 
