@@ -69,7 +69,7 @@ set_target_properties(JermanBlobness PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAK
 # RhuiZhang -----------------------
 
 add_executable(Zhang src/ruiZhang.cpp)
-target_include_directories(RuiZhang PUBLIC
+target_include_directories(Zhang PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/RuiZhang>"
   "$<INSTALL_INTERFACE:include/RuiZhang>"
