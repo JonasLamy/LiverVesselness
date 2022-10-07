@@ -89,7 +89,7 @@ target_include_directories(Meijering PUBLIC
   )
 target_link_libraries(Meijering ${ITK_LIBRARIES} )
 set_target_properties(Meijering PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
-
+# utilities --------------------------------
 # Sato -----------------------------
 
 add_executable(Sato src/Filters/sato.cpp)
@@ -166,120 +166,115 @@ set_target_properties(Test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_D
 
 # process ircad -------------------
 
-add_executable(CropImages src/BDDGeneration/crop_ircad_data.cpp)
-target_include_directories(CropImages PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(CropImages ${ITK_LIBRARIES})
-set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#add_executable(CropImages src/BDDGeneration/crop_ircad_data.cpp)
+#target_include_directories(CropImages PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(CropImages ${ITK_LIBRARIES})
+#set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
 # utilities --------------------------------
 
-add_executable(ChangeLabelDicom src/BDDGeneration/changeLabelDicom.cpp)
-target_include_directories(ChangeLabelDicom PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
-set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+#add_executable(ChangeLabelDicom src/BDDGeneration/changeLabelDicom.cpp)
+#target_include_directories(ChangeLabelDicom PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
+#set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
   
-add_executable(MakeIso src/BDDGeneration/makeIso.cpp)
-target_include_directories(MakeIso PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeIso ${ITK_LIBRARIES})
-set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
+#add_executable(MakeIso src/BDDGeneration/makeIso.cpp)
+#target_include_directories(MakeIso PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeIso ${ITK_LIBRARIES})
+#set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
   
-add_executable(MakeIsoBullit src/BDDGeneration/makeIsoBullit.cpp)
-target_include_directories(MakeIsoBullit PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeIsoBullit ${ITK_LIBRARIES})
-set_target_properties(MakeIsoBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
+#add_executable(MakeIsoBullit src/BDDGeneration/makeIsoBullit.cpp)
+#target_include_directories(MakeIsoBullit PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeIsoBullit ${ITK_LIBRARIES})
+#set_target_properties(MakeIsoBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
 
 
-add_executable(MakeVascuSynthGT src/BDDGeneration/makeVascuSynthGT.cpp)
-target_include_directories(MakeVascuSynthGT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
-set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+#add_executable(MakeVascuSynthGT src/BDDGeneration/makeVascuSynthGT.cpp)
+#target_include_directories(MakeVascuSynthGT PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
+#set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
-add_executable(LabelVessels src/BDDGeneration/labelVessels.cpp)
-target_include_directories(LabelVessels PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(LabelVessels ${ITK_LIBRARIES})
-set_target_properties(LabelVessels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator" )
+#add_executable(LabelVessels src/BDDGeneration/labelVessels.cpp)
+#target_include_directories(LabelVessels PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(LabelVessels ${ITK_LIBRARIES})
+#set_target_properties(LabelVessels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator" )
 
-add_executable(LabelVesselsBullit src/BDDGeneration/labelVesselsBullit.cpp)
-target_include_directories(LabelVesselsBullit PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(LabelVesselsBullit ${ITK_LIBRARIES})
-set_target_properties(LabelVesselsBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
+#add_executable(LabelVesselsBullit src/BDDGeneration/labelVesselsBullit.cpp)
+#target_include_directories(LabelVesselsBullit PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(LabelVesselsBullit ${ITK_LIBRARIES})
+#set_target_properties(LabelVesselsBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
 
 
 
 # Bifurcations VascuSynth
 
-add_executable(MakeVascuSynthBifurcationGT src/BDDGeneration/makeVascuSynthBifurcationGT.cpp)
-target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
-set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
+#add_executable(MakeVascuSynthBifurcationGT src/BDDGeneration/makeVascuSynthBifurcationGT.cpp)
+#target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeVascuSynthBifurcationGT ${ITK_LIBRARIES})
+#set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
 
 # Bifurcation IRCAD 
 
-add_executable(MakeIrcadBifurcationGT src/BDDGeneration/makeIrcadBifurcation.cpp)
-target_include_directories(MakeIrcadBifurcationGT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
-set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
+#add_executable(MakeIrcadBifurcationGT src/BDDGeneration/makeIrcadBifurcation.cpp)
+#target_include_directories(MakeIrcadBifurcationGT PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeIrcadBifurcationGT ${ITK_LIBRARIES})
+#set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
 # Bifurcation Bullit 
 
-add_executable(MakeBullitBifurcationGT src/BDDGeneration/makeBullitBifurcations.cpp)
-target_include_directories(MakeBullitBifurcationGT PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeBullitBifurcationGT ${ITK_LIBRARIES})
-set_target_properties(MakeBullitBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
+#add_executable(MakeBullitBifurcationGT src/BDDGeneration/makeBullitBifurcations.cpp)
+#target_include_directories(MakeBullitBifurcationGT PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeBullitBifurcationGT ${ITK_LIBRARIES})
+#set_target_properties(MakeBullitBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
 
 
 # Shapes 
 
-add_executable(MakeVascuSynthSizeLabels src/BDDGeneration/makeVascuSizeLabels.cpp)
-target_include_directories(MakeVascuSynthSizeLabels PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(MakeVascuSynthSizeLabels ${ITK_LIBRARIES})
-set_target_properties(MakeVascuSynthSizeLabels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
+#add_executable(MakeVascuSynthSizeLabels src/BDDGeneration/makeVascuSizeLabels.cpp)
+#target_include_directories(MakeVascuSynthSizeLabels PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(MakeVascuSynthSizeLabels ${ITK_LIBRARIES})
+#set_target_properties(MakeVascuSynthSizeLabels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
 
 # isoFromUnit
 
-add_executable(isoFromUnit src/BDDGeneration/isoFromUnit.cpp)
-target_include_directories(isoFromUnit PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-  )
-target_link_libraries(isoFromUnit ${ITK_LIBRARIES})
-set_target_properties(isoFromUnit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
-
-
-
-
-
+#add_executable(isoFromUnit src/BDDGeneration/isoFromUnit.cpp)
+#target_include_directories(isoFromUnit PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+#  "$<INSTALL_INTERFACE:include>"
+#  )
+#target_link_libraries(isoFromUnit ${ITK_LIBRARIES})
+#set_target_properties(isoFromUnit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
