@@ -1,6 +1,8 @@
 # LiverVesselness
 
-This is the Repository for the IEEE, Transaction on medical imaging journal article : 
+** It has been brought to our attention that some errors exist in our code and are working in fixing it. In case you want to use the code, feel free to send me a message, I would gladly keep you updated"
+
+This is the Repository for the journal article : 
 
 **"A Benchmark Framework for Multi-Region Analysis of Vesselness Filters"** Jonas Lamy, Odyssee Merveille, Bertrand Kerautret, Nicolas Passat
 
