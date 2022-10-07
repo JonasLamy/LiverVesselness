@@ -39,7 +39,7 @@ public:
     void SetOutputDirectory(const std::string &outputDir){m_outputDir = outputDir; }
     void SetPatientDirectory(const std::string &patient){m_patient = patient;}
     void SetEnhancementMaskName(const std::string &maskEnhancementFileName){m_maskEnhancementFileName = maskEnhancementFileName;}
-    void SetNbThresholds(int nbThresholds){m_nbThresholds=nbThresholds;}
+    void SetNbThresholds(int nbThresholds){m_nbThresholds=nbThresholds; m_epsilon = (1/(float)m_nbThresholds) * 1.0e-3;}
     void SetRescaleFilters(bool rescaleFilter){m_rescaleFilters=rescaleFilter;}
     void run();
     
@@ -51,6 +51,7 @@ private:
     std::string m_patient;
 
     int m_nbThresholds;
+    double m_epsilon;
     static int m_nbAlgorithms;
     bool m_inputIsDicom;
     bool m_computeMetricsOnly;

@@ -20,7 +20,6 @@ Ircad Dataset : https://www.ircad.fr/research/3d-ircadb-01/
 Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
 
 Scripts to transform data are available in the scripts/BDDgenerator folder
-
 ## Dependancies
 - Benchmark (C/C++)
 
@@ -286,6 +285,7 @@ ROI
 	|_ XXX_mean_M.csv : mean metrics values in ROI for the parameter set chosen by the optimization of metric M in the Organ ROI
 	|_ XXX_mean_CF_M.csv : mean metrics values in ROI for the parameter set chosen by the optimization of metric M in the Organ ROI
 ```
+- **analysing results** (means per parameter sets)
 
 #### agregrateResults.py
 

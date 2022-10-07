@@ -188,7 +188,9 @@ class RORPOScaleSearch:
             #print(l)
             #print( np.ones(len(l))*i )
             plt.plot(l, np.ones( len(l) )*i,marker="x" )
-        plt.title("search space sampling")
+        plt.title("")
+        plt.ylabel("Jeu de paramètre")
+        plt.xlabel("Taille du chemin")
         plt.show()
             
         return parametersSets

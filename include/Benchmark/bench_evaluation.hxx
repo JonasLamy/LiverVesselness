@@ -188,7 +188,7 @@ long double Eval<TImageType, TGroundTruthImageType,TMaskImageType>::matthewsCorr
 	if( std::abs(a) < m_epsilon)
 		return 0;
 
-	long double b = (m_truePositive * m_trueNegative) - (m_falsePositive * m_truePositive);
+	long double b = (m_truePositive * m_trueNegative) - (m_falsePositive * m_falseNegative);
 
 	return b / std::sqrt(a);
 }

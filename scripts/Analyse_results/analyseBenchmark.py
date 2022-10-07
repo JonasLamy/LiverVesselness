@@ -3,7 +3,8 @@ from analyseBenchmarkTools import *
 import copy
 
 
-areas_of_interest = ["Organ","VN","Vlarge","Vmedium","Vsmall","Bifurcations"]
+#areas_of_interest = ["Organ","VN","Vlarge","Vmedium","Vsmall","Bifurcations"]
+areas_of_interest = ["Organ","VN","Vmedium","Vsmall","Bifurcations"]
 optim_aoi = ["Organ"]
 
 optim_metrics = ["MCC"]
@@ -30,13 +31,14 @@ for aoi in optim_aoi:
     bestParameter = dict()    
     l_temp = dict()
     l_roc = dict()
+    l_CM = dict()
     # Dice - MCC
     for metric in optim_metrics:
         aoiCSVPath = f"{csvFilesPath}/{benchName}_{aoi}.csv" 
         aoiDF = loadCSVtoDF( aoiCSVPath )
         
-        dfBestMetricPerVolume = getBestMetricPerVolume(aoiDF,metric)
-        saveBestParameterSet(csvFilesPath,benchName,aoi,metric,dfBestMetricPerVolume) 
+        dfBestMetricPerVolume = getBestMetricPerVolumePerParameterSet(aoiDF,metric)
+        saveBestParameterSetPerVolume(csvFilesPath,benchName,aoi,metric,dfBestMetricPerVolume) 
 
         BMPV = dfBestMetricPerVolume.groupby("SerieName")
         bestMPV = []
@@ -75,7 +77,7 @@ for aoi in optim_aoi:
         print("bobobobo")
         
         # AUC - ROC
-        dfAUCPerVolume,dfROCPerVolume = getAUCandROCPerVolume(aoiDF)
+        dfAUCPerVolume,dfROCPerVolume = getAUCandROCPerVolume(aoiDF,scaleP_N=False)
         saveParameterSet(csvFilesPath,benchName,aoi,"AUC",dfAUCPerVolume)
         saveParameterSet(csvFilesPath,benchName,aoi,"ROC",dfROCPerVolume)
         # get mean AUC for best parameter 
@@ -88,7 +90,7 @@ for aoi in optim_aoi:
         print("l2",l2)
         l_roc[metric] = l2
         
-        l = formatLineToSummaryLine(aoi,metric,values,meanAUCForBestPS,meanCFvalues["mean_sensitivity"].item(),meanCFvalues["std_sensitivity"].item())
+        l = formatLineToSummaryLine_legacy(aoi,metric,values,meanAUCForBestPS,meanCFvalues["mean_sensitivity"].item(),meanCFvalues["std_sensitivity"].item())
         l_temp[metric] = l
         
     # -----------------------------------------------------------
@@ -104,7 +106,7 @@ for aoi in optim_aoi:
         aoiPicklePath = f"{csvFilesPath}/Pickle/{benchName}_{aoi}_Best_{metric}_per_volume.pkl" 
         aoiBestMetricPerVolume = loadPickleToDF( aoiPicklePath )
 
-        # TODO from best parameters, retrieve mean of metric in the other volumes
+        # TODO from best parameters, retraoiDFieve mean of metric in the other volumes
         
         for infoAOI in informative_aoi:
             print("info aoi",infoAOI)
@@ -112,7 +114,6 @@ for aoi in optim_aoi:
             dfInfoAOI = loadCSVtoDF(infoAOICSVPath)
 
             dfInfoMetric,dfInfoAUC,dfInfoROC = getInfoFromBestPS(aoiBestMetricPerVolume, dfInfoAOI,metric, bestParameter[metric] )
-            
             dfInfoMeanMetric_part1,dfInfoMeanMetric_part2 = getMeanPerParameterSets(dfInfoMetric)
 
             saveMeanPerParameterSet(csvFilesPath,benchName,aoi,infoAOI,metric,dfInfoMeanMetric_part1,dfInfoMeanMetric_part2)
@@ -122,6 +123,10 @@ for aoi in optim_aoi:
             
             ps_name,values = getValuesForMaxMetric(dfInfoMeanMetric_part2,f"mean_{metric}")
             valuesROC = getValuesForParameter(dfInfoMeanROC,ps_name)
+
+            print("yaaarg !!!")
+            print(valuesROC.columns)
+            exit()
 
             if( (meanCFvalues['mean_TN'].values[0]+meanCFvalues['mean_FP'].values[0]) == 0 ): # annoying case for bifurcation area, where FP and TN doesn't exists
                 ratio_P_N = 1

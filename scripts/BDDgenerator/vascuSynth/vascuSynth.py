@@ -10,7 +10,7 @@ import scipy.ndimage
 
 class Generator:
     def __init__(self):
-        self.noiseLevels = [2.0, 4.0, 6.0, 8.0]#[2.0,3.0, 4.0,5.0, 6.0,7.0, 8.0, 9.0, 10.0]
+        self.noiseLevels = [2.0, 4.0, 6.0, 8.0]#[6.0, 8.0, 10.0, 20.0, 30.0, 40.0,70.0,150]##
 
     def gauss3d(self,x=0,y=0,z=0,mx=0,my=0,mz=0,sx=1,sy=1,sz=1):  
         return  1 / (sx*sy*sz * np.sqrt(2. * np.pi ) * np.sqrt(2. * np.pi ) ) * np.exp(-( (x - mx)**2. / (2. * sx**2.) + (y - my)**2. / (2. * sy**2.) + (z - mz)**2. / (2. * sz**2.) ) )  
@@ -37,9 +37,10 @@ class Generator:
         
         os.system("./MakeVascuSynthBifurcationGT "+binaryVesselsPath+" "+bifurcationTxtFile+" "+bifurcationGtFilePath)
         
-        #print(binaryVesselsPath)
-        #print(bifurcationTxtFile)
-        #print(bifurcationGtFilePath)
+        print("-- debug --")
+        print(binaryVesselsPath)
+        print(bifurcationTxtFile)
+        print(bifurcationGtFilePath)
              
     def noisyImage(self,inputPath,outputName,noiseType):
         
@@ -51,22 +52,79 @@ class Generator:
             if( noiseType == "poisson"):
                 datNoisy = 0.5 * np.random.poisson(dat,None) + 0.5 * np.random.normal(dat,i,None)
             elif( noiseType == "rician"):
+                dat[dat <= 0] = 1
                 datNoisy = rice.rvs(dat/i,scale=i)
             else:
                 print("error noise type not supported")
                 
             datNoisy[datNoisy < 0] = 0
-            datNoisy[datNoisy > 255] = 255
+            #datNoisy[datNoisy > 255] = 255
             datNoisy[0,0,0] = 0 # used for easier display in slicer
-            datNoisy[0,0,1] = 255 # used for easier display in slicer
+            #datNoisy[0,0,1] = 255 # used for easier display in slicer
                 # writing image on disk
-            noisyImg = itk.GetImageFromArray(datNoisy.astype(np.uint8))
+            noisyImg = itk.GetImageFromArray(datNoisy.astype(np.short) ) #.astype(np.uint8))
 
             print(i)                
-            outputPath = outputName+"_"+str(i)+".nii"
+            outputPath = outputName+"_"+str(i)+".nii.gz"
+            noisyImg.SetOrigin(img.GetOrigin())
+            noisyImg.SetSpacing(img.GetSpacing())
             itk.imwrite(noisyImg,outputPath)
             
             print(outputPath)
+
+    def gaussianVariations(self,data, outputPath, sigmaMin, sigmaMax, nbGaussianBackground,ponderationWeight,dataOrigin,dataSpacing):
+
+        # background intensity
+        bgPonderation = np.zeros(data.shape)
+        for i in range(nbGaussianBackground):
+            bgPonderation += self.makeGaussian(bgPonderation,sigmaMin,sigmaMax)
+        # background illumination magnetic artefacts
+        bgPonderation = bgPonderation/bgPonderation.max() * ponderationWeight + (1-ponderationWeight)
+
+        print("bgPonderation",np.max(bgPonderation),np.min(bgPonderation))
+
+        dat = ( data + np.min(data) ) * bgPonderation
+
+        #dat[dat < 0] = 0
+        #dat[dat > 255] = 255
+
+        dat[0,0,0] = 0 # used for easier display in slicer
+        #dat[0,0,1] = 255 # used for easier display in slicer
+        
+        
+        img = itk.GetImageFromArray(dat.astype(itk.ctype("short") )) # data is in double but it is not supported in itk
+        img.SetOrigin(dataOrigin)
+        img.SetSpacing(dataSpacing)
+        itk.imwrite(img,outputPath)
+
+        return
+
+    def gaussianVariationsInMask(self,data, outputPath, sigmaMin, sigmaMax, nbGaussianBackground,ponderationWeight,dataOrigin,dataSpacing,mask):
+
+        # background intensity
+        bgPonderation = np.zeros(data.shape)
+        for i in range(nbGaussianBackground):
+            bgPonderation += self.makeGaussianInMask(bgPonderation,sigmaMin,sigmaMax,mask)
+        # background illumination magnetic artefacts
+        bgPonderation = bgPonderation/bgPonderation.max() * ponderationWeight + (1-ponderationWeight)
+
+        print("bgPonderation",np.max(bgPonderation),np.min(bgPonderation))
+
+        dat = ( data + np.min(data) ) * bgPonderation
+
+        #dat[dat < 0] = 0
+        #dat[dat > 255] = 255
+
+        dat[0,0,0] = 0 # used for easier display in slicer
+        #dat[0,0,1] = 255 # used for easier display in slicer
+        
+        
+        img = itk.GetImageFromArray(dat.astype(itk.ctype("short") )) # data is in double but it is not supported in itk
+        img.SetOrigin(dataOrigin)
+        img.SetSpacing(dataSpacing)
+        itk.imwrite(img,outputPath)
+
+        return
 
     def bifurcationsYGT(self,DirPath,gtVessels,gtBifurcations):
         imgGTPath = DirPath + "/" + gtVessels
@@ -214,35 +272,69 @@ class Generator:
 
 
     def makeGaussian(self,dat,sigmaMin,sigmaMax):
-            startX = 0
-            startY = 0
-            startZ = 0
+        startX = 0
+        startY = 0
+        startZ = 0
 
-            endX = dat.shape[0]
-            endY = dat.shape[1]
-            endZ = dat.shape[2]
+        endX = dat.shape[0]
+        endY = dat.shape[1]
+        endZ = dat.shape[2]
+    
+        stepX = endX - startX
+        stepY = endY - startY
+        stepZ = endZ - startZ
+                    
+        x = np.linspace(startX,endX,stepX)
+        y = np.linspace(startY,endY,stepY)
+        z = np.linspace(startZ,endZ,stepZ)
         
-            stepX = endX - startX
-            stepY = endY - startY
-            stepZ = endZ - startZ
-                        
-            x = np.linspace(startX,endX,stepX)
-            y = np.linspace(startY,endY,stepY)
-            z = np.linspace(startZ,endZ,stepZ)
-            
-            x, y,z = np.meshgrid(x,y,z) # get 2D variables instead of 1D
-            print(len(x),len(y),len(z))
+        y,x, z = np.meshgrid(y,x,z) # get 3D variables instead of 1D
+        print(len(x),len(y),len(z))
+    
+        m_x = np.random.randint(0,endX)
+        m_y = np.random.randint(0,endY)
+        m_z = np.random.randint(0,endZ)
+
+        sigma1 = np.random.randint(sigmaMin,sigmaMax)
+        sigma2 = np.random.randint(sigmaMin,sigmaMax)
+        sigma3 = np.random.randint(sigmaMin,sigmaMax)
+
+        return self.gauss3d(y,x, z,mx=m_y,my=m_x,mz=m_z,sx=sigma2,sy=sigma1,sz=sigma3)
+
+    def makeGaussianInMask(self,dat,sigmaMin,sigmaMax,mask):
+        startX = 0
+        startY = 0
+        startZ = 0
+
+        endX = dat.shape[0]
+        endY = dat.shape[1]
+        endZ = dat.shape[2]
+    
+        stepX = endX - startX
+        stepY = endY - startY
+        stepZ = endZ - startZ
+                    
+        x = np.linspace(startX,endX,stepX)
+        y = np.linspace(startY,endY,stepY)
+        z = np.linspace(startZ,endZ,stepZ)
         
-            m_x = np.random.randint(0,endX)
-            m_y = np.random.randint(0,endY)
-            m_z = np.random.randint(0,endZ)
+        y,x, z = np.meshgrid(y,x,z) # get 3D variables instead of 1D
+        print(len(x),len(y),len(z))
 
-            sigma1 = np.random.randint(sigmaMin,sigmaMax)
-            sigma2 = np.random.randint(sigmaMin,sigmaMax)
-            sigma3 = np.random.randint(sigmaMin,sigmaMax)
+        posVessels = np.where( mask > 0 )
 
-            return self.gauss3d(x, y, z,mx=m_x,my=m_y,mz=m_z,sx=sigma1,sy=sigma2,sz=sigma3)
+        shuffledIndex = np.random.permutation(len(posVessels[0]))
+        shuffledPosVessels = posVessels[0][shuffledIndex],posVessels[1][shuffledIndex],posVessels[2][shuffledIndex]
+        
+        m_x = shuffledPosVessels[0][0]#np.random.randint(0,endX)
+        m_y = shuffledPosVessels[1][0]#np.random.randint(0,endY)
+        m_z = shuffledPosVessels[2][0]#np.random.randint(0,endZ)
 
+        sigma1 = np.random.randint(sigmaMin,sigmaMax)
+        sigma2 = np.random.randint(sigmaMin,sigmaMax)
+        sigma3 = np.random.randint(sigmaMin,sigmaMax)
+
+        return self.gauss3d(y,x, z,mx=m_y,my=m_x,mz=m_z,sx=sigma2,sy=sigma1,sz=sigma3)
 
     def vesselsIllumination(self,
                             inputPath,
