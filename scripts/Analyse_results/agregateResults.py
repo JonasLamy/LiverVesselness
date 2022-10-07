@@ -8,6 +8,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf
 
+import numpy as np
+
 # List all benchmark per filter
 pathDirectory = sys.argv[1]
 print(pathDirectory)
@@ -17,9 +19,24 @@ print(pathDirectory +"/**/*.summary.csv")
 pathListMetrics = sorted(glob.glob(f"{pathDirectory}/**/*metrics_summary.pkl",recursive=True))
 pathListCM = sorted(glob.glob(f"{pathDirectory}/**/*cm_summary.pkl",recursive=True))
 pathListROC = sorted(glob.glob(f"{pathDirectory}/**/*roc_summary.pkl",recursive=True))
-pathListRoc_rescaled = sorted(glob.glob(f"{pathDirectory}/**/*roc_rescaled_summary.pkl",recursive=True))
+pathListROC_rescaled = sorted(glob.glob(f"{pathDirectory}/**/*roc_rescaled_summary.pkl",recursive=True))
 
+pathListBestMean = sorted( glob.glob(f"{pathDirectory}/**/*Organ_Best_mean_MCC.pkl",recursive=True) )
 
+#pathListMetrics,pathListCM,pathListROC,pathListROC_rescaled = (list(t) for t in zip(*sorted(zip(list1, list2))))
+"""
+print("hello")
+print(pathListMetrics)
+print("----")
+print(pathListCM)
+print("----")
+print(pathListROC)
+print("----")
+print(pathListROC_rescaled)
+print("----")
+"""
+#for pathMetrics,pathCM,pathROC,pathRoc_rescaled in zip(pathListMetrics,pathListCM,pathListROC,pathListROC_rescaled):
+#    print(pathMetrics,pathCM,pathROC,pathRoc_rescaled)
 
 # prepare plots
 DFmetrics = loadPickleToDF( pathListMetrics[0] )
@@ -116,6 +133,7 @@ y_loc = np.linspace(0,1,10)
 y_ticks = [ "{:.1f}".format(y_loc[i]) for i in range( len(y_loc) ) ]
 y_lims = [0, 1]
 
+print("labels")
 print(labels)
 x = np.arange(len(labels)) * 100
 width = 70
@@ -136,11 +154,14 @@ lenBar = width / nbFilters
 offset = width / 2
 
 PSsummary = []
-for pathMetrics,pathCM,pathROC,pathRoc_rescaled in zip(pathListMetrics,pathListCM,pathListROC,pathListRoc_rescaled):
+ParamSummary = []
+for pathMetrics, pathCM, pathROC, pathRoc_rescaled, pathBestMean in zip(pathListMetrics,pathListCM,pathListROC,pathListROC_rescaled,pathListBestMean):
 
     DFmetrics = loadPickleToDF(pathMetrics)
     DFROC = loadPickleToDF(pathROC)
     DFROC_rescaled = loadPickleToDF(pathRoc_rescaled)
+
+    DFbestMean = loadPickleToDF(pathBestMean)
 
     tempString = pathMetrics.split("/")[-1]
     tempString = tempString.split("_")
@@ -148,7 +169,11 @@ for pathMetrics,pathCM,pathROC,pathRoc_rescaled in zip(pathListMetrics,pathListC
 
     # TODO : quick fix for bad naming convention
     # Be careful about the naming for good parsing
-    if(dbName == "vascu"):
+    if(dbName == "Ircad"):
+        optimStep = tempString[2]
+        filterName = tempString[3]
+        aoiName = tempString[4]
+    elif(dbName == "Vascu" or dbName == "vascu"):
         optimStep = tempString[2]
         filterName = tempString[3]
         aoiName = tempString[4]    
@@ -156,8 +181,10 @@ for pathMetrics,pathCM,pathROC,pathRoc_rescaled in zip(pathListMetrics,pathListC
         optimStep = tempString[1]
         filterName = tempString[2]
         aoiName = tempString[3]
+    if(filterName == "Rescale"):
+        filterName = "Baseline"
     print("-------")
-    print(dbName,optimStep,filterName,aoiName)
+    print("dbName:",dbName,"|optimStep",optimStep,"|FilterName",filterName,"|ROI",aoiName)
 
     # plot MCC
     # retrieve MCC infos
@@ -167,6 +194,11 @@ for pathMetrics,pathCM,pathROC,pathRoc_rescaled in zip(pathListMetrics,pathListC
     metric = DFmetrics["optimMetric"].unique()
     mean_MCC = DFmetrics["mean_MCC"]
     std_MCC = DFmetrics["std_MCC"]
+
+    print(mean_MCC.iloc[:-1])
+    print(std_MCC.iloc[:-1])
+    print(filterName)
+    print(x[:-1])
     
     plotDict["MCC"].bar(x[:-1]+count*lenBar-offset,mean_MCC.iloc[:-1],lenBar,label=filterName,yerr=std_MCC.iloc[:-1],error_kw=error_kw,color=color[filterName])
 
@@ -177,7 +209,7 @@ for pathMetrics,pathCM,pathROC,pathRoc_rescaled in zip(pathListMetrics,pathListC
     plotDict["MCC"].set_xticks(x[:-1])
     plotDict["MCC"].set_xticklabels(labels[:-1],rotation=30, ha='right',fontsize=xTicksLabelsSize)
     plotDict["MCC"].legend(ncol=3,fontsize=legendLabelSize)
-
+    
     # make little parameter summary
     temp = DFmetrics[DFmetrics["Region"]=="Organ"]
     temp2 = DFROC[DFROC["Region"] == "Organ"]
@@ -255,7 +287,24 @@ for pathMetrics,pathCM,pathROC,pathRoc_rescaled in zip(pathListMetrics,pathListC
     plotDict["ROC_rescaled"].set_xlabel("False positive rate",fontsize=xLabelsSize)
     #plotDict["ROC_rescaled"].set_xlim([0,10])
 
+    # retrieving parameters min and max
+    print(DFbestMean)
+
+    id_min = DFbestMean["mean_MCC"].idxmin()
+    id_max = DFbestMean["mean_MCC"].idxmax()
+    minLine = DFbestMean.loc[id_min]
+    maxLine = DFbestMean.loc[id_max]
+
+    minMCC = minLine["mean_MCC"]
+    maxMCC = maxLine["mean_MCC"]
+
+    minParam = minLine["VolumeName"]
+    maxParam = maxLine["VolumeName"]
+
+    ParamSummary.append( [filterName,minMCC,maxMCC,minParam,maxParam] )
+
     count += 1
+    
 #plt.gca().set_aspect('equal', adjustable='box')
 pdf = matplotlib.backends.backend_pdf.PdfPages(pathDirectory+f"/{dbName}_aggregated_summary.pdf")
 for i,key in enumerate(plotDict):
@@ -263,6 +312,13 @@ for i,key in enumerate(plotDict):
     pdf.savefig(figs[i])
 pdf.close()
 
+print("saving results at",pathDirectory+f"/{dbName}_aggregated_bestPS_summary.csv")
 dfPSsummary = pd.DataFrame(PSsummary,columns=["FilterName","AOI","Parameters","mean_Threshold","mean_MCC"])
 print(dfPSsummary)
 dfPSsummary.to_csv(pathDirectory+f"/{dbName}_aggregated_bestPS_summary.csv",index=False)
+
+# --------------------------------
+
+dfParamMean = pd.DataFrame(ParamSummary,columns=["FilterName","minMCC","maxMCC","minParam","maxParam"])
+print(dfParamMean)
+dfParamMean.to_csv(pathDirectory+f"/{dbName}_aggregated_bestParam_summary.csv",index=False)
