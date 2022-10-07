@@ -1,6 +1,6 @@
 # LiverVesselness
 
-** It has been brought to our attention that some errors exist in our code and are working in fixing it. In case you want to use the code, feel free to send me a message, I would gladly keep you updated"
+EDIT : Repository updated the 7th of October 2022. Some implementation mistakes have been corrected.
 
 This is the Repository for the journal article : 
 
@@ -30,7 +30,7 @@ CMake > 3.10.2 (https://cmake.org/)
 ITK >= 5.2 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
 recommanded options : Module_Thickness3D, ITK_USE_FFTWF, ITK_USE_FFTWD
 
-Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp)
+Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp). Clone jsoncpp in the lib directory of the repository. 
 
 Boost Math : [Github page](https://github.com/boostorg/math). This is only required for bessel functions in OOF.
 
