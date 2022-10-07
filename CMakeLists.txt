@@ -23,7 +23,7 @@ include(${ITK_USE_FILE})
 
 #Antiga ------------------------
 
-add_executable(Antiga src/antiga.cpp)
+add_executable(Antiga src/Filters/antiga.cpp)
 target_include_directories(Antiga PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -31,9 +31,10 @@ target_include_directories(Antiga PUBLIC
 target_link_libraries(Antiga ${ITK_LIBRARIES}  )
 set_target_properties(Antiga PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
-# Frangi -----------------------
+# Our own Frangi's implementation -----------------------
+# In the benchmark, Antiga implementation is used.
 
-add_executable(Frangi src/frangi.cpp)
+add_executable(Frangi src/Filters/frangi.cpp)
 target_include_directories(Frangi PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Frangi>"
@@ -44,7 +45,7 @@ set_target_properties(Frangi PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY
 
 # Jerman -----------------------
 
-add_executable(Jerman src/jerman.cpp)
+add_executable(Jerman src/Filters/jerman.cpp)
 target_include_directories(Jerman PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Jerman>"
@@ -55,7 +56,7 @@ set_target_properties(Jerman PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY
 
 # Jerman blobness -----------------------
 
-add_executable(JermanBlobness src/jermanBlobness.cpp)
+add_executable(JermanBlobness src/Filters/jermanBlobness.cpp)
 target_include_directories(JermanBlobness PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/JermanBlobness>"
@@ -68,7 +69,7 @@ set_target_properties(JermanBlobness PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAK
 
 # RhuiZhang -----------------------
 
-add_executable(Zhang src/ruiZhang.cpp)
+add_executable(Zhang src/Filters/ruiZhang.cpp)
 target_include_directories(Zhang PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/RuiZhang>"
@@ -80,7 +81,7 @@ set_target_properties(Zhang PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_
 
 # Meijering --------------------------
 
-add_executable(Meijering src/meijering.cpp)
+add_executable(Meijering src/Filters/meijering.cpp)
 target_include_directories(Meijering PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Meijering>"
@@ -91,7 +92,7 @@ set_target_properties(Meijering PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 
 # Sato -----------------------------
 
-add_executable(Sato src/sato.cpp)
+add_executable(Sato src/Filters/sato.cpp)
 target_include_directories(Sato PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   )
@@ -100,7 +101,7 @@ set_target_properties(Sato PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_D
 
 # OOF ------------------------------
 
-add_executable(OOF src/oof.cxx)
+add_executable(OOF src/Filters/oof.cxx)
 target_include_directories(OOF PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/OOF>"
@@ -111,7 +112,7 @@ set_target_properties(OOF PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DI
 
 # OOF Geometric mean -----------------
 
-add_executable(OOF_GM src/oof_GM.cxx)
+add_executable(OOF_GM src/Filters/oof_GM.cxx)
 target_include_directories(OOF_GM PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/OOF>"
@@ -126,7 +127,7 @@ add_subdirectory(RORPO)
 
 # rescale Filter
 
-add_executable(Rescale src/rescale.cpp)
+add_executable(Rescale src/Filters/rescale.cpp)
 target_include_directories(Rescale PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 )
@@ -139,7 +140,7 @@ find_package(jsoncpp REQUIRED)
 get_target_property(JSON_INC_PATH jsoncpp_static INTERFACE_INCLUDE_DIRECTORIES)
 include_directories(${JSON_INC_PATH})
 
-add_executable(Benchmark src/benchmark.cpp)
+add_executable(Benchmark src/Benchmark/benchmark.cpp)
 
 target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -150,10 +151,22 @@ target_link_libraries(Benchmark ${ITK_LIBRARIES} jsoncpp_static)
 
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
+# TEST METRICS -------------------------------------------
+
+add_executable(Test src/Benchmark/test.cpp)
+target_include_directories(Test PUBLIC
+"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
+  "$<INSTALL_INTERFACE:include>"
+  )
+target_link_libraries(Test ${ITK_LIBRARIES} )
+set_target_properties(Test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+
+
 
 # process ircad -------------------
 
-add_executable(CropImages src/crop_ircad_data.cpp)
+add_executable(CropImages src/BDDGeneration/crop_ircad_data.cpp)
 target_include_directories(CropImages PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -163,7 +176,7 @@ set_target_properties(CropImages PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CU
 
 # utilities --------------------------------
 
-add_executable(ChangeLabelDicom src/changeLabelDicom.cpp)
+add_executable(ChangeLabelDicom src/BDDGeneration/changeLabelDicom.cpp)
 target_include_directories(ChangeLabelDicom PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -171,7 +184,7 @@ target_include_directories(ChangeLabelDicom PUBLIC
 target_link_libraries(ChangeLabelDicom ${ITK_LIBRARIES})
 set_target_properties(ChangeLabelDicom PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
   
-add_executable(MakeIso src/makeIso.cpp)
+add_executable(MakeIso src/BDDGeneration/makeIso.cpp)
 target_include_directories(MakeIso PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -180,7 +193,7 @@ target_link_libraries(MakeIso ${ITK_LIBRARIES})
 set_target_properties(MakeIso PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/ircad" )
 
   
-add_executable(MakeIsoBullit src/makeIsoBullit.cpp)
+add_executable(MakeIsoBullit src/BDDGeneration/makeIsoBullit.cpp)
 target_include_directories(MakeIsoBullit PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -189,7 +202,7 @@ target_link_libraries(MakeIsoBullit ${ITK_LIBRARIES})
 set_target_properties(MakeIsoBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/bullit" )
 
 
-add_executable(MakeVascuSynthGT src/makeVascuSynthGT.cpp)
+add_executable(MakeVascuSynthGT src/BDDGeneration/makeVascuSynthGT.cpp)
 target_include_directories(MakeVascuSynthGT PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -197,7 +210,7 @@ target_include_directories(MakeVascuSynthGT PUBLIC
 target_link_libraries(MakeVascuSynthGT ${ITK_LIBRARIES})
 set_target_properties(MakeVascuSynthGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
 
-add_executable(LabelVessels src/labelVessels.cpp)
+add_executable(LabelVessels src/BDDGeneration/labelVessels.cpp)
 target_include_directories(LabelVessels PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -205,7 +218,7 @@ target_include_directories(LabelVessels PUBLIC
 target_link_libraries(LabelVessels ${ITK_LIBRARIES})
 set_target_properties(LabelVessels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator" )
 
-add_executable(LabelVesselsBullit src/labelVesselsBullit.cpp)
+add_executable(LabelVesselsBullit src/BDDGeneration/labelVesselsBullit.cpp)
 target_include_directories(LabelVesselsBullit PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -217,7 +230,7 @@ set_target_properties(LabelVesselsBullit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${
 
 # Bifurcations VascuSynth
 
-add_executable(MakeVascuSynthBifurcationGT src/makeVascuSynthBifurcationGT.cpp)
+add_executable(MakeVascuSynthBifurcationGT src/BDDGeneration/makeVascuSynthBifurcationGT.cpp)
 target_include_directories(MakeVascuSynthBifurcationGT PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -227,7 +240,7 @@ set_target_properties(MakeVascuSynthBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRE
 
 # Bifurcation IRCAD 
 
-add_executable(MakeIrcadBifurcationGT src/makeIrcadBifurcation.cpp)
+add_executable(MakeIrcadBifurcationGT src/BDDGeneration/makeIrcadBifurcation.cpp)
 target_include_directories(MakeIrcadBifurcationGT PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -237,7 +250,7 @@ set_target_properties(MakeIrcadBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTORY
 
 # Bifurcation Bullit 
 
-add_executable(MakeBullitBifurcationGT src/makeBullitBifurcations.cpp)
+add_executable(MakeBullitBifurcationGT src/BDDGeneration/makeBullitBifurcations.cpp)
 target_include_directories(MakeBullitBifurcationGT PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -248,7 +261,7 @@ set_target_properties(MakeBullitBifurcationGT PROPERTIES RUNTIME_OUTPUT_DIRECTOR
 
 # Shapes 
 
-add_executable(MakeVascuSynthSizeLabels src/makeVascuSizeLabels.cpp)
+add_executable(MakeVascuSynthSizeLabels src/BDDGeneration/makeVascuSizeLabels.cpp)
 target_include_directories(MakeVascuSynthSizeLabels PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
@@ -256,24 +269,17 @@ target_include_directories(MakeVascuSynthSizeLabels PUBLIC
 target_link_libraries(MakeVascuSynthSizeLabels ${ITK_LIBRARIES})
 set_target_properties(MakeVascuSynthSizeLabels PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BDDgenerator/vascuSynth" )
 
-# isoFromUnit local script
+# isoFromUnit
 
-#add_executable(isoFromUnit src/isoFromUnit.cpp)
-#target_include_directories(isoFromUnit PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#  )
-#target_link_libraries(isoFromUnit ${ITK_LIBRARIES})
-#set_target_properties(isoFromUnit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
-
-# TEST METRICS
-
-add_executable(Test src/test.cpp)
-target_include_directories(Test PUBLIC
-"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
+add_executable(isoFromUnit src/BDDGeneration/isoFromUnit.cpp)
+target_include_directories(isoFromUnit PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
   )
-target_link_libraries(Test ${ITK_LIBRARIES} )
-set_target_properties(Test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+target_link_libraries(isoFromUnit ${ITK_LIBRARIES})
+set_target_properties(isoFromUnit PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" )
+
+
+
+
 
