@@ -46,6 +46,7 @@ odyssee.merveille@gmail.com
 #include "RORPO/Algo.hpp"
 #include "RORPO/Geodilation.hpp"
 #include "RORPO/RPO.hpp"
+#include "Image/Image_IO_ITK.hpp"
 
 
 template<typename T, typename MaskType>
@@ -63,6 +64,16 @@ Image3D<T> RORPO(const Image3D<T> &image, int L, int nbCores, int dilationSize, 
     Image3D<T> RPO7(image.dimX() + 4, image.dimY() + 4, image.dimZ() + 4, 2);
 
     auto orientationsRPO = RPO(image, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7, nbCores, dilationSize, mask);
+
+ 
+    Write_Itk_Image<T>(RPO1,"RPO_1_"+std::to_string(L)+".nii");
+    Write_Itk_Image<T>(RPO2,"RPO_2_"+std::to_string(L)+".nii");
+    Write_Itk_Image<T>(RPO3,"RPO_3_"+std::to_string(L)+".nii");
+    Write_Itk_Image<T>(RPO4,"RPO_4_"+std::to_string(L)+".nii");
+    Write_Itk_Image<T>(RPO5,"RPO_5_"+std::to_string(L)+".nii");
+    Write_Itk_Image<T>(RPO6,"RPO_6_"+std::to_string(L)+".nii");
+    Write_Itk_Image<T>(RPO7,"RPO_7_"+std::to_string(L)+".nii");    
+    
 
     // ################### Limit Orientations Treatment #######################
 
