@@ -1,0 +1,15 @@
+{
+     "Settings":{
+	"name":"Ircad_iso_PS_Sato",
+	"path":"extendedBenchmark/Ircad_iso/PS",
+      "inputVolumesList":"extendedBenchmark/Filelists/Ircad_iso_EB.txt",
+	"algorithmSets":"extendedBenchmark/ParamSettings/Ircad_iso/Ircad_iso_PS_Sato.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"computeMetricsOnly":false,
+	"rescaleFilters":true
+    }
+}
+

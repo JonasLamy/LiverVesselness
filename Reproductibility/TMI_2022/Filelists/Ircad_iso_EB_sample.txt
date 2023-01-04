@@ -1,0 +1,9 @@
+3Dircadb1.7
+ircad_iso/3Dircadb1.7/patientIso.nii
+ircad_iso/3Dircadb1.7/vesselsIsoCut_.nii
+ircad_iso/3Dircadb1.7/maskedLiverAndVesselsIso.nii
+ircad_iso/3Dircadb1.7/dilatedVesselsMasked.nii
+ircad_iso/3Dircadb1.7/bifurcationsMaskIso.nii
+ircad_iso/3Dircadb1.7/dilatedVesselsMaskLarge.nii
+ircad_iso/3Dircadb1.7/dilatedVesselsMaskMedium.nii
+ircad_iso/3Dircadb1.7/dilatedVesselsMaskSmall.nii

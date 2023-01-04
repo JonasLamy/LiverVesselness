@@ -1,0 +1,8 @@
+Normal033-MRA
+Bullitt_V2/Normal033-MRA/rician_4.0.nii.gz
+Bullitt_V2/Normal033-MRA/binaryVesselsIso_S.nii.gz
+Bullitt_V2/Normal033-MRA/brainMaskIso.nii.gz
+Bullitt_V2/Normal033-MRA/dilatedVesselsMask.nii.gz
+Bullitt_V2/Normal033-MRA/bifurcationMaskIso_S.nii.gz
+Bullitt_V2/Normal033-MRA/dilatedVesselsMaskMedium_S.nii.gz
+Bullitt_V2/Normal033-MRA/dilatedVesselsMaskSmall_S.nii.gz

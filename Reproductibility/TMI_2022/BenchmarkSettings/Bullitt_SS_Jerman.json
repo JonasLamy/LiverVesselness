@@ -1,0 +1,15 @@
+{
+     "Settings":{
+	"name":"Bullitt_SS_Jerman",
+	"path":"extendedBenchmark/Bullitt/SS",
+      "inputVolumesList":"extendedBenchmark/Filelists/Bullitt_EB.txt",
+	"algorithmSets":"extendedBenchmark/ParamSettings/Bullitt/Bullitt_SS_Jerman.json",
+	"maskList":["Organ","VN","Bifurcations","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"computeMetricsOnly":false,
+	"rescaleFilters":true
+    }
+}
+

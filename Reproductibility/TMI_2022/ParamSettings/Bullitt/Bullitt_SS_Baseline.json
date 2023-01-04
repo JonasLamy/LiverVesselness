@@ -1,0 +1,9 @@
+{
+ "Rescale":
+ [
+  {
+   "Output":"baseline.nii",
+   "Arguments":[]
+  }
+ ]
+}

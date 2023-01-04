@@ -1,0 +1,15 @@
+{
+     "Settings":{
+	"name":"Ircad_iso_EB_BestParams",
+	"path":"extendedBenchmark/BestParams",
+      "inputVolumesList":"extendedBenchmark/Filelists/Ircad_iso_EB_sample.txt",
+	"algorithmSets":"extendedBenchmark/ParamSettings/Ircad_iso/Ircad_iso_EB_BestParams.json",
+	 "maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":false,
+	"computeMetricsOnly":false,
+	"rescaleFilters":true
+    }
+}
+

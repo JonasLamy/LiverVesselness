@@ -1,0 +1,15 @@
+{
+     "Settings":{
+	"name":"Vascu_2_SS_RORPO_p1",
+	"path":"extendedBenchmark/Vascu_2/SS",
+      "inputVolumesList":"extendedBenchmark/Filelists/Vascu_2_EB_p1.txt",
+	"algorithmSets":"extendedBenchmark/ParamSettings/Vascu_2/Vascu_2_SS_RORPO.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"computeMetricsOnly":false,
+	"rescaleFilters":true
+    }
+}
+

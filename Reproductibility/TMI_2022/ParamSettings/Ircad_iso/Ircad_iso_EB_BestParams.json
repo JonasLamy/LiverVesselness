@@ -1,0 +1,102 @@
+{
+    "Rescale":
+    [
+	{
+	    "Output":"baseline.nii",
+	    "Arguments":[]
+	}
+    ],
+    "Antiga" :
+    [
+	{
+	    "Output":"antiga_ircad.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.60"},
+		{"sigmaMax":"2.60"},
+		{"nbSigmaSteps":"3"},
+		{"alpha":"1.0"},
+		{"beta":"1.0"},
+		{"gamma":"30"}
+	    ]
+	}
+    ],
+
+    "Jerman" :
+    [
+	{
+	    "Output":"jerman_ircad.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.20"},
+		{"sigmaMax":"1.80"},
+		{"nbSigmaSteps":"3"},
+		{"tau":"0.10"}
+	    ]
+	}
+    ],
+	
+    "RORPO_multiscale_usage" :
+    [
+	{
+	    "Output":"rorpo_ircad.nii",
+	    "Arguments":[
+		{"scaleMin":"70"},
+		{"factor":"1.30"},
+		{"nbScales":"4"},
+		{"core":"7"},
+		{"verbose":""},
+		{"dilationSize":"0"},
+		{"normalize":""},
+	    ]
+	}
+    ],
+    "Meijering" :
+    [
+	{
+	    "Output":"meijering_ircad.nii",
+	    "Arguments":[
+		{"alpha":"-0.33"},
+		{"sigmaMin":"1.20"},
+		{"sigmaMax":"1.80"},	
+		{"nbSigmaSteps":"3"}
+	    ]
+	}
+    ],
+
+    "OOF_GM":
+    [
+	{
+	    "Output":"OOF_GM_ircad.nii",
+	    "Arguments":[
+		{"sigmaMin":"0.80"},
+		{"sigmaMax":"2.20"},
+		{"nbSigmaSteps":"3"},
+		{"sigma":"1.0"}
+	    ]
+	}	
+    ],
+    "Zhang":
+    [
+	{
+	    "Output":"Zhang_ircad.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.20"},
+		{"sigmaMax":"2.20"},
+		{"nbSigmaSteps":"4"},
+		{"tau":"0.30"}
+	    ]
+	}	
+    ],
+    "Sato":
+    [
+	{
+	    "Output":"Sato_ircad.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.20"},
+		{"sigmaMax":"1.80"},
+		{"nbSigmaSteps":"3"},
+		{"alpha1":"0.30"},
+		{"alpha2":"1.60"}
+	    ]
+	}	
+    ]
+}

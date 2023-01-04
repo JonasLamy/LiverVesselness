@@ -1,0 +1,9 @@
+Group4_data11
+/DATA/vascu_extendedBenchmark/Group4/data11/rician_2.0.nii
+/DATA/vascu_extendedBenchmark/Group4/data11/binaryVessels.nii
+/DATA/vascu_extendedBenchmark/maskWholeImage.nii
+/DATA/vascu_extendedBenchmark/Group4/data11/binaryVesselDilated.nii
+/DATA/vascu_extendedBenchmark/Group4/data11/binaryBifurcationsMask.nii
+/DATA/vascu_extendedBenchmark/Group4/data11/dilatedVesselsMaskLarge.nii
+/DATA/vascu_extendedBenchmark/Group4/data11/dilatedVesselsMaskMedium.nii
+/DATA/vascu_extendedBenchmark/Group4/data11/dilatedVesselsMaskSmall.nii

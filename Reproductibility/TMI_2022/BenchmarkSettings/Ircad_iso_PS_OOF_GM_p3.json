@@ -1,0 +1,15 @@
+{
+     "Settings":{
+	"name":"Ircad_iso_PS_OOF_GM_p3",
+	"path":"extendedBenchmark/Ircad_iso/PS",
+      "inputVolumesList":"extendedBenchmark/Filelists/Ircad_iso_EB_p3.txt",
+	"algorithmSets":"extendedBenchmark/ParamSettings/Ircad_iso/Ircad_iso_PS_OOF_GM.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"computeMetricsOnly":false,
+	"rescaleFilters":true
+    }
+}
+

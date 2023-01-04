@@ -1,0 +1,15 @@
+{
+     "Settings":{
+	"name":"Vascu_4_PS_Frangi_p1",
+	"path":"extendedBenchmark/Vascu_4/PS",
+      "inputVolumesList":"extendedBenchmark/Filelists/Vascu_4_EB_p1.txt",
+	"algorithmSets":"extendedBenchmark/ParamSettings/Vascu_4/Vascu_4_PS_Frangi.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"computeMetricsOnly":false,
+	"rescaleFilters":true
+    }
+}
+

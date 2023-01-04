@@ -1,0 +1,15 @@
+{
+     "Settings":{
+	"name":"Vascu_6_PS_OOF_GM_p2",
+	"path":"extendedBenchmark/Vascu_6/PS",
+      "inputVolumesList":"extendedBenchmark/Filelists/Vascu_6_EB_p2.txt",
+	"algorithmSets":"extendedBenchmark/ParamSettings/Vascu_6/Vascu_6_PS_OOF_GM.json",
+	"maskList":["Organ","VN","Bifurcations","Vlarge","Vmedium","Vsmall"],
+	"enhancementMask":"Organ",
+	"nbThresholds":200,
+	"removeResultsVolumes":true,
+	"computeMetricsOnly":false,
+	"rescaleFilters":true
+    }
+}
+

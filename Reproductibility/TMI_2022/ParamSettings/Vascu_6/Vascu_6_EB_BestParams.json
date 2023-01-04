@@ -1,0 +1,102 @@
+{
+    "Rescale":
+    [
+	{
+	    "Output":"baseline.nii",
+	    "Arguments":[]
+	}
+    ],
+    "Antiga" :
+    [
+	{
+	    "Output":"antiga_v6.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.60"},
+		{"sigmaMax":"2.2"},
+		{"nbSigmaSteps":"4"},
+		{"alpha":"0.20"},
+		{"beta":"0.40"},
+		{"gamma":"30"}
+	    ]
+	}
+    ],
+
+    "Jerman" :
+    [
+	{
+	    "Output":"jerman_v6.nii",
+	    "Arguments":[
+		{"sigmaMin":"0.80"},
+		{"sigmaMax":"1.40"},
+		{"nbSigmaSteps":"3"},
+		{"tau":"0.30"}
+	    ]
+	}
+    ],
+	
+    "RORPO_multiscale_usage" :
+    [
+	{
+	    "Output":"rorpo_v6.nii",
+	    "Arguments":[
+		{"scaleMin":"40"},
+		{"factor":"1.40"},
+		{"nbScales":"3"},
+		{"core":"7"},
+		{"verbose":""},
+		{"dilationSize":"0"},
+		{"normalize":""},
+	    ]
+	}
+    ],
+    "Meijering" :
+    [
+	{
+	    "Output":"meijering_v6.nii",
+	    "Arguments":[
+		{"alpha":"-0.33"},
+		{"sigmaMin":"0.80"},
+		{"sigmaMax":"1.40"},	
+		{"nbSigmaSteps":"3"}
+	    ]
+	}
+    ],
+
+    "OOF_GM":
+    [
+	{
+	    "Output":"OOF_GM_v6.nii",
+	    "Arguments":[
+		{"sigmaMin":"0.80"},
+		{"sigmaMax":"1.40"},
+		{"nbSigmaSteps":"3"},
+		{"sigma":"0.1"}
+	    ]
+	}	
+    ],
+    "Zhang":
+    [
+	{
+	    "Output":"Zhang_v6.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.20"},
+		{"sigmaMax":"1.80"},
+		{"nbSigmaSteps":"4"},
+		{"tau":"0.90"}
+	    ]
+	}	
+    ],
+    "Sato":
+    [
+	{
+	    "Output":"Sato_v6.nii",
+	    "Arguments":[
+		{"sigmaMin":"1.2"},
+		{"sigmaMax":"1.8"},
+		{"nbSigmaSteps":"4"},
+		{"alpha1":"0.5"},
+		{"alpha2":"2"}
+	    ]
+	}	
+    ]
+}
