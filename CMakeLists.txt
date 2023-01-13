@@ -134,10 +134,23 @@ set_target_properties(Rescale PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINAR
 
 # benchmark ------------------------
 
-#find_package(jsoncpp REQUIRED)
-#get_target_property(JSON_INC_PATH jsoncpp_static INTERFACE_INCLUDE_DIRECTORIES)
-#include_directories(${JSON_INC_PATH})
 add_subdirectory(lib/jsoncpp)
+
+find_package(jsoncpp REQUIRED)
+get_target_property(JSON_INC_PATH jsoncpp_static INTERFACE_INCLUDE_DIRECTORIES)
+include_directories(${JSON_INC_PATH})
+
+#include(lib/jsoncpp.cmake)
+#if(BENCHMARK_VESSEL_USE_LOCAL_JSONCPP)
+#	set(JSONCPP_FOUND ${JSONCPP_FOUND} PARENT_SCOPE)
+#	set(JSON_INC_PATH ${JSONCPP_INCLUDE_DIRS} PARENT_SCOPE)
+#	set(JSONCPP_LIBRARIES ${JSONCPP_LIBRARIES} PARENT_SCOPE)
+#	set(JSONCPP_SOURCES ${JSONCPP_SOURCES} PARENT_SCOPE)
+#else()
+#   find_package(jsoncpp REQUIRED) 
+#   get_target_property(JSON_INC_PATH jsoncpp_lib INTERFACE_INCLUDE_DIRECTORIES)
+#   include_directories(${JSON_INC_PATH})
+#endif()
 
 add_executable(Benchmark src/Benchmark/benchmark.cpp)
 
