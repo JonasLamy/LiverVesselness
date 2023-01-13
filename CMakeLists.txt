@@ -9,8 +9,6 @@ if(APPLE)
     set(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk)
 endif()
 
-
-
 # CLI11
 include_directories( "${PROJECT_SOURCE_DIR}/lib/" )
 
@@ -136,9 +134,10 @@ set_target_properties(Rescale PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINAR
 
 # benchmark ------------------------
 
-find_package(jsoncpp REQUIRED)
-get_target_property(JSON_INC_PATH jsoncpp_static INTERFACE_INCLUDE_DIRECTORIES)
-include_directories(${JSON_INC_PATH})
+#find_package(jsoncpp REQUIRED)
+#get_target_property(JSON_INC_PATH jsoncpp_static INTERFACE_INCLUDE_DIRECTORIES)
+#include_directories(${JSON_INC_PATH})
+add_subdirectory(lib/jsoncpp)
 
 add_executable(Benchmark src/Benchmark/benchmark.cpp)
 
@@ -147,8 +146,8 @@ target_include_directories(Benchmark PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Benchmark>"
   "$<INSTALL_INTERFACE:include/Benchmark>"
   )
-target_link_libraries(Benchmark ${ITK_LIBRARIES} jsoncpp_static)
 
+target_link_libraries(Benchmark ${ITK_LIBRARIES} ${JSONCPP_LIBRARIES}   jsoncpp_lib)
 set_target_properties(Benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 # TEST METRICS -------------------------------------------
