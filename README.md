@@ -30,7 +30,10 @@ CMake > 3.10.2 (https://cmake.org/)
 ITK >= 5.2 : [Github page](https://github.com/InsightSoftwareConsortium/ITK)
 recommanded options : Module_Thickness3D, ITK_USE_FFTWF, ITK_USE_FFTWD
 
-Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp). Clone jsoncpp in the lib directory of the repository. 
+Jsoncpp : [Github page](https://github.com/open-source-parsers/jsoncpp). Initialise with :
+```
+git submodule update --init
+```
 
 Boost Math : [Github page](https://github.com/boostorg/math). This is only required for bessel functions in OOF.
 
