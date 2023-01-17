@@ -1,3 +1,10 @@
+"""
+scaleSearch.py
+
+Contains methods to loop through a set of parameters as well as bound classes. Bounds classes specify the parameters min bound, max bound and step.
+This specific file is for scale parameters. See parameterSearch for intrinsic parameters.
+"""
+
 from methods import *
 import math
 import matplotlib.pyplot as plt

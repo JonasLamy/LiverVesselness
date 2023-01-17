@@ -38,13 +38,13 @@ class NewVesselness:
 
         return st
 
-
+# Base class for vesselness
 class Vesselness:
     def __init__(self,output):
         self.output = output
     def __str__(self):
         return """   \"Output\":\""""+self.output+"""\",\n"""
-
+# Base class for Hessian based vesselness
 class Hessian(Vesselness):
     def __init__(self,output,sigmaMin,sigmaMax,nbSigmaSteps):
         super().__init__(output)

@@ -1,4 +1,7 @@
+"""
+methodsParameters.py
 
+"""
 
 class FrangiParameters:
     def __init__(self,alpha=0.5,beta=0.5,gamma=5):

@@ -1,19 +1,27 @@
+"""
+makeParameters.py
+
+Main file to generate JSON files for both scale parameters and intrinsic parameters set.
+"""
+
 from scaleSearch import *
 from parameterSearch import *
 import os
-##################
-# Main 
-##################
+
+
 
 dirPath = "test/"
-
 datasetName = "Bullitt"
 
 print("Saving files in directory :",dirPath)
 if not os.path.exists(dirPath):
     print("path to directory "+dirPath+" does not exists...aborting")
     exit()
-"""
+
+# -----------------------------------------------
+#  scale parameter generation
+# -----------------------------------------------
+
 bounds = BoundsSS()
 bounds.minBoundStart = 0.2
 bounds.minBoundEnd   = 1.6
@@ -26,7 +34,6 @@ bounds.maxBoundStep  = 0.8
 bounds.nbScalesMin = 3
 bounds.nbScalesMax = 4
 bounds.nbScalesStep = 1
-
 
 print("Scale search - Number of parameters sets")
 print("--------------------")
@@ -65,7 +72,7 @@ zhangParams = ZhangParameters(tau=0.5)
 zhangSS = HessianScaleSearch(bounds,"Zhang",zhangParams)
 print(zhangSS, file=open(dirPath+f"{datasetName}_SS_Zhang.json","w"))
 print("Zhang scale search:",zhangSS.nbParameters)
-"""
+
 rorpoBoundsSS = RORPOBoundsSS()
 rorpoBoundsSS.minScaleStart = 10
 rorpoBoundsSS.minScaleEnd = 90
@@ -83,6 +90,10 @@ rorpoParams = RORPOParameters(core=7,dilationSize=0,verbose=True)
 rorpoSS = RORPOScaleSearch("RORPO_multiscale_usage",rorpoBoundsSS,rorpoParams)
 print(rorpoSS,file=open(dirPath+f"{datasetName}_SS_RORPO.json","w"))
 print("RORPO scale search:",rorpoSS.nbParameters)
+
+# -----------------------------------------------
+#  Intrinsic parameter generations
+# -----------------------------------------------
 
 # Frangi PS
 frangiBoundsPS = FrangiBounds()
@@ -112,7 +123,6 @@ satoBoundsPS.alpha2Step  = 0.2
 satoPS = SatoParametersSearch("Sato",satoBoundsPS,sigmaMin=0.20,sigmaMax=1.20,sigmaSteps=3)
 print(satoPS,file=open(dirPath+f"{datasetName}_PS_Sato.json","w"))
 print("sato parameters search:",satoPS.nbParameters)
-
 
 # Meijering PS
 

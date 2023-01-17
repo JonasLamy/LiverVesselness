@@ -1,3 +1,10 @@
+"""
+parameterSearch.py
+
+Contains methods to loop through a set of parameters as well as bound classes. Bounds classes specify the parameters min bound, max bound and step.
+This specific file is for intrinsic parameters. See scaleSearch for scale parameters.
+
+"""
 from methods import *
 
 class FrangiBounds:
