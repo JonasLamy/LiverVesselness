@@ -2,12 +2,9 @@
 build/
 script/
 MethodsRecap/
-.nii
-.vol
-.tar.xz
+*.nii
+*.vol
+*.tar.xz
 *~
-<<<<<<< HEAD
-.pyc
-.zip
-=======
->>>>>>> c3eb276534e58677589fc392169d7d1b99e61748
+*.pyc
+*.zip
