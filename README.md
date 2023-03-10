@@ -12,6 +12,18 @@ The implementations of the seven vessel filtering methods are available and the 
 An installation-free online demonstration is also available:
 [http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
+Please cite the reference of this work if you use part of it
+```
+@ARTICLE{9833530,
+  author={Lamy, Jonas and Merveille, Odyssée and Kerautret, Bertrand and Passat, Nicolas},
+  journal={IEEE Transactions on Medical Imaging}, 
+  title={A Benchmark Framework for Multiregion Analysis of Vesselness Filters}, 
+  year={2022},
+  volume={41},
+  number={12},
+  pages={3649-3662},
+  doi={10.1109/TMI.2022.3192679}}
+```
 ## DATA
 
 Data for the benchmark comes from the modification of public datasets. The tweaked versions are available here : http://eidolon.univ-lyon2.fr/~jlamy/
@@ -20,6 +32,7 @@ Original data are available on the authors websites :
 
 Ircad Dataset : https://www.ircad.fr/research/3d-ircadb-01/
 Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
+Bullitt Dataset : https://data.kitware.com/#collection/591086ee8d777f16d01e0724/folder/58a372e38d777f0721a64dc6
 
 Scripts to transform data are available in the scripts/BDDgenerator folder
 ## Dependancies
