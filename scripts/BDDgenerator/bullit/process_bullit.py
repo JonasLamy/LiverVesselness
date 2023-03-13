@@ -7,9 +7,6 @@ python3 process_bullit.py BASE_DIR OUTPUT_DIR IDENTITY_SPACING
     BASE_DIR : original bullitt dataset location
     OUTPUT_DIR : Destination directory
     IDENTITY_SPACING : either 0 or 1. Define if the isotropic spacing is [1mm,1mm,1mm] or based on volume maximum resolution [maxRes,maxRes,maxRes].
-
-The steps involve :
-
 """
 import sys
 import os

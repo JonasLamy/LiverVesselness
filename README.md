@@ -12,7 +12,8 @@ The implementations of the seven vessel filtering methods are available and the 
 An installation-free online demonstration is also available:
 [http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
-Please cite the reference of this work if you use part of it
+## How to cite
+Please cite the reference of this work if you use any of it :
 ```
 @ARTICLE{9833530,
   author={Lamy, Jonas and Merveille, Odyssée and Kerautret, Bertrand and Passat, Nicolas},
