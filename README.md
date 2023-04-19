@@ -27,7 +27,7 @@ Please cite the reference of this work if you use any of it :
 ```
 ## DATA
 
-Data for the benchmark comes from the modification of public datasets. The tweaked versions are available here : http://eidolon.univ-lyon2.fr/~jlamy/
+Data for the benchmark comes from the modification of public datasets. The tweaked versions are available here : http://dionysos.univ-lyon2.fr/R-vessel-X/
 
 Original data are available on the authors websites :
 
