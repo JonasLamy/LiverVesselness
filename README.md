@@ -31,9 +31,9 @@ Data for the benchmark comes from the modification of public datasets. The tweak
 
 Original data are available on the authors websites :
 
-Ircad Dataset : https://www.ircad.fr/research/3d-ircadb-01/
-Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
-Bullitt Dataset : https://data.kitware.com/#collection/591086ee8d777f16d01e0724/folder/58a372e38d777f0721a64dc6
+- Ircad Dataset : https://www.ircad.fr/research/3d-ircadb-01/
+- Vascusynth Dataset : http://vascusynth.cs.sfu.ca/Data.html
+- Bullitt Dataset : https://data.kitware.com/#collection/591086ee8d777f16d01e0724/folder/58a372e38d777f0721a64dc6
 
 Scripts to transform data are available in the scripts/BDDgenerator folder
 ## Dependancies
