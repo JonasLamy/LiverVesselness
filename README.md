@@ -12,6 +12,13 @@ The implementations of the seven vessel filtering methods are available and the 
 An installation-free online demonstration is also available:
 [http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo](http://ipol-geometry.loria.fr/~kerautre/ipol_demo/LiverVesselnessIPOLDemo/)
 
+### 3D Slicer integration (13/06/2023)
+
+The filters implementation is now directly available in 3DSlicer extension manager. [Github page](https://github.com/R-Vessel-X/SlicerRVXVesselnessFilters)
+
+A plug-in for manual liver vessels segmentation is also available here: [Github page](https://github.com/R-Vessel-X/SlicerRVXLiverSegmentation)
+
+
 ## How to cite
 Please cite the reference of this work if you use any of it :
 ```
@@ -25,12 +32,6 @@ Please cite the reference of this work if you use any of it :
   pages={3649-3662},
   doi={10.1109/TMI.2022.3192679}}
 ```
-## 3D Slicer integration (13/06/2023)
-
-The filters implementation is now directly available in 3DSlicer extension manager. [Github page](https://github.com/R-Vessel-X/SlicerRVXVesselnessFilters)
-
-A plug-in for manual liver vessels segmentation is also available here: [Github page](https://github.com/R-Vessel-X/SlicerRVXLiverSegmentation)
-
 ## DATA
 
 Data for the benchmark comes from the modification of public datasets. The tweaked versions are available here : http://dionysos.univ-lyon2.fr/R-vessel-X/
