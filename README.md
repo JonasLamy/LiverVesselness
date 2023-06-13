@@ -25,6 +25,11 @@ Please cite the reference of this work if you use any of it :
   pages={3649-3662},
   doi={10.1109/TMI.2022.3192679}}
 ```
+## 3D Slicer integration (13/06/2023)
+
+The filters implementation has now been integrated into 3DSlicer as a plug-in that can be downloaded directly into the 3DSlicer extension manager.
+[Github page](https://github.com/R-Vessel-X/SlicerRVXVesselnessFilters)
+
 ## DATA
 
 Data for the benchmark comes from the modification of public datasets. The tweaked versions are available here : http://dionysos.univ-lyon2.fr/R-vessel-X/
