@@ -1,6 +1,6 @@
 # LiverVesselness
 
-EDIT : Repository updated the 7th of October 2022. Some implementation mistakes have been corrected.
+EDIT : Repository updated the 7th of October 2022. Some implementation mistakes have been corrected. The corrected version of the journal article is available [here](https://hal.science/hal-04422096)
 
 This is the Repository for the journal article : 
 
