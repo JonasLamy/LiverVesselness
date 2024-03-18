@@ -146,7 +146,7 @@ Example of settings file:
 
 For existing methods parameters, please refers to vesselness executables documentation and reference papers.
 
-*Masks can greatly beneficiate some methods that relies on gobal information such that the biggest eigen value in the whole image, or a Kmean in a specific area.
+*Masks can greatly beneficiate some methods that rely on gobal information such as the biggest eigen value in the whole image, or a Kmean in a specific area.
 
 ### Benchmark Hierarchy
 Running a benchmark will create the following hierarchy :
