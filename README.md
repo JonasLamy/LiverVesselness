@@ -1,5 +1,7 @@
 # LiverVesselness
 
+/!\ Edit: This version contains metrics errors corrected later in the follow up journal article (see main branch). However, this branch is kept in this state for reproducibility of the published article.
+
 Repository of the work published at ICPR 2020:
 
 **"Vesselness Filters: A Survey with Benchmarks Applied to Liver Imaging"**, Jonas Lamy, Odyssée Merveille, Bertrand Kerautret, Nicolas Passat, Antoine Vacavant, ICPR, 2020
