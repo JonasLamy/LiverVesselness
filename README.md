@@ -44,7 +44,7 @@ Original data are available on the authors websites :
 
 Scripts to transform data are available in the scripts/BDDgenerator folder
 ## Dependancies
-- Benchmark (C/C++)
+- Benchmark (C/C++ 17)
 
 CMake > 3.10.2 (https://cmake.org/)
 
