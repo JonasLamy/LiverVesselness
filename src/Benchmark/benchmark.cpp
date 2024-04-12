@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <map>
 
+#include <filesystem>
+#include <exception>
+
 #include "itkImageFileReader.h"
 #include "itkBinaryThresholdImageFilter.h"
 
@@ -27,18 +30,28 @@
   #include <sys/types.h>
 #endif
 
-int createDirectory(std::string path)
+namespace fs = std::filesystem;
+
+bool createDirectory(const fs::path& path)  
 {
-  int error = mkdir(path.c_str(), S_IRWXG | S_IRWXU | S_IROTH | S_IXOTH);
-  if (error)
-  {
-    if (errno != EEXIST)
-    {
-      std::cout << "directory creation error: " << errno << " " << path.c_str() << std::endl;
-      throw 1;
-    }
+  bool isOk = false;
+
+  try {
+    bool isOk = fs::create_directories(path);
+    std::cout << "created directories :" << path << std::endl;
   }
-  std::cout << "created directory :"<<path<< std::endl;
+  catch (const fs::filesystem_error& e)
+  {
+    std::cout << "File hierarchy creation failed : " << e.path1() << "\n\t" << e.what() << std::endl;
+    throw e; // Rethrow to crash the program
+  }
+  catch (const std::exception& e)
+  {
+    std::cout << "Something went wrong... " << e.what() << std::endl;
+    throw e; // Rethrow to crash the program
+  }
+
+  return isOk;
 }
 
 std::ofstream initCSVFile(std::string csvFileName)
@@ -123,17 +136,16 @@ int main(int argc, char** argv)
 
 
 
-  // creating benchmark root directory
-  std::string benchDir = benchPath + "/" + benchName;
+  // creating benchmark root directories
+  fs::path benchDir(benchPath);
+  benchDir.append(benchName);
 
 #ifdef __WIN32__
   std::cout << "Windows not supported" << std::endl;
   throw;
   //mkdir("bench");
 #else
-  createDirectory(benchPath);
-  createDirectory(benchDir);
-  createDirectory( benchDir+"/csv" );
+  createDirectory( benchDir / "csv" );
 #endif
 
   std::cout<< "---------------------" << std::endl;
@@ -150,7 +162,7 @@ int main(int argc, char** argv)
       enhancementMaskIndex = nbMasks;
     }
 
-    csvFileMaskList.push_back(benchDir + "/csv/" + benchName + "_" + mask.asString() +".csv");
+    csvFileMaskList.push_back( (benchDir / "csv" / "").string() + benchName + "_" + mask.asString() + ".csv");
     csvFileMaskStreamList.push_back( initCSVFile(csvFileMaskList[nbMasks]) );
     std::cout<<"Opening csv file for mask : "<<mask.asString()<<std::endl;
     nbMasks++;
@@ -237,7 +249,7 @@ int main(int argc, char** argv)
       std::cout<<"Non Unix directory creation not supported 1"<<std::endl;
       throw;
 #else
-      createDirectory( benchDir+"/"+patientName );
+      createDirectory( benchDir / patientName );
 #endif
 
     // reading groundTruthImage path, if it is Directory, we assume all inputs are full DICOM 16 bits
@@ -261,8 +273,8 @@ int main(int argc, char** argv)
                                                                                 groundTruth,
                                                                                 dicomMaskImageList,
                                                                                 csvFileMaskStreamList);
-        b.SetOutputDirectory(benchDir+"/"+patientName);
-        b.SetPatientDirectory(benchName+"/"+patientName);
+        b.SetOutputDirectory( (benchDir / patientName).string() );
+        b.SetPatientDirectory( (fs::path(benchName) / patientName).string() );
         b.SetDicomInput();
         b.SetComputeMetricsOnly(computeMetricsOnly);
         b.SetRemoveResultsVolume(removeResultsVolumes);
@@ -289,8 +301,8 @@ int main(int argc, char** argv)
                                                                   groundTruth,
                                                                   maskImageList,
                                                                   csvFileMaskStreamList);
-        b.SetOutputDirectory(benchDir+"/"+patientName);
-        b.SetPatientDirectory(benchName+"/"+patientName);
+        b.SetOutputDirectory( (benchDir / patientName).string() );
+        b.SetPatientDirectory( (fs::path(benchName) / patientName).string() );
         b.SetNiftiInput();
         b.SetComputeMetricsOnly(computeMetricsOnly);
         b.SetRemoveResultsVolume(removeResultsVolumes);
